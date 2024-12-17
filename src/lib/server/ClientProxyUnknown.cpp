@@ -18,6 +18,7 @@
 
 #include "server/ClientProxyUnknown.h"
 
+#include "base/Game.h" // Add this include for getCurrentTime()
 #include "base/IEventQueue.h"
 #include "base/Log.h"
 #include "base/TMethodEventJob.h"
@@ -26,6 +27,7 @@
 #include "deskflow/XDeskflow.h"
 #include "deskflow/protocol_types.h"
 #include "io/IStream.h"
+#include "io/StreamBuffer.h" // Add this for stream operations
 #include "io/XIO.h"
 #include "server/ClientProxy1_0.h"
 #include "server/ClientProxy1_1.h"
@@ -232,22 +234,26 @@ void ClientProxyUnknown::initProxy(const String &name, int major, int minor)
 
 bool ClientProxyUnknown::isRateLimited(const String &clientAddress)
 {
+  if (clientAddress.empty()) {
+    return false; // Don't rate limit if we can't get address
+  }
+
   std::lock_guard<std::mutex> lock(s_connectionMutex);
 
   cleanupOldConnections();
 
-  auto &history = s_connectionHistory[clientAddress];
-  double now = Game::getCurrentTime();
+  const auto &history = s_connectionHistory[clientAddress];
+  const double now = Game::getCurrentTime();
 
   // Count connections in the last minute
-  int recentConnections = 0;
+  size_t recentConnections = 0;
   for (const double &timestamp : history) {
-    if (now - timestamp < CONNECTION_WINDOW_SECONDS) {
+    if (now - timestamp < static_cast<double>(CONNECTION_WINDOW_SECONDS)) {
       recentConnections++;
     }
   }
 
-  return recentConnections >= MAX_CONNECTIONS_PER_MINUTE;
+  return recentConnections >= static_cast<size_t>(MAX_CONNECTIONS_PER_MINUTE);
 }
 
 void ClientProxyUnknown::recordConnection(const String &clientAddress)
@@ -258,7 +264,8 @@ void ClientProxyUnknown::recordConnection(const String &clientAddress)
 
 void ClientProxyUnknown::cleanupOldConnections()
 {
-  double now = Game::getCurrentTime();
+  const double now = Game::getCurrentTime();
+  const double windowSize = static_cast<double>(CONNECTION_WINDOW_SECONDS);
 
   for (auto it = s_connectionHistory.begin(); it != s_connectionHistory.end();) {
     auto &timestamps = it->second;
@@ -267,7 +274,7 @@ void ClientProxyUnknown::cleanupOldConnections()
     timestamps.erase(
         std::remove_if(
             timestamps.begin(), timestamps.end(),
-            [now](double timestamp) { return now - timestamp >= CONNECTION_WINDOW_SECONDS; }
+            [now, windowSize](double timestamp) { return (now - timestamp) >= windowSize; }
         ),
         timestamps.end()
     );
@@ -283,6 +290,11 @@ void ClientProxyUnknown::cleanupOldConnections()
 
 void ClientProxyUnknown::handleData(const Event &, void *)
 {
+  if (!m_stream) {
+    LOG((CLOG_ERR "null stream in handleData"));
+    throw XBadClient();
+  }
+
   // Validate handshake state
   if (m_handshakeState != HandshakeState::HELLO_SENT) {
     LOG((CLOG_WARN "received unexpected hello reply in state %d", static_cast<int>(m_handshakeState)));
