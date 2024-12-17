@@ -39,20 +39,37 @@
 #include "server/Server.h"
 
 #include <iterator>
+#include <map>
+#include <mutex>
 #include <sstream>
 
 //
 // ClientProxyUnknown
 //
 
+std::map<String, std::vector<double>> ClientProxyUnknown::s_connectionHistory;
+std::mutex ClientProxyUnknown::s_connectionMutex;
+
 ClientProxyUnknown::ClientProxyUnknown(deskflow::IStream *stream, double timeout, Server *server, IEventQueue *events)
     : m_stream(stream),
       m_proxy(NULL),
       m_ready(false),
       m_server(server),
-      m_events(events)
+      m_events(events),
+      m_handshakeState(HandshakeState::INITIAL)
 {
   assert(m_server != NULL);
+
+  // Get client address for rate limiting
+  String clientAddress = stream->getAddress();
+
+  // Check rate limiting
+  if (isRateLimited(clientAddress)) {
+    LOG((CLOG_WARN "connection attempt rate limited from %s", clientAddress.c_str()));
+    throw XBadClient();
+  }
+
+  recordConnection(clientAddress);
 
   m_events->adoptHandler(
       Event::kTimer, this, new TMethodEventJob<ClientProxyUnknown>(this, &ClientProxyUnknown::handleTimeout, NULL)
@@ -65,6 +82,8 @@ ClientProxyUnknown::ClientProxyUnknown(deskflow::IStream *stream, double timeout
 
   LOG_DEBUG("saying hello as %s, protocol v%d.%d", protocol.c_str(), kProtocolMajorVersion, kProtocolMinorVersion);
   ProtocolUtil::writef(m_stream, helloMessage.c_str(), kProtocolMajorVersion, kProtocolMinorVersion);
+
+  m_handshakeState = HandshakeState::HELLO_SENT;
 }
 
 ClientProxyUnknown::~ClientProxyUnknown()
@@ -211,8 +230,65 @@ void ClientProxyUnknown::initProxy(const String &name, int major, int minor)
   }
 }
 
+bool ClientProxyUnknown::isRateLimited(const String &clientAddress)
+{
+  std::lock_guard<std::mutex> lock(s_connectionMutex);
+
+  cleanupOldConnections();
+
+  auto &history = s_connectionHistory[clientAddress];
+  double now = Game::getCurrentTime();
+
+  // Count connections in the last minute
+  int recentConnections = 0;
+  for (const double &timestamp : history) {
+    if (now - timestamp < CONNECTION_WINDOW_SECONDS) {
+      recentConnections++;
+    }
+  }
+
+  return recentConnections >= MAX_CONNECTIONS_PER_MINUTE;
+}
+
+void ClientProxyUnknown::recordConnection(const String &clientAddress)
+{
+  std::lock_guard<std::mutex> lock(s_connectionMutex);
+  s_connectionHistory[clientAddress].push_back(Game::getCurrentTime());
+}
+
+void ClientProxyUnknown::cleanupOldConnections()
+{
+  double now = Game::getCurrentTime();
+
+  for (auto it = s_connectionHistory.begin(); it != s_connectionHistory.end();) {
+    auto &timestamps = it->second;
+
+    // Remove timestamps older than the window
+    timestamps.erase(
+        std::remove_if(
+            timestamps.begin(), timestamps.end(),
+            [now](double timestamp) { return now - timestamp >= CONNECTION_WINDOW_SECONDS; }
+        ),
+        timestamps.end()
+    );
+
+    // Remove empty entries
+    if (timestamps.empty()) {
+      it = s_connectionHistory.erase(it);
+    } else {
+      ++it;
+    }
+  }
+}
+
 void ClientProxyUnknown::handleData(const Event &, void *)
 {
+  // Validate handshake state
+  if (m_handshakeState != HandshakeState::HELLO_SENT) {
+    LOG((CLOG_WARN "received unexpected hello reply in state %d", static_cast<int>(m_handshakeState)));
+    throw XBadClient();
+  }
+
   LOG((CLOG_DEBUG1 "parsing hello reply"));
 
   String name("<unknown>");
@@ -249,8 +325,12 @@ void ClientProxyUnknown::handleData(const Event &, void *)
     LOG((CLOG_DEBUG1 "created proxy for client \"%s\" version %d.%d", name.c_str(), major, minor));
     m_stream = NULL;
 
+    m_handshakeState = HandshakeState::HELLO_RECEIVED;
+
     // wait until the proxy signals that it's ready or has disconnected
     addProxyHandlers();
+
+    m_handshakeState = HandshakeState::COMPLETED;
     return;
   } catch (XIncompatibleClient &e) {
     // client is incompatible
@@ -264,6 +344,8 @@ void ClientProxyUnknown::handleData(const Event &, void *)
     // misc error
     LOG((CLOG_WARN "error communicating with client \"%s\": %s", name.c_str(), e.what()));
   }
+
+  m_handshakeState = HandshakeState::FAILED;
   sendFailure();
 }
 
@@ -281,7 +363,10 @@ void ClientProxyUnknown::handleTimeout(const Event &, void *)
 
 void ClientProxyUnknown::handleDisconnect(const Event &, void *)
 {
-  LOG((CLOG_NOTE "new client disconnected"));
+  // Only log unexpected disconnections
+  if (m_handshakeState != HandshakeState::COMPLETED && m_handshakeState != HandshakeState::FAILED) {
+    LOG((CLOG_NOTE "client disconnected during handshake (state: %d)", static_cast<int>(m_handshakeState)));
+  }
   sendFailure();
 }
 

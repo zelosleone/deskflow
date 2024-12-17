@@ -22,6 +22,9 @@
 #include "base/EventTypes.h"
 #include "base/String.h"
 #include "deskflow/option_types.h"
+#include <map>
+#include <mutex>
+#include <vector>
 
 class ClientProxy;
 class EventQueueTimer;
@@ -82,4 +85,23 @@ private:
   bool m_ready;
   Server *m_server;
   IEventQueue *m_events;
+
+  static constexpr int MAX_CONNECTIONS_PER_MINUTE = 60;
+  static constexpr int CONNECTION_WINDOW_SECONDS = 60;
+  static std::map<String, std::vector<double>> s_connectionHistory;
+  static std::mutex s_connectionMutex;
+
+  enum class HandshakeState
+  {
+    INITIAL,
+    HELLO_SENT,
+    HELLO_RECEIVED,
+    COMPLETED,
+    FAILED
+  };
+
+  HandshakeState m_handshakeState;
+  bool isRateLimited(const String &clientAddress);
+  void recordConnection(const String &clientAddress);
+  void cleanupOldConnections();
 };
