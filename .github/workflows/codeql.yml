@@ -29,22 +29,48 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake g++ libssl-dev \
-            qtbase6-dev libqt6core6 libqt6dbus6 \
-            libgdk-pixbuf2.0-dev libnotify-dev \
-            libei-dev libportal-dev
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libssl-dev \
+            qtbase6-dev \
+            qt6-base-dev \
+            libqt6core6 \
+            libqt6dbus6 \
+            libgdk-pixbuf2.0-dev \
+            libnotify-dev \
+            libei-dev \
+            libportal-dev \
+            libxtst-dev \
+            libxrandr-dev \
+            libcurl4-openssl-dev \
+            libasound2-dev
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
 
-      - name: Build
+      - name: Configure CMake
         run: |
           mkdir -p build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make VERBOSE=1
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DBUILD_INSTALLER=OFF \
+            ..
+
+      - name: Build
+        working-directory: ${{github.workspace}}/build
+        run: |
+          ninja
+          if [ $? -ne 0 ]; then
+            echo "Build failed"
+            exit 1
+          fi
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
