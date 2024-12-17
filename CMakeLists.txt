@@ -19,7 +19,7 @@
 # > New in version 3.8: If the SOURCE_DATE_EPOCH environment variable is set,
 # > its value will be used instead of the current time.
 # > See https://reproducible-builds.org/specs/source-date-epoch/ for details.
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.8)
 
 # Link items by fill path
 cmake_policy(SET CMP0003 NEW)
@@ -84,7 +84,7 @@ set(DESKFLOW_VERSION_MS_CSV
 #Define our project
 project(
   deskflow
-  VERSION ${DESKFLOW_VERSION}
+  VERSION 2.4.1
   DESCRIPTION "Mouse and keyboard sharing utility"
   LANGUAGES C CXX)
 
