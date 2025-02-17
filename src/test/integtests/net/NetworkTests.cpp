@@ -15,9 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// TODO: fix, tests failing intermittently and/or with segfault
-#if 0
-
 #define TEST_ENV
 
 #include "base/Log.h"
@@ -357,6 +354,71 @@ TEST_F(NetworkTests, sendToServer_mockFile) {
   m_events.cleanupQuitTimeout();
 }
 
+TEST_F(NetworkTests, sendToClient_memorySafety) {
+    // server and client
+    NetworkAddress serverAddress(TEST_HOST, TEST_PORT);
+    serverAddress.resolve();
+
+    // server
+    SocketMultiplexer serverSocketMultiplexer;
+    TCPSocketFactory* serverSocketFactory = new TCPSocketFactory(&m_events, &serverSocketMultiplexer);
+    ClientListener listener(serverAddress, serverSocketFactory, &m_events, false);
+    NiceMock<MockScreen> serverScreen;
+    NiceMock<MockPrimaryClient> primaryClient;
+    NiceMock<MockConfig> serverConfig;
+    NiceMock<MockInputFilter> serverInputFilter;
+
+    ON_CALL(serverConfig, isScreen(_)).WillByDefault(Return(true));
+    ON_CALL(serverConfig, getInputFilter()).WillByDefault(Return(&serverInputFilter));
+
+    // Set maximum message size to 100MB
+    const size_t maxMessageSize = 100 * 1024 * 1024;
+    deskflow::ServerArgs serverArgs;
+    serverArgs.m_enableDragDrop = true;
+    serverArgs.m_maxMessageSize = maxMessageSize;
+    Server server(serverConfig, &primaryClient, &serverScreen, &m_events, serverArgs);
+    server.m_mock = true;
+    listener.setServer(&server);
+
+    // client
+    NiceMock<MockScreen> clientScreen;
+    SocketMultiplexer clientSocketMultiplexer;
+    TCPSocketFactory* clientSocketFactory = new TCPSocketFactory(&m_events, &clientSocketMultiplexer);
+
+    ON_CALL(clientScreen, getShape(_, _, _, _)).WillByDefault(Invoke(getScreenShape));
+    ON_CALL(clientScreen, getCursorPos(_, _)).WillByDefault(Invoke(getCursorPos));
+
+    deskflow::ClientArgs clientArgs;
+    clientArgs.m_enableDragDrop = true;
+    clientArgs.m_enableCrypto = false;
+    clientArgs.m_maxMessageSize = maxMessageSize;
+    Client client(&m_events, "stub", serverAddress, clientSocketFactory, &clientScreen, clientArgs);
+
+    // Try to send a message larger than the maximum allowed size
+    size_t largeMessageSize = maxMessageSize + 1024;
+    UInt8* largeMessage = new UInt8[largeMessageSize];
+    memset(largeMessage, 'A', largeMessageSize);
+
+    // This should fail due to size limit
+    bool exceptionThrown = false;
+    try {
+        FileChunk* chunk = FileChunk::data(largeMessage, largeMessageSize);
+        m_events.addEvent(Event(m_events.forFile().fileChunkSending(), &server, chunk));
+    }
+    catch (const std::runtime_error& e) {
+        exceptionThrown = true;
+        // Verify the error message indicates size limit exceeded
+        EXPECT_TRUE(std::string(e.what()).find("exceeds maximum allowed size") != std::string::npos);
+    }
+
+    EXPECT_TRUE(exceptionThrown);
+    delete[] largeMessage;
+
+    m_events.initQuitTimeout(10);
+    m_events.loop();
+    m_events.cleanupQuitTimeout();
+}
+
 void NetworkTests::sendToClient_mockData_handleClientConnected(
     const Event &, void *vlistener) {
   ClientListener *listener = static_cast<ClientListener *>(vlistener);
@@ -528,5 +590,3 @@ void getCursorPos(SInt32 &x, SInt32 &y) {
   x = 0;
   y = 0;
 }
-
-#endif // WINAPI_CARBON
