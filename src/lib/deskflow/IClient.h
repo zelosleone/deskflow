@@ -1,29 +1,19 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "deskflow/IScreen.h"
 #include "deskflow/clipboard_types.h"
 #include "deskflow/key_types.h"
 #include "deskflow/mouse_types.h"
 #include "deskflow/option_types.h"
+
+#include <string>
 
 //! Client interface
 /*!
@@ -44,7 +34,7 @@ public:
   screen is being entered because the screen saver is starting.
   Subsequent clipboard events should report \p seqNum.
   */
-  virtual void enter(SInt32 xAbs, SInt32 yAbs, UInt32 seqNum, KeyModifierMask mask, bool forScreensaver) = 0;
+  virtual void enter(int32_t xAbs, int32_t yAbs, uint32_t seqNum, KeyModifierMask mask, bool forScreensaver) = 0;
 
   //! Leave screen
   /*!
@@ -86,14 +76,14 @@ public:
   synthesize an up or repeat for the same client key synthesized by
   keyDown().
   */
-  virtual void keyDown(KeyID id, KeyModifierMask, KeyButton, const String &) = 0;
+  virtual void keyDown(KeyID id, KeyModifierMask, KeyButton, const std::string &) = 0;
 
   //! Notify of key repeat
   /*!
   Synthesize key events to generate a press and release of key \c id
   \c count times.  If possible match the given modifier mask.
   */
-  virtual void keyRepeat(KeyID id, KeyModifierMask, SInt32 count, KeyButton, const String &lang) = 0;
+  virtual void keyRepeat(KeyID id, KeyModifierMask, int32_t count, KeyButton, const std::string &lang) = 0;
 
   //! Notify of key release
   /*!
@@ -119,14 +109,14 @@ public:
   Synthesize mouse events to generate mouse motion to the absolute
   screen position \c xAbs,yAbs.
   */
-  virtual void mouseMove(SInt32 xAbs, SInt32 yAbs) = 0;
+  virtual void mouseMove(int32_t xAbs, int32_t yAbs) = 0;
 
   //! Notify of mouse motion
   /*!
   Synthesize mouse events to generate mouse motion by the relative
   amount \c xRel,yRel.
   */
-  virtual void mouseRelativeMove(SInt32 xRel, SInt32 yRel) = 0;
+  virtual void mouseRelativeMove(int32_t xRel, int32_t yRel) = 0;
 
   //! Notify of mouse wheel motion
   /*!
@@ -135,7 +125,7 @@ public:
   to the right and negative for motion towards the user or to the left.
   Each wheel click should generate a delta of +/-120.
   */
-  virtual void mouseWheel(SInt32 xDelta, SInt32 yDelta) = 0;
+  virtual void mouseWheel(int32_t xDelta, int32_t yDelta) = 0;
 
   //! Notify of screen saver change
   virtual void screensaver(bool activate) = 0;
@@ -161,13 +151,13 @@ public:
   /*!
   Return the client's name.
   */
-  virtual String getName() const = 0;
+  virtual std::string getName() const = 0;
 
   //@}
 
   // IScreen overrides
   virtual void *getEventTarget() const = 0;
   virtual bool getClipboard(ClipboardID id, IClipboard *) const = 0;
-  virtual void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const = 0;
-  virtual void getCursorPos(SInt32 &x, SInt32 &y) const = 0;
+  virtual void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const = 0;
+  virtual void getCursorPos(int32_t &x, int32_t &y) const = 0;
 };

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 // TODO: consider whether or not to use either encapsulation (as below)
@@ -48,7 +37,6 @@
 #include "arch/win32/ArchSleepWindows.h"
 #include "arch/win32/ArchStringWindows.h"
 #include "arch/win32/ArchSystemWindows.h"
-#include "arch/win32/ArchTaskBarWindows.h"
 #include "arch/win32/ArchTimeWindows.h"
 
 #elif SYSAPI_UNIX
@@ -61,7 +49,6 @@
 #include "arch/unix/ArchSleepUnix.h"
 #include "arch/unix/ArchStringUnix.h"
 #include "arch/unix/ArchSystemUnix.h"
-#include "arch/unix/ArchTaskBarXWindows.h"
 #include "arch/unix/ArchTimeUnix.h"
 
 #if HAVE_PTHREAD
@@ -95,7 +82,6 @@ class Arch : public ARCH_CONSOLE,
              public ARCH_SLEEP,
              public ARCH_STRING,
              public ARCH_SYSTEM,
-             public ARCH_TASKBAR,
              public ARCH_TIME
 {
 public:

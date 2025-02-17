@@ -1,22 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2024 Symless
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
+#include <QDir>
+#include <QFileInfoList>
 #include <QGuiApplication>
 #include <QPalette>
 #include <QStyleHints>
@@ -36,5 +27,40 @@ inline bool isDarkMode()
   const auto window = defaultPalette.color(QPalette::Window);
   return text.lightness() > window.lightness();
 }
+/**
+ * @brief get a string for the iconMode
+ * @returns "dark" or "light"
+ */
+inline QString iconMode()
+{
+  return isDarkMode() ? QStringLiteral("dark") : QStringLiteral("light");
+}
 
+/**
+ * @brief checkSubDir checks for subdirs in a dir
+ * @param path The path to check for subdirs
+ * @return list of subdirs
+ */
+inline QStringList checkSubDir(const QString &path)
+{
+  QStringList paths;
+  auto dir = QDir(path);
+  const QFileInfoList items = dir.entryInfoList({"*"}, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+  for (const QFileInfo &item : items) {
+    if (item.isDir()) {
+      paths.append(item.absoluteFilePath());
+      paths.append(checkSubDir(item.absoluteFilePath()));
+    }
+  }
+  return paths;
+}
+
+/**
+ * @brief setIconFallbackPaths Set the icon fallback path to our light or dark theme
+ */
+inline void setIconFallbackPaths()
+{
+  QStringList paths = checkSubDir(QStringLiteral(":/icons/deskflow-%1").arg(iconMode()));
+  QIcon::setFallbackSearchPaths(paths);
+}
 } // namespace deskflow::gui

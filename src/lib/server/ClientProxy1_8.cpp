@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2021 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2015 - 2021 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
+
 #include "base/Log.h"
 #include "deskflow/ProtocolUtil.h"
 #include "deskflow/languages/LanguageManager.h"
@@ -21,7 +11,7 @@
 #include "ClientProxy1_8.h"
 
 ClientProxy1_8::ClientProxy1_8(
-    const String &name, deskflow::IStream *adoptedStream, Server *server, IEventQueue *events
+    const std::string &name, deskflow::IStream *adoptedStream, Server *server, IEventQueue *events
 )
     : ClientProxy1_7(name, adoptedStream, server, events)
 {
@@ -40,7 +30,7 @@ void ClientProxy1_8::synchronizeLanguages() const
   }
 }
 
-void ClientProxy1_8::keyDown(KeyID key, KeyModifierMask mask, KeyButton button, const String &language)
+void ClientProxy1_8::keyDown(KeyID key, KeyModifierMask mask, KeyButton button, const std::string &language)
 {
   LOG(
       (CLOG_DEBUG1 "send key down to \"%s\" id=%d, mask=0x%04x, button=0x%04x, language=%s", getName().c_str(), key,

@@ -1,29 +1,16 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/ClientApp.h"
 
 #include "arch/Arch.h"
-#include "arch/IArchTaskBarReceiver.h"
 #include "base/Event.h"
 #include "base/IEventQueue.h"
 #include "base/Log.h"
-#include "base/String.h"
 #include "base/TMethodEventJob.h"
 #include "client/Client.h"
 #include "common/constants.h"
@@ -75,8 +62,8 @@
 
 #define RETRY_TIME 1.0
 
-ClientApp::ClientApp(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver)
-    : App(events, createTaskBarReceiver, new deskflow::ClientArgs()),
+ClientApp::ClientApp(IEventQueue *events)
+    : App(events, new deskflow::ClientArgs()),
       m_client(NULL),
       m_clientScreen(NULL),
       m_serverAddress(NULL)
@@ -229,11 +216,8 @@ void ClientApp::updateStatus()
   updateStatus("");
 }
 
-void ClientApp::updateStatus(const String &msg)
+void ClientApp::updateStatus(const std::string &msg)
 {
-  if (m_taskBarReceiver) {
-    m_taskBarReceiver->updateStatus(m_client, msg);
-  }
 }
 
 void ClientApp::resetRestartTimeout()
@@ -321,8 +305,8 @@ void ClientApp::handleClientFailed(const Event &e, void *)
   if ((++m_lastServerAddressIndex) < m_client->getLastResolvedAddressesCount()) {
     std::unique_ptr<Client::FailInfo> info(static_cast<Client::FailInfo *>(e.getData()));
 
-    updateStatus(String("Failed to connect to server: ") + info->m_what + " Trying next address...");
-    LOG((CLOG_NOTE "failed to connect to server=%s, trying next address", info->m_what.c_str()));
+    updateStatus(std::string("Failed to connect to server: ") + info->m_what + " Trying next address...");
+    LOG((CLOG_WARN "failed to connect to server=%s, trying next address", info->m_what.c_str()));
     if (!m_suspended) {
       scheduleClientRestart(nextRestartTimeout());
     }
@@ -336,7 +320,7 @@ void ClientApp::handleClientRefused(const Event &e, void *)
 {
   std::unique_ptr<Client::FailInfo> info(static_cast<Client::FailInfo *>(e.getData()));
 
-  updateStatus(String("Failed to connect to server: ") + info->m_what);
+  updateStatus(std::string("Failed to connect to server: ") + info->m_what);
   if (!args().m_restartable || !info->m_retry) {
     LOG((CLOG_ERR "failed to connect to server: %s", info->m_what.c_str()));
     m_events->addEvent(Event(Event::kQuit));
@@ -359,7 +343,7 @@ void ClientApp::handleClientDisconnected(const Event &, void *)
   updateStatus();
 }
 
-Client *ClientApp::openClient(const String &name, const NetworkAddress &address, deskflow::Screen *screen)
+Client *ClientApp::openClient(const std::string &name, const NetworkAddress &address, deskflow::Screen *screen)
 {
   Client *client = new Client(m_events, name, address, getSocketFactory(), screen, args());
 
@@ -432,7 +416,7 @@ bool ClientApp::startClient()
   } catch (XScreenUnavailable &e) {
     LOG((CLOG_WARN "secondary screen unavailable: %s", e.what()));
     closeClientScreen(clientScreen);
-    updateStatus(String("secondary screen unavailable: ") + e.what());
+    updateStatus(std::string("secondary screen unavailable: ") + e.what());
     retryTime = e.getRetryTime();
   } catch (XScreenOpenFailure &e) {
     LOG((CLOG_CRIT "failed to start client: %s", e.what()));
@@ -543,11 +527,6 @@ int ClientApp::runInner(int argc, char **argv, ILogOutputter *outputter, Startup
     // run
     result = startup(argc, argv);
   } catch (...) {
-    if (m_taskBarReceiver) {
-      // done with task bar receiver
-      delete m_taskBarReceiver;
-    }
-
     delete m_serverAddress;
 
     throw;

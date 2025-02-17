@@ -1,24 +1,17 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
+#include "io/filesystem.h"
+#include "net/SecurityLevel.h"
 #include "net/TCPSocket.h"
 #include "net/XSocket.h"
+#include <mutex>
 
 class IEventQueue;
 class SocketMultiplexer;
@@ -33,8 +26,14 @@ A secure socket using SSL.
 class SecureSocket : public TCPSocket
 {
 public:
-  SecureSocket(IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family);
-  SecureSocket(IEventQueue *events, SocketMultiplexer *socketMultiplexer, ArchSocket socket);
+  SecureSocket(
+      IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family,
+      SecurityLevel securityLevel = SecurityLevel::Encrypted
+  );
+  SecureSocket(
+      IEventQueue *events, SocketMultiplexer *socketMultiplexer, ArchSocket socket,
+      SecurityLevel securityLevel = SecurityLevel::Encrypted
+  );
   SecureSocket(SecureSocket const &) = delete;
   SecureSocket(SecureSocket &&) = delete;
   ~SecureSocket();
@@ -65,7 +64,7 @@ public:
   EJobResult doRead() override;
   EJobResult doWrite() override;
   void initSsl(bool server);
-  bool loadCertificates(String &CertFile);
+  bool loadCertificates(std::string &CertFile);
 
 private:
   // SSL
@@ -77,8 +76,7 @@ private:
   bool showCertificate() const;
   void checkResult(int n, int &retry);
   void disconnect();
-  void formatFingerprint(String &fingerprint, bool hex = true, bool separator = true);
-  bool verifyCertFingerprint();
+  bool verifyCertFingerprint(const deskflow::fs::path &fingerprintDbPath);
 
   ISocketMultiplexerJob *serviceConnect(ISocketMultiplexerJob *, bool, bool, bool);
 
@@ -87,7 +85,13 @@ private:
   void handleTCPConnected(const Event &event, void *);
 
 private:
+  // all accesses to m_ssl must be protected by this mutex. The only function that is called
+  // from outside SocketMultiplexer thread is close(), so we mostly care about things accessed
+  // by it.
+  std::mutex ssl_mutex_;
+
   Ssl *m_ssl;
   bool m_secureReady;
   bool m_fatal;
+  SecurityLevel m_securityLevel = SecurityLevel::Encrypted;
 };

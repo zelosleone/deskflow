@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -46,14 +35,14 @@ public:
   // These all just forward to the underlying stream except getEventTarget.
   // Override as necessary.  getEventTarget returns a pointer to this.
   virtual void close();
-  virtual UInt32 read(void *buffer, UInt32 n);
-  virtual void write(const void *buffer, UInt32 n);
+  virtual uint32_t read(void *buffer, uint32_t n);
+  virtual void write(const void *buffer, uint32_t n);
   virtual void flush();
   virtual void shutdownInput();
   virtual void shutdownOutput();
   virtual void *getEventTarget() const;
   virtual bool isReady() const;
-  virtual UInt32 getSize() const;
+  virtual uint32_t getSize() const;
 
   //! Get the stream
   /*!

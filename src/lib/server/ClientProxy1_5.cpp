@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2013-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2013 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "server/ClientProxy1_5.h"
@@ -31,7 +20,7 @@
 // ClientProxy1_5
 //
 
-ClientProxy1_5::ClientProxy1_5(const String &name, deskflow::IStream *stream, Server *server, IEventQueue *events)
+ClientProxy1_5::ClientProxy1_5(const std::string &name, deskflow::IStream *stream, Server *server, IEventQueue *events)
     : ClientProxy1_4(name, stream, server, events),
       m_events(events)
 {
@@ -47,19 +36,19 @@ ClientProxy1_5::~ClientProxy1_5()
   m_events->removeHandler(m_events->forFile().keepAlive(), this);
 }
 
-void ClientProxy1_5::sendDragInfo(UInt32 fileCount, const char *info, size_t size)
+void ClientProxy1_5::sendDragInfo(uint32_t fileCount, const char *info, size_t size)
 {
-  String data(info, size);
+  std::string data(info, size);
 
   ProtocolUtil::writef(getStream(), kMsgDDragInfo, fileCount, &data);
 }
 
-void ClientProxy1_5::fileChunkSending(UInt8 mark, char *data, size_t dataSize)
+void ClientProxy1_5::fileChunkSending(uint8_t mark, char *data, size_t dataSize)
 {
   FileChunk::send(getStream(), mark, data, dataSize);
 }
 
-bool ClientProxy1_5::parseMessage(const UInt8 *code)
+bool ClientProxy1_5::parseMessage(const uint8_t *code)
 {
   if (memcmp(code, kMsgDFileTransfer, 4) == 0) {
     fileChunkReceived();
@@ -81,7 +70,7 @@ void ClientProxy1_5::fileChunkReceived()
     m_events->addEvent(Event(m_events->forFile().fileRecieveCompleted(), server));
   } else if (result == kStart) {
     if (server->getFakeDragFileList().size() > 0) {
-      String filename = server->getFakeDragFileList().at(0).getFilename();
+      std::string filename = server->getFakeDragFileList().at(0).getFilename();
       LOG((CLOG_DEBUG "start receiving %s", filename.c_str()));
     }
   }
@@ -90,8 +79,8 @@ void ClientProxy1_5::fileChunkReceived()
 void ClientProxy1_5::dragInfoReceived()
 {
   // parse
-  UInt32 fileNum = 0;
-  String content;
+  uint32_t fileNum = 0;
+  std::string content;
   ProtocolUtil::readf(getStream(), kMsgDDragInfo + 4, &fileNum, &content);
 
   m_server->dragInfoReceived(fileNum, content);

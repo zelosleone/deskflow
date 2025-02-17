@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -63,13 +52,13 @@ public:
   virtual bool isEmpty() const;
   virtual IEventJob *getHandler(Event::Type type, void *target) const;
   virtual const char *getTypeName(Event::Type type);
-  virtual Event::Type getRegisteredType(const String &name) const;
+  virtual Event::Type getRegisteredType(const std::string &name) const;
   void *getSystemTarget();
   virtual void waitForReady() const;
 
 private:
-  UInt32 saveEvent(const Event &event);
-  Event removeEvent(UInt32 eventID);
+  uint32_t saveEvent(const Event &event);
+  Event removeEvent(uint32_t eventID);
   bool hasTimerExpired(Event &event);
   double getNextTimerTimeout() const;
   void addEventToBuffer(const Event &event);
@@ -102,14 +91,14 @@ private:
     double m_time;
   };
 
-  typedef std::set<EventQueueTimer *> Timers;
-  typedef PriorityQueue<Timer> TimerQueue;
-  typedef std::map<UInt32, Event> EventTable;
-  typedef std::vector<UInt32> EventIDList;
-  typedef std::map<Event::Type, const char *> TypeMap;
-  typedef std::map<String, Event::Type> NameMap;
-  typedef std::map<Event::Type, IEventJob *> TypeHandlerTable;
-  typedef std::map<void *, TypeHandlerTable> HandlerTable;
+  using Timers = std::set<EventQueueTimer *>;
+  using TimerQueue = PriorityQueue<Timer>;
+  using EventTable = std::map<uint32_t, Event>;
+  using EventIDList = std::vector<uint32_t>;
+  using TypeMap = std::map<Event::Type, const char *>;
+  using NameMap = std::map<std::string, Event::Type>;
+  using TypeHandlerTable = std::map<Event::Type, IEventJob *>;
+  using HandlerTable = std::map<void *, TypeHandlerTable>;
 
   int m_systemTarget;
   ArchMutex m_mutex;

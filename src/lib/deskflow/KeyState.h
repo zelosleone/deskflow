@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -29,8 +18,8 @@ platform specific methods.
 class KeyState : public IKeyState
 {
 public:
-  KeyState(IEventQueue *events, std::vector<String> layouts, bool isLangSyncEnabled);
-  KeyState(IEventQueue *events, deskflow::KeyMap &keyMap, std::vector<String> layouts, bool isLangSyncEnabled);
+  KeyState(IEventQueue *events, std::vector<std::string> layouts, bool isLangSyncEnabled);
+  KeyState(IEventQueue *events, deskflow::KeyMap &keyMap, std::vector<std::string> layouts, bool isLangSyncEnabled);
   virtual ~KeyState();
 
   //! @name manipulators
@@ -52,7 +41,7 @@ public:
   to the superclass.
   */
   virtual void sendKeyEvent(
-      void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, SInt32 count, KeyButton button
+      void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, int32_t count, KeyButton button
   );
 
   //@}
@@ -69,8 +58,8 @@ public:
   }
   void updateKeyState() override;
   void setHalfDuplexMask(KeyModifierMask) override;
-  void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang) override;
-  bool fakeKeyRepeat(KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang) override;
+  void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang) override;
+  bool fakeKeyRepeat(KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang) override;
   bool fakeKeyUp(KeyButton button) override;
   void fakeAllKeysUp() override;
   bool fakeMediaKey(KeyID id) override;
@@ -80,16 +69,16 @@ public:
   // Left abstract
   virtual bool fakeCtrlAltDel() override = 0;
   virtual KeyModifierMask pollActiveModifiers() const override = 0;
-  virtual SInt32 pollActiveGroup() const override = 0;
+  virtual int32_t pollActiveGroup() const override = 0;
   virtual void pollPressedKeys(KeyButtonSet &pressedKeys) const override = 0;
 
-  SInt32 getKeyState(KeyButton keyButton)
+  int32_t getKeyState(KeyButton keyButton)
   {
     return m_keys[keyButton];
   }
 
 protected:
-  typedef deskflow::KeyMap::Keystroke Keystroke;
+  using Keystroke = deskflow::KeyMap::Keystroke;
 
   //! @name protected manipulators
   //@{
@@ -121,7 +110,7 @@ protected:
   /*!
   Returns the number of the group \p offset groups after group \p group.
   */
-  SInt32 getEffectiveGroup(SInt32 group, SInt32 offset) const;
+  int32_t getEffectiveGroup(int32_t group, int32_t offset) const;
 
   //! Check if key is ignored
   /*!
@@ -135,22 +124,22 @@ protected:
   Return the button mapped to key \p id in group \p group if any,
   otherwise returns 0.
   */
-  KeyButton getButton(KeyID id, SInt32 group) const;
+  KeyButton getButton(KeyID id, int32_t group) const;
 
   //@}
 
 private:
-  typedef deskflow::KeyMap::Keystrokes Keystrokes;
-  typedef deskflow::KeyMap::ModifierToKeys ModifierToKeys;
+  using Keystrokes = deskflow::KeyMap::Keystrokes;
+  using ModifierToKeys = deskflow::KeyMap::ModifierToKeys;
 
 public:
   struct AddActiveModifierContext
   {
   public:
-    AddActiveModifierContext(SInt32 group, KeyModifierMask mask, ModifierToKeys &activeModifiers);
+    AddActiveModifierContext(int32_t group, KeyModifierMask mask, ModifierToKeys &activeModifiers);
 
   public:
-    SInt32 m_activeGroup;
+    int32_t m_activeGroup;
     KeyModifierMask m_mask;
     ModifierToKeys &m_activeModifiers;
 
@@ -191,13 +180,13 @@ private:
   void addCombinationEntries();
 
   // synthesize key events.  synthesize auto-repeat events count times.
-  void fakeKeys(const Keystrokes &, UInt32 count);
+  void fakeKeys(const Keystrokes &, uint32_t count);
 
   // update key state to match changes to modifiers
   void updateModifierKeyState(KeyButton button, const ModifierToKeys &oldModifiers, const ModifierToKeys &newModifiers);
 
   // active modifiers collection callback
-  static void addActiveModifierCB(KeyID id, SInt32 group, deskflow::KeyMap::KeyItem &keyItem, void *vcontext);
+  static void addActiveModifierCB(KeyID id, int32_t group, deskflow::KeyMap::KeyItem &keyItem, void *vcontext);
 
 private:
   // must be declared before m_keyMap. used when this class owns the key map.
@@ -215,16 +204,16 @@ private:
   // current keyboard state (> 0 if pressed, 0 otherwise).  this is
   // initialized to the keyboard state according to the system then
   // it tracks synthesized events.
-  SInt32 m_keys[kNumButtons];
+  int32_t m_keys[kNumButtons];
 
   // synthetic keyboard state (> 0 if pressed, 0 otherwise).  this
   // tracks the synthesized keyboard state.  if m_keys[n] > 0 but
   // m_syntheticKeys[n] == 0 then the key was pressed locally and
   // not synthesized yet.
-  SInt32 m_syntheticKeys[kNumButtons];
+  int32_t m_syntheticKeys[kNumButtons];
 
   // client data for each pressed key
-  UInt32 m_keyClientData[kNumButtons];
+  uint32_t m_keyClientData[kNumButtons];
 
   // server keyboard state.  an entry is 0 if not the key isn't pressed
   // otherwise it's the local KeyButton synthesized for the server key.

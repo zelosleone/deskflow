@@ -1,35 +1,22 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "common/common.h"
-#include "common/stdstring.h"
+#include <string>
 
 #include <stdarg.h>
 #include <vector>
 
-// use standard C++ string class for our string class
-using String = std::string;
-
 namespace deskflow {
 
-//! String utilities
+//! std::string utilities
 /*!
 Provides functions for string manipulation.
 */
@@ -45,67 +32,91 @@ characters and conversion specifications introduced by `\%':
 All arguments in the variable list are const char*.  Positional
 elements are indexed from 1.
 */
-String format(const char *fmt, ...);
+std::string format(const char *fmt, ...);
 
 //! Format positional arguments
 /*!
 Same as format() except takes va_list.
 */
-String vformat(const char *fmt, va_list);
+std::string vformat(const char *fmt, va_list);
 
 //! Print a string using sprintf-style formatting
 /*!
 Equivalent to sprintf() except the result is returned as a String.
 */
-String sprintf(const char *fmt, ...);
+std::string sprintf(const char *fmt, ...);
 
 //! Find and replace all
 /*!
 Finds \c find inside \c subject and replaces it with \c replace
 */
-void findReplaceAll(String &subject, const String &find, const String &replace);
+void findReplaceAll(std::string &subject, const std::string &find, const std::string &replace);
 
 //! Remove file extension
 /*!
 Finds the last dot and remove all characters from the dot to the end
 */
-String removeFileExt(String filename);
+std::string removeFileExt(std::string filename);
 
 //! Convert into hexdecimal
 /*!
 Convert each character in \c subject into hexdecimal form with \c width
+Return a new hexString
 */
-void toHex(String &subject, int width, const char fill = '0');
+std::string toHex(const std::string &subject, int width, const char fill = '0');
+
+/**
+ * @brief toHex Convert each value in input into a hex string
+ * @param input vector of uint8_t
+ * @param width
+ * @param fill fill character 0 is default
+ * @return a hex string
+ */
+std::string toHex(const std::vector<uint8_t> &input, int width, const char fill = '0');
+
+/**
+ * @brief fromHexChar Convert a single char to its hexidecmal value
+ * @param c input char 0-F
+ * @return The value of c in Hex or -1 for invalid hex chars
+ */
+int fromHexChar(char c);
+
+/**
+ * @brief fromHex Turn the string into a std::vector<uint8_t>
+ * @param hexString a Hexidecimal string
+ * @return std::vector<uint8_t> version of the hex chars
+ */
+std::vector<uint8_t> fromHex(const std::string &hexString);
 
 //! Convert to all uppercase
 /*!
 Convert each character in \c subject to uppercase
 */
-void uppercase(String &subject);
+void uppercase(std::string &subject);
 
 //! Remove all specific char in suject
 /*!
 Remove all specific \c c in \c suject
 */
-void removeChar(String &subject, const char c);
+void removeChar(std::string &subject, const char c);
 
 //! Convert a size type to a string
 /*!
 Convert an size type to a string
 */
-String sizeTypeToString(size_t n);
+std::string sizeTypeToString(size_t n);
 
 //! Convert a string to a size type
 /*!
 Convert an a \c string to an size type
 */
-size_t stringToSizeType(String string);
+size_t stringToSizeType(std::string string);
 
 //! Split a string into substrings
 /*!
 Split a \c string that separated by a \c c into substrings
 */
-std::vector<String> splitString(String string, const char c);
+std::vector<std::string> splitString(std::string string, const char c);
 
 //! Case-insensitive comparisons
 /*!
@@ -115,19 +126,19 @@ class CaselessCmp
 {
 public:
   //! Same as less()
-  bool operator()(const String &a, const String &b) const;
+  bool operator()(const std::string &a, const std::string &b) const;
 
   //! Returns true iff \c a is lexicographically less than \c b
-  static bool less(const String &a, const String &b);
+  static bool less(const std::string &a, const std::string &b);
 
   //! Returns true iff \c a is lexicographically equal to \c b
-  static bool equal(const String &a, const String &b);
+  static bool equal(const std::string &a, const std::string &b);
 
   //! Returns true iff \c a is lexicographically less than \c b
-  static bool cmpLess(const String::value_type &a, const String::value_type &b);
+  static bool cmpLess(const std::string::value_type &a, const std::string::value_type &b);
 
   //! Returns true iff \c a is lexicographically equal to \c b
-  static bool cmpEqual(const String::value_type &a, const String::value_type &b);
+  static bool cmpEqual(const std::string::value_type &a, const std::string::value_type &b);
 };
 
 } // namespace string

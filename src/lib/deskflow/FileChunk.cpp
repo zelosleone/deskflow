@@ -1,36 +1,26 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/FileChunk.h"
 
 #include "base/Log.h"
 #include "base/Stopwatch.h"
+#include "base/String.h"
 #include "deskflow/ProtocolUtil.h"
 #include "deskflow/protocol_types.h"
 #include "io/IStream.h"
 
-static const UInt16 kIntervalThreshold = 1;
+static const uint16_t kIntervalThreshold = 1;
 
 FileChunk::FileChunk(size_t size) : Chunk(size)
 {
   m_dataSize = size - FILE_CHUNK_META_SIZE;
 }
 
-FileChunk *FileChunk::start(const String &size)
+FileChunk *FileChunk::start(const std::string &size)
 {
   size_t sizeLength = size.size();
   FileChunk *start = new FileChunk(sizeLength + FILE_CHUNK_META_SIZE);
@@ -42,7 +32,7 @@ FileChunk *FileChunk::start(const String &size)
   return start;
 }
 
-FileChunk *FileChunk::data(UInt8 *data, size_t dataSize)
+FileChunk *FileChunk::data(uint8_t *data, size_t dataSize)
 {
   FileChunk *chunk = new FileChunk(dataSize + FILE_CHUNK_META_SIZE);
   char *chunkData = chunk->m_chunk;
@@ -63,11 +53,11 @@ FileChunk *FileChunk::end()
   return end;
 }
 
-int FileChunk::assemble(deskflow::IStream *stream, String &dataReceived, size_t &expectedSize)
+int FileChunk::assemble(deskflow::IStream *stream, std::string &dataReceived, size_t &expectedSize)
 {
   // parse
-  UInt8 mark = 0;
-  String content;
+  uint8_t mark = 0;
+  std::string content;
   static size_t receivedDataSize;
   static double elapsedTime;
   static Stopwatch stopwatch;
@@ -128,9 +118,9 @@ int FileChunk::assemble(deskflow::IStream *stream, String &dataReceived, size_t 
   return kError;
 }
 
-void FileChunk::send(deskflow::IStream *stream, UInt8 mark, char *data, size_t dataSize)
+void FileChunk::send(deskflow::IStream *stream, uint8_t mark, char *data, size_t dataSize)
 {
-  String chunk(data, dataSize);
+  std::string chunk(data, dataSize);
 
   switch (mark) {
   case kDataStart:

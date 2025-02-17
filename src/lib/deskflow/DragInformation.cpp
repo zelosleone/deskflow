@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2013-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2013 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/DragInformation.h"
@@ -28,18 +17,18 @@ DragInformation::DragInformation() : m_filename(), m_filesize(0)
 {
 }
 
-void DragInformation::parseDragInfo(DragFileList &dragFileList, UInt32 fileNum, String data)
+void DragInformation::parseDragInfo(DragFileList &dragFileList, uint32_t fileNum, std::string data)
 {
   size_t startPos = 0;
   size_t findResult1 = 0;
   size_t findResult2 = 0;
   dragFileList.clear();
-  String slash("\\");
-  if (data.find("/", startPos) != string::npos) {
+  std::string slash("\\");
+  if (data.find("/", startPos) != std::string::npos) {
     slash = "/";
   }
 
-  UInt32 index = 0;
+  uint32_t index = 0;
   while (index < fileNum) {
     findResult1 = data.find(',', startPos);
     findResult2 = data.find_last_of(slash, findResult1);
@@ -51,7 +40,7 @@ void DragInformation::parseDragInfo(DragFileList &dragFileList, UInt32 fileNum, 
 
     // set filename
     if (findResult1 - findResult2 > 1) {
-      String filename = data.substr(findResult2 + 1, findResult1 - findResult2 - 1);
+      std::string filename = data.substr(findResult2 + 1, findResult1 - findResult2 - 1);
       DragInformation di;
       di.setFilename(filename);
       dragFileList.push_back(di);
@@ -61,7 +50,7 @@ void DragInformation::parseDragInfo(DragFileList &dragFileList, UInt32 fileNum, 
     // set filesize
     findResult2 = data.find(',', startPos);
     if (findResult2 - findResult1 > 1) {
-      String filesize = data.substr(findResult1 + 1, findResult2 - findResult1 - 1);
+      std::string filesize = data.substr(findResult1 + 1, findResult2 - findResult1 - 1);
       size_t size = stringToNum(filesize);
       dragFileList.at(index).setFilesize(size);
     }
@@ -77,31 +66,31 @@ void DragInformation::parseDragInfo(DragFileList &dragFileList, UInt32 fileNum, 
   }
 }
 
-String DragInformation::getDragFileExtension(String filename)
+std::string DragInformation::getDragFileExtension(std::string filename)
 {
-  size_t findResult = string::npos;
+  size_t findResult = std::string::npos;
   findResult = filename.find_last_of(".", filename.size());
-  if (findResult != string::npos) {
+  if (findResult != std::string::npos) {
     return filename.substr(findResult + 1, filename.size() - findResult - 1);
   } else {
     return "";
   }
 }
 
-int DragInformation::setupDragInfo(DragFileList &fileList, String &output)
+int DragInformation::setupDragInfo(DragFileList &fileList, std::string &output)
 {
   int size = static_cast<int>(fileList.size());
   for (int i = 0; i < size; ++i) {
     output.append(fileList.at(i).getFilename());
     output.append(",");
-    String filesize = getFileSize(fileList.at(i).getFilename());
+    std::string filesize = getFileSize(fileList.at(i).getFilename());
     output.append(filesize);
     output.append(",");
   }
   return size;
 }
 
-bool DragInformation::isFileValid(String filename)
+bool DragInformation::isFileValid(std::string filename)
 {
   bool result = false;
   std::fstream file(filename.c_str(), ios::in | ios::binary);
@@ -115,7 +104,7 @@ bool DragInformation::isFileValid(String filename)
   return result;
 }
 
-size_t DragInformation::stringToNum(String &str)
+size_t DragInformation::stringToNum(std::string &str)
 {
   istringstream iss(str.c_str());
   size_t size;
@@ -123,7 +112,7 @@ size_t DragInformation::stringToNum(String &str)
   return size;
 }
 
-String DragInformation::getFileSize(String &filename)
+std::string DragInformation::getFileSize(std::string &filename)
 {
   std::fstream file(filename.c_str(), ios::in | ios::binary);
 

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -76,7 +65,7 @@ public:
   class SwitchToScreenInfo
   {
   public:
-    static SwitchToScreenInfo *alloc(const String &screen);
+    static SwitchToScreenInfo *alloc(const std::string &screen);
 
   public:
     // this is a C-string;  this type is a variable size structure
@@ -97,12 +86,12 @@ public:
   class ScreenConnectedInfo
   {
   public:
-    ScreenConnectedInfo(String screen) : m_screen(screen)
+    ScreenConnectedInfo(std::string screen) : m_screen(screen)
     {
     }
 
   public:
-    String m_screen; // was char[1]
+    std::string m_screen; // was char[1]
   };
 
   //! Keyboard broadcast data
@@ -117,7 +106,7 @@ public:
     };
 
     static KeyboardBroadcastInfo *alloc(State state = kToggle);
-    static KeyboardBroadcastInfo *alloc(State state, const String &screens);
+    static KeyboardBroadcastInfo *alloc(State state, const std::string &screens);
 
   public:
     State m_state;
@@ -181,7 +170,7 @@ public:
   void sendFileToClient(const char *filename);
 
   //! Received dragging information from client
-  void dragInfoReceived(UInt32 fileNum, String content);
+  void dragInfoReceived(uint32_t fileNum, std::string content);
 
   //! Store ClientListener pointer
   void setListener(ClientListener *p)
@@ -203,13 +192,13 @@ public:
   /*!
   Returns the number of connected clients, including the server itself.
   */
-  UInt32 getNumClients() const;
+  uint32_t getNumClients() const;
 
   //! Get the list of connected clients
   /*!
   Set the \c list to the names of the currently connected clients.
   */
-  void getClients(std::vector<String> &list) const;
+  void getClients(std::vector<std::string> &list) const;
 
   //! Return true if recieved file size is valid
   bool isReceivedFileSizeValid();
@@ -221,7 +210,7 @@ public:
   }
 
   //! Return received file data
-  String &getReceivedFileData()
+  std::string &getReceivedFileData()
   {
     return m_receivedFileData;
   }
@@ -239,10 +228,10 @@ public:
 
 private:
   // get canonical name of client
-  String getName(const BaseClientProxy *) const;
+  std::string getName(const BaseClientProxy *) const;
 
   // get the sides of the primary screen that have neighbors
-  UInt32 getActivePrimarySides() const;
+  uint32_t getActivePrimarySides() const;
 
   // returns true iff mouse should be locked to the current screen
   // according to this object only, ignoring what the primary client
@@ -254,21 +243,21 @@ private:
   bool isLockedToScreen() const;
 
   // returns the jump zone of the client
-  SInt32 getJumpZoneSize(BaseClientProxy *) const;
+  int32_t getJumpZoneSize(BaseClientProxy *) const;
 
   // change the active screen
-  void switchScreen(BaseClientProxy *, SInt32 x, SInt32 y, bool forScreenSaver);
+  void switchScreen(BaseClientProxy *, int32_t x, int32_t y, bool forScreenSaver);
 
   // jump to screen
   void jumpToScreen(BaseClientProxy *);
 
   // convert pixel position to fraction, using x or y depending on the
   // direction.
-  float mapToFraction(BaseClientProxy *, EDirection, SInt32 x, SInt32 y) const;
+  float mapToFraction(BaseClientProxy *, EDirection, int32_t x, int32_t y) const;
 
   // convert fraction to pixel position, writing only x or y depending
   // on the direction.
-  void mapToPixel(BaseClientProxy *, EDirection, float f, SInt32 &x, SInt32 &y) const;
+  void mapToPixel(BaseClientProxy *, EDirection, float f, int32_t &x, int32_t &y) const;
 
   // returns true if the client has a neighbor anywhere along the edge
   // indicated by the direction.
@@ -276,27 +265,27 @@ private:
 
   // lookup neighboring screen, mapping the coordinate independent of
   // the direction to the neighbor's coordinate space.
-  BaseClientProxy *getNeighbor(BaseClientProxy *, EDirection, SInt32 &x, SInt32 &y) const;
+  BaseClientProxy *getNeighbor(BaseClientProxy *, EDirection, int32_t &x, int32_t &y) const;
 
   // lookup neighboring screen.  given a position relative to the
   // source screen, find the screen we should move onto and where.
   // if the position is sufficiently far from the source then we
   // cross multiple screens.  if there is no suitable screen then
   // return NULL and x,y are not modified.
-  BaseClientProxy *mapToNeighbor(BaseClientProxy *, EDirection, SInt32 &x, SInt32 &y) const;
+  BaseClientProxy *mapToNeighbor(BaseClientProxy *, EDirection, int32_t &x, int32_t &y) const;
 
   // adjusts x and y or neither to avoid ending up in a jump zone
   // after entering the client in the given direction.
-  void avoidJumpZone(BaseClientProxy *, EDirection, SInt32 &x, SInt32 &y) const;
+  void avoidJumpZone(BaseClientProxy *, EDirection, int32_t &x, int32_t &y) const;
 
   // test if a switch is permitted.  this includes testing user
   // options like switch delay and tracking any state required to
   // implement them.  returns true iff a switch is permitted.
-  bool isSwitchOkay(BaseClientProxy *dst, EDirection, SInt32 x, SInt32 y, SInt32 xActive, SInt32 yActive);
+  bool isSwitchOkay(BaseClientProxy *dst, EDirection, int32_t x, int32_t y, int32_t xActive, int32_t yActive);
 
   // update switch state due to a mouse move at \p x, \p y that
   // doesn't switch screens.
-  void noSwitch(SInt32 x, SInt32 y);
+  void noSwitch(int32_t x, int32_t y);
 
   // stop switch timers
   void stopSwitch();
@@ -305,7 +294,7 @@ private:
   void startSwitchTwoTap();
 
   // arm the two tap switch timer if \p x, \p y is outside the tap zone
-  void armSwitchTwoTap(SInt32 x, SInt32 y);
+  void armSwitchTwoTap(int32_t x, int32_t y);
 
   // stop the two tap switch timer
   void stopSwitchTwoTap();
@@ -317,7 +306,7 @@ private:
   bool shouldSwitchTwoTap() const;
 
   // start delay switch timer
-  void startSwitchWait(SInt32 x, SInt32 y);
+  void startSwitchWait(int32_t x, int32_t y);
 
   // stop delay switch timer
   void stopSwitchWait();
@@ -327,7 +316,7 @@ private:
 
   // returns the corner (EScreenSwitchCornerMasks) where x,y is on the
   // given client.  corners have the given size.
-  UInt32 getCorner(BaseClientProxy *, SInt32 x, SInt32 y, SInt32 size) const;
+  uint32_t getCorner(BaseClientProxy *, int32_t x, int32_t y, int32_t size) const;
 
   // stop relative mouse moves
   void stopRelativeMoves();
@@ -365,16 +354,16 @@ private:
   void handleFileRecieveCompletedEvent(const Event &, void *);
 
   // event processing
-  void onClipboardChanged(BaseClientProxy *sender, ClipboardID id, UInt32 seqNum);
+  void onClipboardChanged(BaseClientProxy *sender, ClipboardID id, uint32_t seqNum);
   void onScreensaver(bool activated);
-  void onKeyDown(KeyID, KeyModifierMask, KeyButton, const String &, const char *screens);
+  void onKeyDown(KeyID, KeyModifierMask, KeyButton, const std::string &, const char *screens);
   void onKeyUp(KeyID, KeyModifierMask, KeyButton, const char *screens);
-  void onKeyRepeat(KeyID, KeyModifierMask, SInt32, KeyButton, const String &);
+  void onKeyRepeat(KeyID, KeyModifierMask, int32_t, KeyButton, const std::string &);
   void onMouseDown(ButtonID);
   void onMouseUp(ButtonID);
-  bool onMouseMovePrimary(SInt32 x, SInt32 y);
-  void onMouseMoveSecondary(SInt32 dx, SInt32 dy);
-  void onMouseWheel(SInt32 xDelta, SInt32 yDelta);
+  bool onMouseMovePrimary(int32_t x, int32_t y);
+  void onMouseMoveSecondary(int32_t dx, int32_t dy);
+  void onMouseWheel(int32_t xDelta, int32_t yDelta);
   void onFileChunkSending(const void *data);
   void onFileRecieveCompleted();
 
@@ -424,9 +413,9 @@ private:
 
   public:
     Clipboard m_clipboard;
-    String m_clipboardData;
-    String m_clipboardOwner;
-    UInt32 m_clipboardSeqNum;
+    std::string m_clipboardData;
+    std::string m_clipboardOwner;
+    uint32_t m_clipboardSeqNum;
   };
 
   // used in hello message sent to the client
@@ -436,31 +425,31 @@ private:
   PrimaryClient *m_primaryClient;
 
   // all clients (including the primary client) indexed by name
-  typedef std::map<String, BaseClientProxy *> ClientList;
-  typedef std::set<BaseClientProxy *> ClientSet;
+  using ClientList = std::map<std::string, BaseClientProxy *>;
+  using ClientSet = std::set<BaseClientProxy *>;
   ClientList m_clients;
   ClientSet m_clientSet;
 
   // all old connections that we're waiting to hangup
-  typedef std::map<BaseClientProxy *, EventQueueTimer *> OldClients;
+  using OldClients = std::map<BaseClientProxy *, EventQueueTimer *>;
   OldClients m_oldClients;
 
   // the client with focus
   BaseClientProxy *m_active;
 
   // the sequence number of enter messages
-  UInt32 m_seqNum;
+  uint32_t m_seqNum;
 
   // current mouse position (in absolute screen coordinates) on
   // whichever screen is active
-  SInt32 m_x, m_y;
+  int32_t m_x, m_y;
 
   // last mouse deltas.  this is needed to smooth out double tap
   // on win32 which reports bogus mouse motion at the edge of
   // the screen when using low level hooks, synthesizing motion
   // in the opposite direction the mouse actually moved.
-  SInt32 m_xDelta, m_yDelta;
-  SInt32 m_xDelta2, m_yDelta2;
+  int32_t m_xDelta, m_yDelta;
+  int32_t m_xDelta2, m_yDelta2;
 
   // current configuration
   ServerConfig *m_config;
@@ -473,7 +462,7 @@ private:
 
   // state saved when screen saver activates
   BaseClientProxy *m_activeSaver;
-  SInt32 m_xSaver, m_ySaver;
+  int32_t m_xSaver, m_ySaver;
 
   // common state for screen switch tests.  all tests are always
   // trying to reach the same screen in the same direction.
@@ -483,14 +472,14 @@ private:
   // state for delayed screen switching
   double m_switchWaitDelay;
   EventQueueTimer *m_switchWaitTimer;
-  SInt32 m_switchWaitX, m_switchWaitY;
+  int32_t m_switchWaitX, m_switchWaitY;
 
   // state for double-tap screen switching
   double m_switchTwoTapDelay;
   Stopwatch m_switchTwoTapTimer;
   bool m_switchTwoTapEngaged;
   bool m_switchTwoTapArmed;
-  SInt32 m_switchTwoTapZone;
+  int32_t m_switchTwoTapZone;
 
   // modifiers needed before switching
   bool m_switchNeedsShift;
@@ -503,7 +492,7 @@ private:
   // flag whether or not we have broadcasting enabled and the screens to
   // which we should send broadcasted keys.
   bool m_keyboardBroadcasting;
-  String m_keyboardBroadcastingScreens;
+  std::string m_keyboardBroadcastingScreens;
 
   // screen locking (former scroll lock)
   bool m_lockedToScreen;
@@ -516,12 +505,12 @@ private:
   // file transfer
   using AutoThread = std::unique_ptr<Thread>;
   size_t m_expectedFileSize;
-  String m_receivedFileData;
+  std::string m_receivedFileData;
   DragFileList m_dragFileList;
   DragFileList m_fakeDragFileList;
   AutoThread m_sendFileThread;
   AutoThread m_writeToDropDirThread;
-  String m_dragFileExt;
+  std::string m_dragFileExt;
   bool m_ignoreFileTransfer;
   bool m_disableLockToScreen;
   bool m_enableClipboard;

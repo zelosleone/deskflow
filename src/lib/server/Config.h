@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -40,11 +29,11 @@ class IEventQueue;
 namespace std {
 template <> struct iterator_traits<deskflow::server::Config>
 {
-  typedef String value_type;
-  typedef ptrdiff_t difference_type;
-  typedef bidirectional_iterator_tag iterator_category;
-  typedef String *pointer;
-  typedef String &reference;
+  using value_type = std::string;
+  using difference_type = ptrdiff_t;
+  using iterator_category = bidirectional_iterator_tag;
+  using pointer = std::string *;
+  using reference = std::string &;
 };
 }; // namespace std
 
@@ -63,20 +52,20 @@ namespace and must be unique.
 class Config
 {
 public:
-  typedef std::map<OptionID, OptionValue> ScreenOptions;
-  typedef std::pair<float, float> Interval;
+  using ScreenOptions = std::map<OptionID, OptionValue>;
+  using Interval = std::pair<float, float>;
 
   class CellEdge
   {
   public:
     CellEdge(EDirection side, float position);
     CellEdge(EDirection side, const Interval &);
-    CellEdge(const String &name, EDirection side, const Interval &);
+    CellEdge(const std::string &name, EDirection side, const Interval &);
     ~CellEdge();
 
     Interval getInterval() const;
-    void setName(const String &newName);
-    String getName() const;
+    void setName(const std::string &newName);
+    std::string getName() const;
     EDirection getSide() const;
     bool overlaps(const CellEdge &) const;
     bool isInside(float x) const;
@@ -95,10 +84,10 @@ public:
     bool operator!=(const CellEdge &) const;
 
   private:
-    void init(const String &name, EDirection side, const Interval &);
+    void init(const std::string &name, EDirection side, const Interval &);
 
   private:
-    String m_name;
+    std::string m_name;
     EDirection m_side;
     Interval m_interval;
   };
@@ -107,28 +96,28 @@ private:
   class Name
   {
   public:
-    Name(Config *, const String &name);
+    Name(Config *, const std::string &name);
 
-    bool operator==(const String &name) const;
+    bool operator==(const std::string &name) const;
 
   private:
     Config *m_config;
-    String m_name;
+    std::string m_name;
   };
 
   class Cell
   {
   private:
-    typedef std::map<CellEdge, CellEdge> EdgeLinks;
+    using EdgeLinks = std::map<CellEdge, CellEdge>;
 
   public:
-    typedef EdgeLinks::const_iterator const_iterator;
+    using const_iterator = EdgeLinks::const_iterator;
 
     bool add(const CellEdge &src, const CellEdge &dst);
     void remove(EDirection side);
     void remove(EDirection side, float position);
     void remove(const Name &destinationName);
-    void rename(const Name &oldName, const String &newName);
+    void rename(const Name &oldName, const std::string &newName);
 
     bool hasEdge(const CellEdge &) const;
     bool overlaps(const CellEdge &) const;
@@ -147,13 +136,13 @@ private:
   public:
     ScreenOptions m_options;
   };
-  typedef std::map<String, Cell, deskflow::string::CaselessCmp> CellMap;
-  typedef std::map<String, String, deskflow::string::CaselessCmp> NameMap;
+  using CellMap = std::map<std::string, Cell, deskflow::string::CaselessCmp>;
+  using NameMap = std::map<std::string, std::string, deskflow::string::CaselessCmp>;
 
 public:
-  typedef Cell::const_iterator link_const_iterator;
-  typedef CellMap::const_iterator internal_const_iterator;
-  typedef NameMap::const_iterator all_const_iterator;
+  using link_const_iterator = Cell::const_iterator;
+  using internal_const_iterator = CellMap::const_iterator;
+  using all_const_iterator = NameMap::const_iterator;
   class const_iterator : std::iterator_traits<Config>
   {
   public:
@@ -171,11 +160,11 @@ public:
       m_i = i.m_i;
       return *this;
     }
-    String operator*()
+    std::string operator*()
     {
       return m_i->first;
     }
-    const String *operator->()
+    const std::string *operator->()
     {
       return &(m_i->first);
     }
@@ -227,14 +216,14 @@ public:
   Adds a screen, returning true iff successful.  If a screen or
   alias with the given name exists then it fails.
   */
-  bool addScreen(const String &name);
+  bool addScreen(const std::string &name);
 
   //! Rename screen
   /*!
   Renames a screen.  All references to the name are updated.
   Returns true iff successful.
   */
-  bool renameScreen(const String &oldName, const String &newName);
+  bool renameScreen(const std::string &oldName, const std::string &newName);
 
   //! Remove screen
   /*!
@@ -242,7 +231,7 @@ public:
   disconnects any connections to the screen.  \c name may be an
   alias.
   */
-  void removeScreen(const String &name);
+  void removeScreen(const std::string &name);
 
   //! Remove all screens
   /*!
@@ -257,21 +246,21 @@ public:
   Returns false if the alias name already exists or the canonical
   name is unknown, otherwise returns true.
   */
-  bool addAlias(const String &canonical, const String &alias);
+  bool addAlias(const std::string &canonical, const std::string &alias);
 
   //! Remove alias
   /*!
   Removes an alias for a screen name.  It returns false if the
   alias is unknown or a canonical name, otherwise returns true.
   */
-  bool removeAlias(const String &alias);
+  bool removeAlias(const std::string &alias);
 
   //! Remove aliases
   /*!
   Removes all aliases for a canonical screen name.  It returns false
   if the canonical name is unknown, otherwise returns true.
   */
-  bool removeAliases(const String &canonical);
+  bool removeAliases(const std::string &canonical);
 
   //! Remove all aliases
   /*!
@@ -296,8 +285,8 @@ public:
   be inside the range [0,1].
   */
   bool connect(
-      const String &srcName, EDirection srcSide, float srcStart, float srcEnd, const String &dstName, float dstStart,
-      float dstEnd
+      const std::string &srcName, EDirection srcSide, float srcStart, float srcEnd, const std::string &dstName,
+      float dstStart, float dstEnd
   );
 
   //! Disconnect screens
@@ -305,7 +294,7 @@ public:
   Removes all connections created by connect() on side \c srcSide.
   Returns false if \c srcName is unknown.
   */
-  bool disconnect(const String &srcName, EDirection srcSide);
+  bool disconnect(const std::string &srcName, EDirection srcSide);
 
   //! Disconnect screens
   /*!
@@ -313,7 +302,7 @@ public:
   covering position \c position.  Returns false if \c srcName is
   unknown.
   */
-  bool disconnect(const String &srcName, EDirection srcSide, float position);
+  bool disconnect(const std::string &srcName, EDirection srcSide, float position);
 
   //! Set server address
   /*!
@@ -328,7 +317,7 @@ public:
   existing option's value if there is one.  Returns true iff \c name
   is a known screen.
   */
-  bool addOption(const String &name, OptionID option, OptionValue value);
+  bool addOption(const std::string &name, OptionID option, OptionValue value);
 
   //! Remove a screen option
   /*!
@@ -336,14 +325,14 @@ public:
   nothing if the option doesn't exist on the screen.  Returns true
   iff \c name is a known screen.
   */
-  bool removeOption(const String &name, OptionID option);
+  bool removeOption(const std::string &name, OptionID option);
 
   //! Remove a screen options
   /*!
   Removes all options and values from the named screen.  Returns true
   iff \c name is a known screen.
   */
-  bool removeOptions(const String &name);
+  bool removeOptions(const std::string &name);
 
   //! Get the hot key input filter
   /*!
@@ -360,7 +349,7 @@ public:
   /*!
   Returns true iff \c name is a valid screen name.
   */
-  bool isValidScreenName(const String &name) const;
+  bool isValidScreenName(const std::string &name) const;
 
   //! Get beginning (canonical) screen name iterator
   const_iterator begin() const;
@@ -376,20 +365,20 @@ public:
   /*!
   Returns true iff \c name names a screen.
   */
-  virtual bool isScreen(const String &name) const;
+  virtual bool isScreen(const std::string &name) const;
 
   //! Test for canonical screen name
   /*!
   Returns true iff \c name is the canonical name of a screen.
   */
-  bool isCanonicalName(const String &name) const;
+  bool isCanonicalName(const std::string &name) const;
 
   //! Get canonical name
   /*!
   Returns the canonical name of a screen or the empty string if
   the name is unknown.  Returns the canonical name if one is given.
   */
-  String getCanonicalName(const String &name) const;
+  std::string getCanonicalName(const std::string &name) const;
 
   //! Get neighbor
   /*!
@@ -399,26 +388,26 @@ public:
   saves the position on the neighbor in \c positionOut if it's not
   \c NULL.
   */
-  String getNeighbor(const String &, EDirection, float position, float *positionOut) const;
+  std::string getNeighbor(const std::string &, EDirection, float position, float *positionOut) const;
 
   //! Check for neighbor
   /*!
   Returns \c true if the screen has a neighbor anywhere along the edge
   given by the direction.
   */
-  bool hasNeighbor(const String &, EDirection) const;
+  bool hasNeighbor(const std::string &, EDirection) const;
 
   //! Check for neighbor
   /*!
   Returns \c true if the screen has a neighbor in the given range along
   the edge given by the direction.
   */
-  bool hasNeighbor(const String &, EDirection, float start, float end) const;
+  bool hasNeighbor(const std::string &, EDirection, float start, float end) const;
 
   //! Get beginning neighbor iterator
-  link_const_iterator beginNeighbor(const String &) const;
+  link_const_iterator beginNeighbor(const std::string &) const;
   //! Get ending neighbor iterator
-  link_const_iterator endNeighbor(const String &) const;
+  link_const_iterator endNeighbor(const std::string &) const;
 
   //! Get the server address
   const NetworkAddress &getDeskflowAddress() const;
@@ -429,7 +418,7 @@ public:
   if the screen is unknown and an empty collection if there are no
   options.
   */
-  const ScreenOptions *getOptions(const String &name) const;
+  const ScreenOptions *getOptions(const std::string &name) const;
 
   //! Check for lock to screen action
   /*!
@@ -472,13 +461,13 @@ public:
   /*!
   Returns an interval as a parseable string.
   */
-  static String formatInterval(const Interval &);
+  static std::string formatInterval(const Interval &);
 
   //! Get client address as a string
   /*!
    * Return client address a string.
    */
-  String getClientAddress() const;
+  std::string getClientAddress() const;
 
   //! Return true if server started in client mode
   /*!
@@ -495,14 +484,16 @@ private:
   void readSectionLinks(ConfigReadContext &);
   void readSectionAliases(ConfigReadContext &);
 
-  InputFilter::Condition *parseCondition(ConfigReadContext &, const String &condition, const std::vector<String> &args);
+  InputFilter::Condition *
+  parseCondition(ConfigReadContext &, const std::string &condition, const std::vector<std::string> &args);
   void parseAction(
-      ConfigReadContext &, const String &action, const std::vector<String> &args, InputFilter::Rule &, bool activate
+      ConfigReadContext &, const std::string &action, const std::vector<std::string> &args, InputFilter::Rule &,
+      bool activate
   );
 
-  void parseScreens(ConfigReadContext &, const String &, std::set<String> &screens) const;
+  void parseScreens(ConfigReadContext &, const std::string &, std::set<std::string> &screens) const;
   static const char *getOptionName(OptionID);
-  static String getOptionValue(OptionID, OptionValue);
+  static std::string getOptionValue(OptionID, OptionValue);
 
 private:
   CellMap m_map;
@@ -512,7 +503,7 @@ private:
   InputFilter m_inputFilter;
   bool m_hasLockToScreenAction;
   IEventQueue *m_events;
-  String m_ClientAddress;
+  std::string m_ClientAddress;
 };
 
 //! Configuration read context
@@ -522,30 +513,31 @@ Maintains a context when reading a configuration from a stream.
 class ConfigReadContext
 {
 public:
-  typedef std::vector<String> ArgList;
+  using ArgList = std::vector<std::string>;
 
-  ConfigReadContext(std::istream &, SInt32 firstLine = 1);
+  ConfigReadContext(std::istream &, int32_t firstLine = 1);
   ~ConfigReadContext();
 
-  bool readLine(String &);
-  UInt32 getLineNumber() const;
+  bool readLine(std::string &);
+  uint32_t getLineNumber() const;
 
   bool operator!() const;
 
-  OptionValue parseBoolean(const String &) const;
-  OptionValue parseInt(const String &) const;
-  OptionValue parseModifierKey(const String &) const;
-  OptionValue parseCorner(const String &) const;
-  OptionValue parseCorners(const String &) const;
-  OptionValue parseProtocol(const String &) const;
+  OptionValue parseBoolean(const std::string &) const;
+  OptionValue parseInt(const std::string &) const;
+  OptionValue parseModifierKey(const std::string &) const;
+  OptionValue parseCorner(const std::string &) const;
+  OptionValue parseCorners(const std::string &) const;
+  OptionValue parseProtocol(const std::string &) const;
   Config::Interval parseInterval(const ArgList &args) const;
   void parseNameWithArgs(
-      const String &type, const String &line, const String &delim, String::size_type &index, String &name, ArgList &args
+      const std::string &type, const std::string &line, const std::string &delim, std::string::size_type &index,
+      std::string &name, ArgList &args
   ) const;
-  IPlatformScreen::KeyInfo *parseKeystroke(const String &keystroke) const;
-  IPlatformScreen::KeyInfo *parseKeystroke(const String &keystroke, const std::set<String> &screens) const;
-  IPlatformScreen::ButtonInfo *parseMouse(const String &mouse) const;
-  KeyModifierMask parseModifier(const String &modifiers) const;
+  IPlatformScreen::KeyInfo *parseKeystroke(const std::string &keystroke) const;
+  IPlatformScreen::KeyInfo *parseKeystroke(const std::string &keystroke, const std::set<std::string> &screens) const;
+  IPlatformScreen::ButtonInfo *parseMouse(const std::string &mouse) const;
+  KeyModifierMask parseModifier(const std::string &modifiers) const;
   std::istream &getStream() const
   {
     return m_stream;
@@ -555,11 +547,11 @@ private:
   // not implemented
   ConfigReadContext &operator=(const ConfigReadContext &);
 
-  static String concatArgs(const ArgList &args);
+  static std::string concatArgs(const ArgList &args);
 
 private:
   std::istream &m_stream;
-  SInt32 m_line;
+  int32_t m_line;
 };
 
 //! Configuration stream read exception
@@ -569,16 +561,16 @@ Thrown when a configuration stream cannot be parsed.
 class XConfigRead : public XBase
 {
 public:
-  XConfigRead(const ConfigReadContext &context, const String &);
-  XConfigRead(const ConfigReadContext &context, const char *errorFmt, const String &arg);
+  XConfigRead(const ConfigReadContext &context, const std::string &);
+  XConfigRead(const ConfigReadContext &context, const char *errorFmt, const std::string &arg);
   virtual ~XConfigRead() _NOEXCEPT;
 
 protected:
   // XBase overrides
-  virtual String getWhat() const throw();
+  virtual std::string getWhat() const throw();
 
 private:
-  String m_error;
+  std::string m_error;
 };
 
 } // namespace deskflow::server

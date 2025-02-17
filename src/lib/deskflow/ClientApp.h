@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -36,7 +25,7 @@ class ClientArgs;
 class ClientApp : public App
 {
 public:
-  ClientApp(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver);
+  ClientApp(IEventQueue *events);
   virtual ~ClientApp();
 
   //
@@ -50,7 +39,7 @@ public:
   void loadConfig() override
   {
   }
-  bool loadConfig(const String &pathname) override
+  bool loadConfig(const std::string &pathname) override
   {
     return false;
   }
@@ -75,7 +64,7 @@ public:
   //
 
   void updateStatus();
-  void updateStatus(const String &msg);
+  void updateStatus(const std::string &msg);
   void resetRestartTimeout();
   double nextRestartTimeout();
   void handleScreenError(const Event &, void *);
@@ -87,7 +76,7 @@ public:
   void handleClientFailed(const Event &e, void *);
   void handleClientRefused(const Event &e, void *);
   void handleClientDisconnected(const Event &, void *);
-  Client *openClient(const String &name, const NetworkAddress &address, deskflow::Screen *screen);
+  Client *openClient(const std::string &name, const NetworkAddress &address, deskflow::Screen *screen);
   void closeClient(Client *client);
   bool startClient();
   void stopClient();

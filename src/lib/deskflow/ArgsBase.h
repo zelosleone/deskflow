@@ -1,23 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
+#include <string>
 
 namespace deskflow {
 
@@ -65,7 +54,7 @@ public:
   const char *m_display = nullptr;
 
   /// @brief The name of the current computer
-  String m_name;
+  std::string m_name;
 
   /// @brief Should the app add a tray icon
   bool m_disableTray = false;
@@ -83,19 +72,19 @@ public:
   bool m_shouldExitFail = false;
 
   /// @brief Bind to this address
-  String m_deskflowAddress;
+  std::string m_deskflowAddress;
 
   /// @brief Should the connections be TLS encrypted
   bool m_enableCrypto = false;
 
   /// @brief The dir to load settings from
-  String m_profileDirectory;
+  std::string m_profileDirectory;
 
   /// @brief The dir to load plugins from
-  String m_pluginDirectory;
+  std::string m_pluginDirectory;
 
   /// @brief Contains the location of the TLS certificate file
-  String m_tlsCertFile;
+  std::string m_tlsCertFile;
 
   /// @brief Stop this computer from sleeping
   bool m_preventSleep = false;

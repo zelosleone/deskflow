@@ -1,26 +1,16 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "common/stdvector.h"
 #include "deskflow/KeyState.h"
+
+#include <string>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -38,11 +28,12 @@ class MSWindowsKeyState : public KeyState
 {
 public:
   MSWindowsKeyState(
-      MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, std::vector<String> layouts, bool isLangSyncEnabled
+      MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, std::vector<std::string> layouts,
+      bool isLangSyncEnabled
   );
   MSWindowsKeyState(
       MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, deskflow::KeyMap &keyMap,
-      std::vector<String> layouts, bool isLangSyncEnabled
+      std::vector<std::string> layouts, bool isLangSyncEnabled
   );
   virtual ~MSWindowsKeyState();
 
@@ -140,17 +131,17 @@ public:
   //@}
 
   // IKeyState overrides
-  virtual void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang);
-  virtual bool fakeKeyRepeat(KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang);
+  virtual void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang);
+  virtual bool fakeKeyRepeat(KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang);
   virtual bool fakeCtrlAltDel();
   virtual KeyModifierMask pollActiveModifiers() const;
-  virtual SInt32 pollActiveGroup() const;
+  virtual int32_t pollActiveGroup() const;
   virtual void pollPressedKeys(KeyButtonSet &pressedKeys) const;
 
   // KeyState overrides
   virtual void onKey(KeyButton button, bool down, KeyModifierMask newState);
   virtual void sendKeyEvent(
-      void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, SInt32 count, KeyButton button
+      void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, int32_t count, KeyButton button
   );
 
   // Unit test accessors
@@ -178,13 +169,13 @@ protected:
   virtual KeyModifierMask &getActiveModifiersRValue();
 
 private:
-  typedef std::vector<HKL> GroupList;
+  using GroupList = std::vector<HKL>;
 
   // send ctrl+alt+del hotkey event on NT family
   static void ctrlAltDelThread(void *);
 
   bool getGroups(GroupList &) const;
-  void setWindowGroup(SInt32 group);
+  void setWindowGroup(int32_t group);
 
   KeyID getIDForKey(deskflow::KeyMap::KeyItem &item, KeyButton button, UINT virtualKey, PBYTE keyState, HKL hkl) const;
 
@@ -198,8 +189,8 @@ private:
   MSWindowsKeyState &operator=(const MSWindowsKeyState &);
 
 private:
-  typedef std::map<HKL, SInt32> GroupMap;
-  typedef std::map<KeyID, UINT> KeyToVKMap;
+  using GroupMap = std::map<HKL, int32_t>;
+  using KeyToVKMap = std::map<KeyID, UINT>;
 
   void *m_eventTarget;
   MSWindowsDesks *m_desks;

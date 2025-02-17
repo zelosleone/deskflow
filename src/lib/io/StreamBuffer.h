@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -41,20 +30,20 @@ public:
   (which must be <= getSize()).  The caller must not modify the returned
   memory nor delete it.
   */
-  const void *peek(UInt32 n);
+  const void *peek(uint32_t n);
 
   //! Discard data
   /*!
   Discards the next \c n bytes.  If \c n >= getSize() then the buffer
   is cleared.
   */
-  void pop(UInt32 n);
+  void pop(uint32_t n);
 
   //! Write data to buffer
   /*!
   Appends \c n bytes from \c data to the buffer.
   */
-  void write(const void *data, UInt32 n);
+  void write(const void *data, uint32_t n);
 
   //@}
   //! @name accessors
@@ -64,17 +53,17 @@ public:
   /*!
   Returns the number of bytes in the buffer.
   */
-  UInt32 getSize() const;
+  uint32_t getSize() const;
 
   //@}
 
 private:
-  static const UInt32 kChunkSize;
+  static const uint32_t kChunkSize;
 
-  typedef std::vector<UInt8> Chunk;
-  typedef std::list<Chunk> ChunkList;
+  using Chunk = std::vector<uint8_t>;
+  using ChunkList = std::list<Chunk>;
 
   ChunkList m_chunks;
-  UInt32 m_size;
-  UInt32 m_headUsed;
+  uint32_t m_size;
+  uint32_t m_headUsed;
 };

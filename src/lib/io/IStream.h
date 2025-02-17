@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -57,7 +46,7 @@ public:
   (zero if no data is available or input is shutdown).  \p buffer
   may be NULL in which case the data is discarded.
   */
-  virtual UInt32 read(void *buffer, UInt32 n) = 0;
+  virtual uint32_t read(void *buffer, uint32_t n) = 0;
 
   //! Write to stream
   /*!
@@ -66,7 +55,7 @@ public:
   order to return more quickly.  A output error event is generated
   when writing fails.
   */
-  virtual void write(const void *buffer, UInt32 n) = 0;
+  virtual void write(const void *buffer, uint32_t n) = 0;
 
   //! Flush the stream
   /*!
@@ -115,7 +104,7 @@ public:
   Some streams may not be able to determine this and will always
   return zero.
   */
-  virtual UInt32 getSize() const = 0;
+  virtual uint32_t getSize() const = 0;
 
   //@}
 };

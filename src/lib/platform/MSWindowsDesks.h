@@ -1,24 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "common/stdmap.h"
 #include "deskflow/key_types.h"
 #include "deskflow/mouse_types.h"
@@ -26,6 +14,8 @@
 #include "mt/CondVar.h"
 #include "mt/Mutex.h"
 #include "platform/dfwhook.h"
+
+#include <string>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -125,7 +115,7 @@ public:
   /*!
   This tells the desks that the display size has changed.
   */
-  void setShape(SInt32 x, SInt32 y, SInt32 width, SInt32 height, SInt32 xCenter, SInt32 yCenter, bool isMultimon);
+  void setShape(int32_t x, int32_t y, int32_t width, int32_t height, int32_t xCenter, int32_t yCenter, bool isMultimon);
 
   //! Install/uninstall screensaver hooks
   /*!
@@ -155,7 +145,7 @@ public:
   /*!
   Return the current position of the cursor in \c x and \c y.
   */
-  void getCursorPos(SInt32 &x, SInt32 &y) const;
+  void getCursorPos(int32_t &x, int32_t &y) const;
 
   //! Fake key press/release
   /*!
@@ -173,19 +163,19 @@ public:
   /*!
   Synthesize a mouse move to the absolute coordinates \c x,y.
   */
-  void fakeMouseMove(SInt32 x, SInt32 y) const;
+  void fakeMouseMove(int32_t x, int32_t y) const;
 
   //! Fake mouse move
   /*!
   Synthesize a mouse move to the relative coordinates \c dx,dy.
   */
-  void fakeMouseRelativeMove(SInt32 dx, SInt32 dy) const;
+  void fakeMouseRelativeMove(int32_t dx, int32_t dy) const;
 
   //! Fake mouse wheel
   /*!
   Synthesize a mouse wheel event of amount \c delta in direction \c axis.
   */
-  void fakeMouseWheel(SInt32 xDelta, SInt32 yDelta) const;
+  void fakeMouseWheel(int32_t xDelta, int32_t yDelta) const;
 
   //@}
 
@@ -193,7 +183,7 @@ private:
   class Desk
   {
   public:
-    String m_name;
+    std::string m_name;
     Thread *m_thread;
     DWORD m_threadID;
     DWORD m_targetID;
@@ -202,7 +192,7 @@ private:
     HWND m_foregroundWindow;
     bool m_lowLevel;
   };
-  typedef std::map<String, Desk *> Desks;
+  using Desks = std::map<std::string, Desk *>;
 
   // initialization and shutdown operations
   HCURSOR createBlankCursor() const;
@@ -213,14 +203,14 @@ private:
   void destroyWindow(HWND) const;
 
   // message handlers
-  void deskMouseMove(SInt32 x, SInt32 y) const;
-  void deskMouseRelativeMove(SInt32 dx, SInt32 dy) const;
+  void deskMouseMove(int32_t x, int32_t y) const;
+  void deskMouseRelativeMove(int32_t dx, int32_t dy) const;
   void deskEnter(Desk *desk);
   void deskLeave(Desk *desk, HKL keyLayout);
   void deskThread(void *vdesk);
 
   // desk switch checking and handling
-  Desk *addDesk(const String &name, HDESK hdesk);
+  Desk *addDesk(const std::string &name, HDESK hdesk);
   void removeDesks();
   void checkDesk();
   bool isDeskAccessible(const Desk *desk) const;
@@ -236,7 +226,7 @@ private:
   // desk API wrappers
   HDESK openInputDesktop();
   void closeDesktop(HDESK);
-  String getDesktopName(HDESK);
+  std::string getDesktopName(HDESK);
 
   // our desk window procs
   static LRESULT CALLBACK primaryDeskProc(HWND, UINT, WPARAM, LPARAM);
@@ -257,9 +247,9 @@ private:
   HCURSOR m_cursor;
 
   // screen shape stuff
-  SInt32 m_x, m_y;
-  SInt32 m_w, m_h;
-  SInt32 m_xCenter, m_yCenter;
+  int32_t m_x, m_y;
+  int32_t m_w, m_h;
+  int32_t m_xCenter, m_yCenter;
 
   // true if system appears to have multiple monitors
   bool m_multimon;
@@ -274,7 +264,7 @@ private:
 
   // the current desk and it's name
   Desk *m_activeDesk;
-  String m_activeDeskName;
+  std::string m_activeDeskName;
 
   // one desk per desktop and a cond var to communicate with it
   Mutex m_mutex;

@@ -1,25 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2024 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "messages.h"
 
 #include "Logger.h"
 #include "common/constants.h"
-#include "common/version.h"
 #include "constants.h"
 #include "env_vars.h"
 #include "styles.h"
@@ -52,7 +40,6 @@ void raiseCriticalDialog()
 
 void showErrorDialog(const QString &message, const QString &fileLine, QtMsgType type)
 {
-
   auto title = type == QtFatalMsg ? "Fatal error" : "Critical error";
   QString text;
   if (type == QtFatalMsg) {
@@ -66,8 +53,7 @@ void showErrorDialog(const QString &message, const QString &fileLine, QtMsgType 
                   " and copy/paste the following error:</p>")
               .arg(kUrlHelp, kColorSecondary);
 
-  const QString version = QString::fromStdString(deskflow::version());
-  text += QString("<pre>v%1\n%2\n%3</pre>").arg(version, message, fileLine);
+  text += QString("<pre>v%1\n%2\n%3</pre>").arg(kVersion, message, fileLine);
 
   if (type == QtFatalMsg) {
     // create a blocking message box for fatal errors, as we want to wait
@@ -109,7 +95,6 @@ QString fileLine(const QMessageLogContext &context)
 
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message)
 {
-
   const auto fileLine = messages::fileLine(context);
   Logger::instance().handleMessage(type, fileLine, message);
 
@@ -220,23 +205,33 @@ void showClientConnectError(QWidget *parent, ClientError error, const QString &a
   dialog.exec();
 }
 
-NewClientPromptResult showNewClientPrompt(QWidget *parent, const QString &clientName)
+NewClientPromptResult showNewClientPrompt(QWidget *parent, const QString &clientName, bool tlsAcceptedClient)
 {
   using enum NewClientPromptResult;
 
-  QMessageBox message(parent);
-  const QPushButton *ignore = message.addButton("Ignore", QMessageBox::RejectRole);
-  const QPushButton *add = message.addButton("Add client", QMessageBox::AcceptRole);
-  message.setText(QString("A new client called '%1' wants to connect").arg(clientName));
-  message.exec();
-
-  if (message.clickedButton() == add) {
+  if (tlsAcceptedClient) {
+    // When peer checking is enabled you will be prompted to allow the connection before seeing this dialog.
+    // This is why we do not show a dialog with an option to ignore the new client
+    QMessageBox::information(
+        parent, QString("New Client"),
+        QString("A new client called '%1' has been accepted. You'll need to add it to your server's screen layout.")
+            .arg(clientName)
+    );
     return Add;
-  } else if (message.clickedButton() == ignore) {
-    return Ignore;
   } else {
-    qFatal("no expected dialog button was clicked");
-    abort();
+    QMessageBox message(parent);
+    const QPushButton *ignore = message.addButton("Ignore", QMessageBox::RejectRole);
+    const QPushButton *add = message.addButton("Add client", QMessageBox::AcceptRole);
+    message.setText(QString("A new client called '%1' wants to connect").arg(clientName));
+    message.exec();
+    if (message.clickedButton() == add) {
+      return Add;
+    } else if (message.clickedButton() == ignore) {
+      return Ignore;
+    } else {
+      qFatal("no expected dialog button was clicked");
+      abort();
+    }
   }
 }
 

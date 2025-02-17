@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -21,7 +10,6 @@
 #include "base/Event.h"
 #include "base/EventTypes.h"
 #include "base/IEventQueue.h"
-#include "base/String.h"
 #include "common/IInterface.h"
 #include "common/stdset.h"
 #include "deskflow/key_types.h"
@@ -45,26 +33,26 @@ public:
   class KeyInfo
   {
   public:
-    static KeyInfo *alloc(KeyID, KeyModifierMask, KeyButton, SInt32 count);
-    static KeyInfo *alloc(KeyID, KeyModifierMask, KeyButton, SInt32 count, const std::set<String> &destinations);
+    static KeyInfo *alloc(KeyID, KeyModifierMask, KeyButton, int32_t count);
+    static KeyInfo *alloc(KeyID, KeyModifierMask, KeyButton, int32_t count, const std::set<std::string> &destinations);
     static KeyInfo *alloc(const KeyInfo &);
 
     static bool isDefault(const char *screens);
-    static bool contains(const char *screens, const String &name);
+    static bool contains(const char *screens, const std::string &name);
     static bool equal(const KeyInfo *, const KeyInfo *);
-    static String join(const std::set<String> &destinations);
-    static void split(const char *screens, std::set<String> &);
+    static std::string join(const std::set<std::string> &destinations);
+    static void split(const char *screens, std::set<std::string> &);
 
   public:
     KeyID m_key;
     KeyModifierMask m_mask;
     KeyButton m_button;
-    SInt32 m_count;
+    int32_t m_count;
     char *m_screens;
     char m_screensBuffer[1];
   };
 
-  typedef std::set<KeyButton> KeyButtonSet;
+  using KeyButtonSet = std::set<KeyButton>;
 
   //! @name manipulators
   //@{
@@ -95,13 +83,14 @@ public:
   /*!
   Synthesizes a key press event and updates the key state.
   */
-  virtual void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang) = 0;
+  virtual void fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang) = 0;
 
   //! Fake a key repeat
   /*!
   Synthesizes a key repeat event and updates the key state.
   */
-  virtual bool fakeKeyRepeat(KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang) = 0;
+  virtual bool
+  fakeKeyRepeat(KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang) = 0;
 
   //! Fake a key release
   /*!
@@ -159,7 +148,7 @@ public:
   /*!
   Returns the active keyboard layout according to the operating system.
   */
-  virtual SInt32 pollActiveGroup() const = 0;
+  virtual int32_t pollActiveGroup() const = 0;
 
   //! Get the keys currently pressed from OS
   /*!

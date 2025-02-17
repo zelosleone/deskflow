@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/OSXClipboardTextConverter.h"
@@ -39,13 +28,14 @@ CFStringRef OSXClipboardTextConverter::getOSXFormat() const
   return CFSTR("public.plain-text");
 }
 
-String
-OSXClipboardTextConverter::convertString(const String &data, CFStringEncoding fromEncoding, CFStringEncoding toEncoding)
+std::string OSXClipboardTextConverter::convertString(
+    const std::string &data, CFStringEncoding fromEncoding, CFStringEncoding toEncoding
+)
 {
   CFStringRef stringRef = CFStringCreateWithCString(kCFAllocatorDefault, data.c_str(), fromEncoding);
 
   if (stringRef == NULL) {
-    return String();
+    return std::string();
   }
 
   CFIndex buffSize;
@@ -57,12 +47,12 @@ OSXClipboardTextConverter::convertString(const String &data, CFStringEncoding fr
 
   if (buffer == NULL) {
     CFRelease(stringRef);
-    return String();
+    return std::string();
   }
 
-  CFStringGetBytes(stringRef, entireString, toEncoding, 0, false, (UInt8 *)buffer, buffSize, NULL);
+  CFStringGetBytes(stringRef, entireString, toEncoding, 0, false, (uint8_t *)buffer, buffSize, NULL);
 
-  String result(buffer, buffSize);
+  std::string result(buffer, buffSize);
 
   delete[] buffer;
   CFRelease(stringRef);
@@ -70,12 +60,12 @@ OSXClipboardTextConverter::convertString(const String &data, CFStringEncoding fr
   return result;
 }
 
-String OSXClipboardTextConverter::doFromIClipboard(const String &data) const
+std::string OSXClipboardTextConverter::doFromIClipboard(const std::string &data) const
 {
   return convertString(data, kCFStringEncodingUTF8, CFStringGetSystemEncoding());
 }
 
-String OSXClipboardTextConverter::doToIClipboard(const String &data) const
+std::string OSXClipboardTextConverter::doToIClipboard(const std::string &data) const
 {
   return convertString(data, CFStringGetSystemEncoding(), kCFStringEncodingUTF8);
 }

@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2013-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2013 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/StreamChunker.h"
@@ -55,7 +44,7 @@ void StreamChunker::sendFile(char *filename, IEventQueue *events, void *eventTar
   size_t size = (size_t)file.tellg();
 
   // send first message (file size)
-  String fileSize = deskflow::string::sizeTypeToString(size);
+  std::string fileSize = deskflow::string::sizeTypeToString(size);
   FileChunk *sizeMessage = FileChunk::start(fileSize);
 
   events->addEvent(Event(events->forFile().fileChunkSending(), eventTarget, sizeMessage));
@@ -81,7 +70,7 @@ void StreamChunker::sendFile(char *filename, IEventQueue *events, void *eventTar
 
     char *chunkData = new char[chunkSize];
     file.read(chunkData, chunkSize);
-    UInt8 *data = reinterpret_cast<UInt8 *>(chunkData);
+    uint8_t *data = reinterpret_cast<uint8_t *>(chunkData);
     FileChunk *fileChunk = FileChunk::data(data, chunkSize);
     delete[] chunkData;
 
@@ -106,11 +95,11 @@ void StreamChunker::sendFile(char *filename, IEventQueue *events, void *eventTar
 }
 
 void StreamChunker::sendClipboard(
-    String &data, size_t size, ClipboardID id, UInt32 sequence, IEventQueue *events, void *eventTarget
+    std::string &data, size_t size, ClipboardID id, uint32_t sequence, IEventQueue *events, void *eventTarget
 )
 {
   // send first message (data size)
-  String dataSize = deskflow::string::sizeTypeToString(size);
+  std::string dataSize = deskflow::string::sizeTypeToString(size);
   ClipboardChunk *sizeMessage = ClipboardChunk::start(id, sequence, dataSize);
 
   events->addEvent(Event(events->forClipboard().clipboardSending(), eventTarget, sizeMessage));
@@ -127,7 +116,7 @@ void StreamChunker::sendClipboard(
       chunkSize = size - sentLength;
     }
 
-    String chunk(data.substr(sentLength, chunkSize).c_str(), chunkSize);
+    std::string chunk(data.substr(sentLength, chunkSize).c_str(), chunkSize);
     ClipboardChunk *dataChunk = ClipboardChunk::data(id, sequence, chunk);
 
     events->addEvent(Event(events->forClipboard().clipboardSending(), eventTarget, dataChunk));

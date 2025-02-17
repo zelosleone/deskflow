@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2022 Red Hat, Inc.
- * Copyright (C) 2024 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2022 Red Hat, Inc.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/EiKeyState.h"
@@ -60,10 +49,11 @@ void EiKeyState::init_default_keymap()
 void EiKeyState::init(int fd, size_t len)
 {
   auto buffer = std::make_unique<char[]>(len + 1);
+  lseek(fd, 0, SEEK_SET);
   auto sz = read(fd, buffer.get(), len);
 
   if ((size_t)sz < len) {
-    LOG_NOTE("failed to create xkb context: %s", strerror(errno));
+    LOG_WARN("failed to create xkb context: %s", strerror(errno));
     return;
   }
 
@@ -75,7 +65,7 @@ void EiKeyState::init(int fd, size_t len)
   buffer[len] = '\0'; // guarantee null-termination
   auto keymap = xkb_keymap_new_from_string(xkb_, buffer.get(), XKB_KEYMAP_FORMAT_TEXT_V1, XKB_KEYMAP_COMPILE_NO_FLAGS);
   if (!keymap) {
-    LOG_NOTE("failed to compile keymap, falling back to defaults");
+    LOG_WARN("failed to compile keymap, falling back to defaults");
     // Falling back to layout "us" is a lot more useful than segfaulting
     init_default_keymap();
     return;

@@ -1,19 +1,7 @@
-# Deskflow -- mouse and keyboard sharing utility
-# Copyright (C) 2024 Chris Rizzitello <sithlord48@gmail.com>
-# Copyright (C) 2012-2024 Symless Ltd.
-# Copyright (C) 2009-2012 Nick Bolton
-#
-# This package is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# found in the file LICENSE that should have accompanied this file.
-#
-# This package is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# SPDX-FileCopyrightText: 2024 Chris Rizzitello <sithlord48@gmail.com>
+# SPDX-FileCopyrightText: 2012 - 2024 Symless Ltd
+# SPDX-FileCopyrightText: 2009 - 2012 Nick Bolton
+# SPDX-License-Identifier: MIT
 
 find_package(CLI11 QUIET)
 if(CLI11_FOUND)
@@ -79,7 +67,7 @@ elseif(UNIX)
   )
 endif()
 
-add_library(${lib_name} STATIC  ${PLATFORM_CODE}
+add_library(${lib_name} STATIC ${PLATFORM_CODE}
   App.cpp
   App.h
   AppUtil.cpp
@@ -94,8 +82,6 @@ add_library(${lib_name} STATIC  ${PLATFORM_CODE}
   ClientApp.h
   ClientArgs.cpp
   ClientArgs.h
-  ClientTaskBarReceiver.cpp
-  ClientTaskBarReceiver.h
   clipboard_types.h
   Clipboard.cpp
   Clipboard.h
@@ -149,8 +135,6 @@ add_library(${lib_name} STATIC  ${PLATFORM_CODE}
   ServerApp.h
   ServerArgs.cpp
   ServerArgs.h
-  ServerTaskBarReceiver.cpp
-  ServerTaskBarReceiver.h
   StreamChunker.cpp
   StreamChunker.h
   XDeskflow.cpp

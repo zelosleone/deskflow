@@ -1,18 +1,7 @@
-# Deskflow -- mouse and keyboard sharing utility
-# Copyright (C) 2012-2024 Symless Ltd.
-# Copyright (C) 2009-2012 Nick Bolton
-#
-# This package is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# found in the file LICENSE that should have accompanied this file.
-#
-# This package is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# SPDX-FileCopyrightText: 2024 Deskflow Developers
+# SPDX-FileCopyrightText: 2012 - 2024 Symless Ltd
+# SPDX-FileCopyrightText: 2009 - 2012 Nick Bolton
+# SPDX-License-Identifier: MIT
 
 include(FetchContent)
 set(INSTALL_GTEST OFF)
@@ -76,11 +65,7 @@ macro(set_sources)
     list(APPEND sources ${headers})
   endif()
 
-  if(WIN32)
-    list(APPEND sources ${PROJECT_BINARY_DIR}/src/version.rc)
-  endif()
-
-  list(APPEND sources ${PROJECT_SOURCE_DIR}/src/gui/res/deskflow.qrc)
+  list(APPEND sources ${PROJECT_SOURCE_DIR}/src/apps/res/deskflow.qrc)
 
   replace_platform_sources()
   replace_arch_sources()

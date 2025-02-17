@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2011 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2011 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 // TODO: fix failing tests (e.g. add_newValue_valueWasStored)
@@ -49,7 +38,7 @@ TEST(OSXClipboardTests, add_newValue_valueWasStored) {
 
   clipboard.add(IClipboard::kText, "synergy rocks!");
 
-  String actual = clipboard.get(IClipboard::kText);
+  std::string actual = clipboard.get(IClipboard::kText);
   EXPECT_EQ("synergy rocks!", actual);
 }
 
@@ -60,7 +49,7 @@ TEST(OSXClipboardTests, add_replaceValue_valueWasReplaced) {
   clipboard.add(IClipboard::kText, "synergy rocks!");
   clipboard.add(IClipboard::kText, "maxivista sucks"); // haha, just kidding.
 
-  String actual = clipboard.get(IClipboard::kText);
+  std::string actual = clipboard.get(IClipboard::kText);
   EXPECT_EQ("maxivista sucks", actual);
 }
 
@@ -97,7 +86,7 @@ TEST(OSXClipboardTests, getTime_openWithNoEmpty_returnsOne) {
 
   // this behavior is different to that of Clipboard which only
   // returns the value passed into open(t) after empty() is called.
-  EXPECT_EQ((UInt32)1, actual);
+  EXPECT_EQ((uint32_t)1, actual);
 }
 
 TEST(OSXClipboardTests, getTime_openAndEmpty_returnsOne) {
@@ -107,7 +96,7 @@ TEST(OSXClipboardTests, getTime_openAndEmpty_returnsOne) {
 
   OSXClipboard::Time actual = clipboard.getTime();
 
-  EXPECT_EQ((UInt32)1, actual);
+  EXPECT_EQ((uint32_t)1, actual);
 }
 
 TEST(OSXClipboardTests, has_withFormatAdded_returnsTrue) {
@@ -136,7 +125,7 @@ TEST(OSXClipboardTests, get_withNoFormats_returnsEmpty) {
   clipboard.open(0);
   clipboard.empty();
 
-  String actual = clipboard.get(IClipboard::kText);
+  std::string actual = clipboard.get(IClipboard::kText);
 
   EXPECT_EQ("", actual);
 }
@@ -147,7 +136,7 @@ TEST(OSXClipboardTests, get_withFormatAdded_returnsExpected) {
   clipboard.empty();
   clipboard.add(IClipboard::kText, "synergy rocks!");
 
-  String actual = clipboard.get(IClipboard::kText);
+  std::string actual = clipboard.get(IClipboard::kText);
 
   EXPECT_EQ("synergy rocks!", actual);
 }

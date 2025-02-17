@@ -1,25 +1,16 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Stephen Jensen <sjensen313@proton.me>
+ * SPDX-FileCopyrightText: (C) 2012 - 2025 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/OSXEventQueueBuffer.h"
 
 #include "base/Event.h"
 #include "base/IEventQueue.h"
+#include "base/Log.h"
 
 //
 // EventQueueTimer
@@ -33,86 +24,70 @@ class EventQueueTimer
 // OSXEventQueueBuffer
 //
 
-OSXEventQueueBuffer::OSXEventQueueBuffer(IEventQueue *events)
-    : m_event(NULL),
-      m_eventQueue(events),
-      m_carbonEventQueue(NULL)
+OSXEventQueueBuffer::OSXEventQueueBuffer(IEventQueue *events) : m_eventQueue(events)
 {
-  // do nothing
+  // Initialization is now managed using modern constructs
 }
 
 OSXEventQueueBuffer::~OSXEventQueueBuffer()
 {
-  // release the last event
-  if (m_event != NULL) {
-    ReleaseEvent(m_event);
-  }
+  // No explicit clean-up needed as GCD and STL handle resource management
 }
 
 void OSXEventQueueBuffer::init()
 {
-  m_carbonEventQueue = GetCurrentEventQueue();
+  // No initialization needed for GCD-based implementation
 }
 
 void OSXEventQueueBuffer::waitForEvent(double timeout)
 {
-  EventRef event;
-  ReceiveNextEvent(0, NULL, timeout, false, &event);
-}
-
-IEventQueueBuffer::Type OSXEventQueueBuffer::getEvent(Event &event, UInt32 &dataID)
-{
-  // release the previous event
-  if (m_event != NULL) {
-    ReleaseEvent(m_event);
-    m_event = NULL;
-  }
-
-  // get the next event
-  OSStatus error = ReceiveNextEvent(0, NULL, 0.0, true, &m_event);
-
-  // handle the event
-  if (error == eventLoopQuitErr) {
-    event = Event(Event::kQuit);
-    return kSystem;
-  } else if (error != noErr) {
-    return kNone;
+  std::unique_lock<std::mutex> lock(m_mutex);
+  if (m_dataQueue.empty()) {
+    auto duration = std::chrono::duration<double>(timeout);
+    LOG_DEBUG2("waiting for event, timeout: %f seconds", timeout);
+    m_cond.wait_for(lock, duration, [this] { return !m_dataQueue.empty(); });
   } else {
-    UInt32 eventClass = GetEventClass(m_event);
-    switch (eventClass) {
-    case 'Syne':
-      dataID = GetEventKind(m_event);
-      return kUser;
-
-    default:
-      event = Event(Event::kSystem, m_eventQueue->getSystemTarget(), &m_event);
-      return kSystem;
-    }
+    LOG_DEBUG2("found events in the queue");
   }
 }
 
-bool OSXEventQueueBuffer::addEvent(UInt32 dataID)
+IEventQueueBuffer::Type OSXEventQueueBuffer::getEvent(Event &event, uint32_t &dataID)
 {
-  EventRef event;
-  OSStatus error = CreateEvent(kCFAllocatorDefault, 'Syne', dataID, 0, kEventAttributeNone, &event);
-
-  if (error == noErr) {
-
-    assert(m_carbonEventQueue != NULL);
-
-    error = PostEventToQueue(m_carbonEventQueue, event, kEventPriorityStandard);
-
-    ReleaseEvent(event);
+  std::unique_lock<std::mutex> lock(m_mutex);
+  if (m_dataQueue.empty()) {
+    LOG_DEBUG2("no events in queue");
+    return kNone;
   }
 
-  return (error == noErr);
+  dataID = m_dataQueue.front();
+  m_dataQueue.pop();
+  lock.unlock(); // Unlock early to allow other threads to proceed
+
+  LOG_DEBUG2("handled user event with dataID: %u", dataID);
+  return kUser;
+}
+
+bool OSXEventQueueBuffer::addEvent(uint32_t dataID)
+{
+  // Use GCD to dispatch event addition on the main queue
+  dispatch_async(dispatch_get_main_queue(), ^{
+    std::lock_guard<std::mutex> lock(this->m_mutex);
+    LOG_DEBUG2("adding user event with dataID: %u", dataID);
+    this->m_dataQueue.push(dataID);
+    this->m_cond.notify_one();
+    LOG_DEBUG2("user event added to queue, dataID=%u", dataID);
+  });
+
+  // Always return true since dispatch_async does not fail under normal conditions
+  return true;
 }
 
 bool OSXEventQueueBuffer::isEmpty() const
 {
-  EventRef event;
-  OSStatus status = ReceiveNextEvent(0, NULL, 0.0, false, &event);
-  return (status == eventLoopTimedOutErr);
+  std::lock_guard<std::mutex> lock(m_mutex);
+  bool empty = m_dataQueue.empty();
+  LOG_DEBUG2("queue is %s", empty ? "empty" : "not empty");
+  return empty;
 }
 
 EventQueueTimer *OSXEventQueueBuffer::newTimer(double, bool) const

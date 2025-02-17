@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include <QString>
@@ -26,7 +15,6 @@
 #include "platform/XWindowsKeyState.h"
 
 #include "base/Log.h"
-#include "base/String.h"
 #include "common/stdmap.h"
 #include "deskflow/AppUtil.h"
 #include "deskflow/ClientApp.h"
@@ -90,7 +78,7 @@ void XWindowsKeyState::init(Display *display, bool useXKB)
   setActiveGroup(kGroupPoll);
 }
 
-void XWindowsKeyState::setActiveGroup(SInt32 group)
+void XWindowsKeyState::setActiveGroup(int32_t group)
 {
   if (group == kGroupPollAndSet) {
     // we need to set the group to -1 in order for pollActiveGroup() to
@@ -113,7 +101,7 @@ void XWindowsKeyState::setAutoRepeat(const XKeyboardState &state)
 KeyModifierMask XWindowsKeyState::mapModifiersFromX(unsigned int state) const
 {
   LOG((CLOG_DEBUG2 "mapping state: %i", state));
-  UInt32 offset = 8 * getGroupFromState(state);
+  uint32_t offset = 8 * getGroupFromState(state);
   KeyModifierMask mask = 0;
   for (int i = 0; i < 8; ++i) {
     if ((state & (1u << i)) != 0) {
@@ -136,7 +124,7 @@ bool XWindowsKeyState::mapModifiersToX(KeyModifierMask mask, unsigned int &modif
 {
   modifiers = 0;
 
-  for (SInt32 i = 0; i < kKeyModifierNumBits; ++i) {
+  for (int32_t i = 0; i < kKeyModifierNumBits; ++i) {
     KeyModifierMask bit = (1u << i);
     if ((mask & bit) != 0) {
       KeyModifierToXMask::const_iterator j = m_modifierToX.find(bit);
@@ -177,7 +165,7 @@ KeyModifierMask XWindowsKeyState::pollActiveModifiers() const
   return mapModifiersFromX(state);
 }
 
-SInt32 XWindowsKeyState::pollActiveGroup() const
+int32_t XWindowsKeyState::pollActiveGroup() const
 {
   // fixed condition where any group < -1 would have undetermined behaviour
   if (m_group >= 0) {
@@ -202,8 +190,8 @@ void XWindowsKeyState::pollPressedKeys(KeyButtonSet &pressedKeys) const
 {
   char keys[32];
   XQueryKeymap(m_display, keys);
-  for (UInt32 i = 0; i < 32; ++i) {
-    for (UInt32 j = 0; j < 8; ++j) {
+  for (uint32_t i = 0; i < 32; ++i) {
+    for (uint32_t j = 0; j < 8; ++j) {
       if ((keys[i] & (1u << j)) != 0) {
         pressedKeys.insert(8 * i + j);
       }
@@ -230,7 +218,7 @@ void XWindowsKeyState::getKeyMap(deskflow::KeyMap &keyMap)
   updateKeysymMap(keyMap);
 }
 
-bool XWindowsKeyState::setCurrentLanguageWithDBus(SInt32 group) const
+bool XWindowsKeyState::setCurrentLanguageWithDBus(int32_t group) const
 {
   QString service = "org.gnome.Shell";
   QString path = "/org/gnome/Shell";
@@ -667,7 +655,7 @@ void XWindowsKeyState::updateKeysymMapXKB(deskflow::KeyMap &keyMap)
         // modifier masks.
         item.m_lock = false;
         bool isModifier = false;
-        UInt32 modifierMask = m_xkb->map->modmap[keycode];
+        uint32_t modifierMask = m_xkb->map->modmap[keycode];
         if (XkbKeyHasActions(m_xkb, keycode) == True) {
           XkbAction *action = XkbKeyActionEntry(m_xkb, keycode, level, eGroup);
           if (action->type == XkbSA_SetMods || action->type == XkbSA_LockMods) {
@@ -709,10 +697,10 @@ void XWindowsKeyState::updateKeysymMapXKB(deskflow::KeyMap &keyMap)
         // record the modifier mask for this key.  don't bother
         // for keys that change the group.
         item.m_generates = 0;
-        UInt32 modifierBit = XWindowsUtil::getModifierBitForKeySym(keysym);
+        uint32_t modifierBit = XWindowsUtil::getModifierBitForKeySym(keysym);
         if (isModifier && modifierBit != kKeyModifierBitNone) {
           item.m_generates = (1u << modifierBit);
-          for (SInt32 j = 0; j < 8; ++j) {
+          for (int32_t j = 0; j < 8; ++j) {
             // skip modifiers this key doesn't generate
             if ((modifierMask & (1u << j)) == 0) {
               continue;
@@ -790,7 +778,7 @@ void XWindowsKeyState::updateKeysymMapXKB(deskflow::KeyMap &keyMap)
 }
 #endif
 
-void XWindowsKeyState::remapKeyModifiers(KeyID id, SInt32 group, deskflow::KeyMap::KeyItem &item, void *vself)
+void XWindowsKeyState::remapKeyModifiers(KeyID id, int32_t group, deskflow::KeyMap::KeyItem &item, void *vself)
 {
   XWindowsKeyState *self = static_cast<XWindowsKeyState *>(vself);
   item.m_required = self->mapModifiersFromX(XkbBuildCoreState(item.m_required, group));
@@ -856,7 +844,7 @@ int XWindowsKeyState::getEffectiveGroup(KeyCode keycode, int group) const
   return group;
 }
 
-UInt32 XWindowsKeyState::getGroupFromState(unsigned int state) const
+uint32_t XWindowsKeyState::getGroupFromState(unsigned int state) const
 {
 #if HAVE_XKB_EXTENSION
   if (m_xkb != NULL) {

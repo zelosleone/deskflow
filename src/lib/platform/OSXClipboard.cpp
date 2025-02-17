@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/OSXClipboard.h"
@@ -41,7 +30,7 @@ OSXClipboard::OSXClipboard() : m_time(0), m_pboard(NULL)
 
   OSStatus createErr = PasteboardCreate(kPasteboardClipboard, &m_pboard);
   if (createErr != noErr) {
-    LOG((CLOG_DEBUG "failed to create clipboard reference: error %i", createErr));
+    LOG((CLOG_WARN "failed to create clipboard reference: error %i", createErr));
     LOG((CLOG_ERR "unable to connect to pasteboard, clipboard sharing disabled", createErr));
     m_pboard = NULL;
     return;
@@ -49,7 +38,7 @@ OSXClipboard::OSXClipboard() : m_time(0), m_pboard(NULL)
 
   OSStatus syncErr = PasteboardSynchronize(m_pboard);
   if (syncErr != noErr) {
-    LOG((CLOG_DEBUG "failed to syncronize clipboard: error %i", syncErr));
+    LOG((CLOG_WARN "failed to syncronize clipboard: error %i", syncErr));
   }
 }
 
@@ -66,7 +55,7 @@ bool OSXClipboard::empty()
 
   OSStatus err = PasteboardClear(m_pboard);
   if (err != noErr) {
-    LOG((CLOG_DEBUG "failed to clear clipboard: error %i", err));
+    LOG((CLOG_WARN "failed to clear clipboard: error %i", err));
     return false;
   }
 
@@ -87,7 +76,7 @@ bool OSXClipboard::synchronize()
   return false;
 }
 
-void OSXClipboard::add(EFormat format, const String &data)
+void OSXClipboard::add(EFormat format, const std::string &data)
 {
   if (m_pboard == NULL)
     return;
@@ -107,9 +96,9 @@ void OSXClipboard::add(EFormat format, const String &data)
 
     // skip converters for other formats
     if (converter->getFormat() == format) {
-      String osXData = converter->fromIClipboard(data);
+      std::string osXData = converter->fromIClipboard(data);
       CFStringRef flavorType = converter->getOSXFormat();
-      CFDataRef dataRef = CFDataCreate(kCFAllocatorDefault, (UInt8 *)osXData.data(), osXData.size());
+      CFDataRef dataRef = CFDataCreate(kCFAllocatorDefault, (uint8_t *)osXData.data(), osXData.size());
       PasteboardItemID itemID = 0;
 
       if (dataRef) {
@@ -168,11 +157,11 @@ bool OSXClipboard::has(EFormat format) const
   return false;
 }
 
-String OSXClipboard::get(EFormat format) const
+std::string OSXClipboard::get(EFormat format) const
 {
   CFStringRef type;
   PasteboardItemID item;
-  String result;
+  std::string result;
 
   if (m_pboard == NULL)
     return result;
@@ -208,7 +197,7 @@ String OSXClipboard::get(EFormat format) const
       throw err;
     }
 
-    result = String((char *)CFDataGetBytePtr(buffer), CFDataGetLength(buffer));
+    result = std::string((char *)CFDataGetBytePtr(buffer), CFDataGetLength(buffer));
   } catch (OSStatus err) {
     LOG((CLOG_DEBUG "exception thrown in OSXClipboard::get MacError (%d)", err));
   } catch (...) {

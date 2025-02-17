@@ -1,26 +1,14 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/Event.h"
 #include "base/Stopwatch.h"
-#include "base/String.h"
 #include "deskflow/clipboard_types.h"
 #include "deskflow/key_types.h"
 #include "deskflow/languages/LanguageManager.h"
@@ -64,10 +52,10 @@ public:
   //@}
 
   // sending file chunk to server
-  void fileChunkSending(UInt8 mark, char *data, size_t dataSize);
+  void fileChunkSending(uint8_t mark, char *data, size_t dataSize);
 
   // sending dragging information to server
-  void sendDragInfo(UInt32 fileCount, const char *info, size_t size);
+  void sendDragInfo(uint32_t fileCount, const char *info, size_t size);
 
 #ifdef TEST_ENV
   void handleDataForTest()
@@ -83,8 +71,8 @@ protected:
     kUnknown,
     kDisconnect
   };
-  EResult parseHandshakeMessage(const UInt8 *code);
-  EResult parseMessage(const UInt8 *code);
+  EResult parseHandshakeMessage(const uint8_t *code);
+  EResult parseMessage(const uint8_t *code);
 
 private:
   // if compressing mouse motion then send the last motion now
@@ -108,7 +96,7 @@ private:
   void leave();
   void setClipboard();
   void grabClipboard();
-  void keyDown(UInt16 id, UInt16 mask, UInt16 button, const String &lang);
+  void keyDown(uint16_t id, uint16_t mask, uint16_t button, const std::string &lang);
   void keyRepeat();
   void keyUp();
   void mouseDown();
@@ -126,21 +114,21 @@ private:
   void handleClipboardSendingEvent(const Event &, void *);
   void secureInputNotification();
   void setServerLanguages();
-  void setActiveServerLanguage(const String &language);
+  void setActiveServerLanguage(const std::string &language);
   void checkMissedLanguages() const;
 
 private:
-  typedef EResult (ServerProxy::*MessageParser)(const UInt8 *);
+  typedef EResult (ServerProxy::*MessageParser)(const uint8_t *);
 
   Client *m_client;
   deskflow::IStream *m_stream;
 
-  UInt32 m_seqNum;
+  uint32_t m_seqNum;
 
   bool m_compressMouse;
   bool m_compressMouseRelative;
-  SInt32 m_xMouse, m_yMouse;
-  SInt32 m_dxMouse, m_dyMouse;
+  int32_t m_xMouse, m_yMouse;
+  int32_t m_dxMouse, m_dyMouse;
 
   bool m_ignoreMouse;
 
@@ -151,7 +139,7 @@ private:
 
   MessageParser m_parser;
   IEventQueue *m_events;
-  String m_serverLanguage = "";
+  std::string m_serverLanguage = "";
   bool m_isUserNotifiedAboutLanguageSyncError = false;
   deskflow::languages::LanguageManager m_languageManager;
 };

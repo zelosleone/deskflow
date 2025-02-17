@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -39,11 +28,11 @@ template <
 class PriorityQueue
 {
 public:
-  typedef typename Container::value_type value_type;
-  typedef typename Container::size_type size_type;
-  typedef typename Container::iterator iterator;
-  typedef typename Container::const_iterator const_iterator;
-  typedef Container container_type;
+  using value_type = Container::value_type;
+  using size_type = Container::size_type;
+  using iterator = Container::iterator;
+  using const_iterator = Container::const_iterator;
+  using container_type = Container;
 
   PriorityQueue()
   {

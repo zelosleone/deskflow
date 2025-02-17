@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2011 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2011 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/MSWindowsHook.h"
@@ -30,12 +19,12 @@ static HHOOK g_keyboardLL = NULL;
 static HHOOK g_mouseLL = NULL;
 static bool g_screenSaver = false;
 static EHookMode g_mode = kHOOK_DISABLE;
-static UInt32 g_zoneSides = 0;
-static SInt32 g_zoneSize = 0;
-static SInt32 g_xScreen = 0;
-static SInt32 g_yScreen = 0;
-static SInt32 g_wScreen = 0;
-static SInt32 g_hScreen = 0;
+static uint32_t g_zoneSides = 0;
+static int32_t g_zoneSize = 0;
+static int32_t g_xScreen = 0;
+static int32_t g_yScreen = 0;
+static int32_t g_wScreen = 0;
+static int32_t g_hScreen = 0;
 static WPARAM g_deadVirtKey = 0;
 static WPARAM g_deadRelease = 0;
 static LPARAM g_deadLParam = 0;
@@ -125,12 +114,12 @@ int MSWindowsHook::cleanup()
   return 1;
 }
 
-void MSWindowsHook::setSides(UInt32 sides)
+void MSWindowsHook::setSides(uint32_t sides)
 {
   g_zoneSides = sides;
 }
 
-void MSWindowsHook::setZone(SInt32 x, SInt32 y, SInt32 w, SInt32 h, SInt32 jumpZoneSize)
+void MSWindowsHook::setZone(int32_t x, int32_t y, int32_t w, int32_t h, int32_t jumpZoneSize)
 {
   g_zoneSize = jumpZoneSize;
   g_xScreen = x;
@@ -477,7 +466,7 @@ static LRESULT CALLBACK keyboardLLHook(int code, WPARAM wParam, LPARAM lParam)
 // events very early.  the earlier the better.
 //
 
-static bool mouseHookHandler(WPARAM wParam, SInt32 x, SInt32 y, SInt32 data)
+static bool mouseHookHandler(WPARAM wParam, int32_t x, int32_t y, int32_t data)
 {
   switch (wParam) {
   case WM_LBUTTONDOWN:
@@ -585,9 +574,9 @@ static LRESULT CALLBACK mouseLLHook(int code, WPARAM wParam, LPARAM lParam)
       return CallNextHookEx(g_mouseLL, code, wParam, lParam);
     }
 
-    SInt32 x = static_cast<SInt32>(info->pt.x);
-    SInt32 y = static_cast<SInt32>(info->pt.y);
-    SInt32 w = static_cast<SInt16>(HIWORD(info->mouseData));
+    int32_t x = static_cast<int32_t>(info->pt.x);
+    int32_t y = static_cast<int32_t>(info->pt.y);
+    int32_t w = static_cast<int16_t>(HIWORD(info->mouseData));
 
     // handle the message
     if (mouseHookHandler(wParam, x, y, w)) {

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/App.h"
@@ -27,9 +16,7 @@
 #include "base/XBase.h"
 #include "base/log_outputters.h"
 #include "common/constants.h"
-#include "common/copyright.h"
 #include "common/ipc.h"
-#include "common/version.h"
 #include "deskflow/ArgsBase.h"
 #include "deskflow/Config.h"
 #include "deskflow/XDeskflow.h"
@@ -69,14 +56,12 @@ App *App::s_instance = nullptr;
 // App
 //
 
-App::App(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver, deskflow::ArgsBase *args)
+App::App(IEventQueue *events, deskflow::ArgsBase *args)
     : m_bye(&exit),
-      m_taskBarReceiver(NULL),
       m_suspended(false),
       m_events(events),
       m_args(args),
       m_fileLog(nullptr),
-      m_createTaskBarReceiver(createTaskBarReceiver),
       m_appUtil(events),
       m_ipcClient(nullptr),
       m_socketMultiplexer(nullptr)
@@ -93,13 +78,11 @@ App::~App()
 
 void App::version()
 {
-  const auto version = deskflow::version();
-
   const auto kBufferLength = 1024;
   std::vector<char> buffer(kBufferLength);
   std::snprintf(                                                   // NOSONAR
       buffer.data(), kBufferLength, "%s v%s, protocol v%d.%d\n%s", //
-      argsBase().m_pname, version.c_str(), kProtocolMajorVersion, kProtocolMinorVersion, deskflow::kCopyright
+      argsBase().m_pname, kVersion, kProtocolMajorVersion, kProtocolMinorVersion, kCopyright
   );
 
   std::cout << std::string(buffer.data()) << std::endl;
@@ -232,10 +215,6 @@ void App::initApp(int argc, const char **argv)
     // as a tray icon tooltip
     BufferedLogOutputter *logBuffer = new BufferedLogOutputter(1000);
     CLOG->insert(logBuffer, true);
-
-    // make the task bar receiver.  the user can control this app
-    // through the task bar.
-    m_taskBarReceiver = m_createTaskBarReceiver(logBuffer, m_events);
   }
 }
 
@@ -280,7 +259,7 @@ void App::runEventsLoop(void *)
 // MinimalApp
 //
 
-MinimalApp::MinimalApp() : App(NULL, NULL, new deskflow::ArgsBase())
+MinimalApp::MinimalApp() : App(NULL, new deskflow::ArgsBase())
 {
   m_arch.init();
   setEvents(m_events);
@@ -323,7 +302,7 @@ void MinimalApp::loadConfig()
 {
 }
 
-bool MinimalApp::loadConfig(const String &pathname)
+bool MinimalApp::loadConfig(const std::string &pathname)
 {
   return false;
 }

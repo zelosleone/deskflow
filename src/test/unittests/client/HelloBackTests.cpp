@@ -1,13 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- *
- * SPDX-FileCopyrightText: Copyright (C) 2024 Symless Ltd.
- * SPDX-License-Identifier: GPL-2.0
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "client/HelloBack.h"
 
-#include "common/basic_types.h"
+#include "common/common.h"
 #include "mock/io/MockStream.h"
 
 #include <array>
@@ -30,13 +29,13 @@ public:
   MOCK_METHOD(void, incompatible, (int major, int minor), (override));
 };
 
-void intTo2ByteBuf(SInt16 value, std::array<char, 2> &buf)
+void intTo2ByteBuf(int16_t value, std::array<char, 2> &buf)
 {
   buf[0] = static_cast<char>((value >> 8) & 0xFF); // MSB
   buf[1] = static_cast<char>(value & 0xFF);        // LSB
 }
 
-void intTo4ByteBuf(SInt32 value, std::array<char, 4> &buf)
+void intTo4ByteBuf(int32_t value, std::array<char, 4> &buf)
 {
   buf[0] = static_cast<char>((value >> 24) & 0xFF); // MSB
   buf[1] = static_cast<char>((value >> 16) & 0xFF);
@@ -55,7 +54,7 @@ std::string printAsHex(const char *buffer, size_t size)
 }
 
 void setupMockHelloRead(
-    MockStream &stream, const std::string &protocolName, const SInt16 majorVersion, const SInt16 minorVersion
+    MockStream &stream, const std::string &protocolName, const int16_t majorVersion, const int16_t minorVersion
 )
 {
 
@@ -89,7 +88,7 @@ void setupMockHelloRead(
 }
 
 void setupMockHelloBackWrite(
-    MockStream &stream, const std::string &protocolName, const SInt16 majorVersion, const SInt16 minorVersion,
+    MockStream &stream, const std::string &protocolName, const int16_t majorVersion, const int16_t minorVersion,
     const std::string &name
 )
 {
@@ -99,12 +98,12 @@ void setupMockHelloBackWrite(
   std::array<char, 4> nameLenBuf;
   intTo2ByteBuf(majorVersion, majorBuf);
   intTo2ByteBuf(minorVersion, minorBuf);
-  intTo4ByteBuf(static_cast<SInt32>(name.size()), nameLenBuf);
+  intTo4ByteBuf(static_cast<int32_t>(name.size()), nameLenBuf);
 
   const auto versionIntSize = 4;
   const auto clientNameIntSize = 4;
-  const UInt32 helloBackSize =
-      static_cast<UInt32>(protocolName.size() + versionIntSize + clientNameIntSize + name.size());
+  const uint32_t helloBackSize =
+      static_cast<uint32_t>(protocolName.size() + versionIntSize + clientNameIntSize + name.size());
 
   std::vector<char> expect;
   expect.reserve(helloBackSize);

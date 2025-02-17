@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2011 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2011 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -26,7 +15,7 @@ class Server;
 class ClientProxy1_4 : public ClientProxy1_3
 {
 public:
-  ClientProxy1_4(const String &name, deskflow::IStream *adoptedStream, Server *server, IEventQueue *events);
+  ClientProxy1_4(const std::string &name, deskflow::IStream *adoptedStream, Server *server, IEventQueue *events);
   ~ClientProxy1_4();
 
   //! @name accessors
@@ -41,8 +30,8 @@ public:
   //@}
 
   // IClient overrides
-  virtual void keyDown(KeyID key, KeyModifierMask mask, KeyButton button, const String &);
-  virtual void keyRepeat(KeyID key, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang);
+  virtual void keyDown(KeyID key, KeyModifierMask mask, KeyButton button, const std::string &);
+  virtual void keyRepeat(KeyID key, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang);
   virtual void keyUp(KeyID key, KeyModifierMask mask, KeyButton button);
   virtual void keepAlive();
 

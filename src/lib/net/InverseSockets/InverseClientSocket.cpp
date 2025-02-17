@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2022 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2022 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "InverseClientSocket.h"
@@ -77,11 +66,11 @@ void *InverseClientSocket::getEventTarget() const
   return const_cast<void *>(static_cast<const void *>(this));
 }
 
-UInt32 InverseClientSocket::read(void *buffer, UInt32 n)
+uint32_t InverseClientSocket::read(void *buffer, uint32_t n)
 {
   // copy data directly from our input buffer
   Lock lock(&m_mutex);
-  UInt32 size = m_inputBuffer.getSize();
+  uint32_t size = m_inputBuffer.getSize();
   if (n > size) {
     n = size;
   }
@@ -99,7 +88,7 @@ UInt32 InverseClientSocket::read(void *buffer, UInt32 n)
   return n;
 }
 
-void InverseClientSocket::write(const void *buffer, UInt32 n)
+void InverseClientSocket::write(const void *buffer, uint32_t n)
 {
   bool wasEmpty;
   {
@@ -193,7 +182,7 @@ bool InverseClientSocket::isFatal() const
   return false;
 }
 
-UInt32 InverseClientSocket::getSize() const
+uint32_t InverseClientSocket::getSize() const
 {
   Lock lock(&m_mutex);
   return m_inputBuffer.getSize();
@@ -212,7 +201,7 @@ void InverseClientSocket::connect(const NetworkAddress &addr)
 
 InverseClientSocket::EJobResult InverseClientSocket::doRead()
 {
-  UInt8 buffer[4096] = {0};
+  uint8_t buffer[4096] = {0};
   size_t bytesRead = m_socket.readSocket(buffer, sizeof(buffer));
 
   if (bytesRead > 0) {
@@ -220,7 +209,7 @@ InverseClientSocket::EJobResult InverseClientSocket::doRead()
 
     // slurp up as much as possible
     do {
-      m_inputBuffer.write(buffer, static_cast<UInt32>(bytesRead));
+      m_inputBuffer.write(buffer, static_cast<uint32_t>(bytesRead));
 
       bytesRead = m_socket.readSocket(buffer, sizeof(buffer));
     } while (bytesRead > 0);
@@ -247,9 +236,9 @@ InverseClientSocket::EJobResult InverseClientSocket::doRead()
 
 InverseClientSocket::EJobResult InverseClientSocket::doWrite()
 {
-  UInt32 bufferSize = m_outputBuffer.getSize();
-  auto buffer = static_cast<const UInt8 *>(m_outputBuffer.peek(bufferSize));
-  const auto bytesWrote = static_cast<UInt32>(m_socket.writeSocket(buffer, bufferSize));
+  uint32_t bufferSize = m_outputBuffer.getSize();
+  auto buffer = static_cast<const uint8_t *>(m_outputBuffer.peek(bufferSize));
+  const auto bytesWrote = static_cast<uint32_t>(m_socket.writeSocket(buffer, bufferSize));
 
   if (bytesWrote > 0) {
     discardWrittenData(bytesWrote);

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/PlatformScreen.h"
@@ -49,12 +38,14 @@ void PlatformScreen::setHalfDuplexMask(KeyModifierMask mask)
   getKeyState()->setHalfDuplexMask(mask);
 }
 
-void PlatformScreen::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang)
+void PlatformScreen::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang)
 {
   getKeyState()->fakeKeyDown(id, mask, button, lang);
 }
 
-bool PlatformScreen::fakeKeyRepeat(KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang)
+bool PlatformScreen::fakeKeyRepeat(
+    KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang
+)
 {
   return getKeyState()->fakeKeyRepeat(id, mask, count, button, lang);
 }
@@ -89,7 +80,7 @@ KeyModifierMask PlatformScreen::pollActiveModifiers() const
   return getKeyState()->pollActiveModifiers();
 }
 
-SInt32 PlatformScreen::pollActiveGroup() const
+int32_t PlatformScreen::pollActiveGroup() const
 {
   return getKeyState()->pollActiveGroup();
 }
@@ -107,7 +98,7 @@ bool PlatformScreen::isDraggingStarted()
   return false;
 }
 
-SInt32 PlatformScreen::mapClientScrollDirection(SInt32 x) const
+int32_t PlatformScreen::mapClientScrollDirection(int32_t x) const
 {
   return (x * m_clientScrollDirection);
 }

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -38,7 +27,7 @@ public:
   Extract marshalled clipboard data and store it in this clipboard.
   Sets the clipboard time to \c time.
   */
-  void unmarshall(const String &data, Time time);
+  void unmarshall(const std::string &data, Time time);
 
   //@}
   //! @name accessors
@@ -49,18 +38,18 @@ public:
   Merge this clipboard's data into a single buffer that can be later
   unmarshalled to restore the clipboard and return the buffer.
   */
-  String marshall() const;
+  std::string marshall() const;
 
   //@}
 
   // IClipboard overrides
   virtual bool empty();
-  virtual void add(EFormat, const String &data);
+  virtual void add(EFormat, const std::string &data);
   virtual bool open(Time) const;
   virtual void close() const;
   virtual Time getTime() const;
   virtual bool has(EFormat) const;
-  virtual String get(EFormat) const;
+  virtual std::string get(EFormat) const;
 
 private:
   mutable bool m_open;
@@ -68,5 +57,5 @@ private:
   bool m_owner;
   Time m_timeOwned;
   bool m_added[kNumFormats];
-  String m_data[kNumFormats];
+  std::string m_data[kNumFormats];
 };

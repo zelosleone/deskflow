@@ -1,19 +1,7 @@
-# Deskflow -- mouse and keyboard sharing utility
-# Copyright (C) 2024 Chris Rizzitello <sithlord48@gmail.com>
-# Copyright (C) 2012-2024 Symless Ltd.
-# Copyright (C) 2009-2012 Nick Bolton
-#
-# This package is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# found in the file LICENSE that should have accompanied this file.
-#
-# This package is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# SPDX-FileCopyrightText: 2024 - 2025 Chris Rizzitello <sithlord48@gmail.com>
+# SPDX-FileCopyrightText: 2012 - 2024 Symless Ltd
+# SPDX-FileCopyrightText: 2009 - 2012 Nick Bolton
+# SPDX-License-Identifier: MIT
 
 # Platform Specific Code
 if(WIN32)
@@ -38,8 +26,6 @@ if(WIN32)
     win32/ArchStringWindows.h
     win32/ArchSystemWindows.cpp
     win32/ArchSystemWindows.h
-    win32/ArchTaskBarWindows.cpp
-    win32/ArchTaskBarWindows.h
     win32/ArchTimeWindows.cpp
     win32/ArchTimeWindows.h
     win32/XArchWindows.cpp
@@ -66,8 +52,6 @@ elseif(UNIX)
     unix/ArchStringUnix.h
     unix/ArchSystemUnix.cpp
     unix/ArchSystemUnix.h
-    unix/ArchTaskBarXWindows.cpp
-    unix/ArchTaskBarXWindows.h
     unix/ArchTimeUnix.cpp
     unix/ArchTimeUnix.h
     unix/XArchUnix.cpp
@@ -92,18 +76,15 @@ add_library(arch STATIC ${PLATFORM_CODE}
   IArchString.cpp
   IArchString.h
   IArchSystem.h
-  IArchTaskBar.h
-  IArchTaskBarReceiver.h
   IArchTime.h
   multibyte.h
-  vsnprintf.h
   XArch.h
 )
 
 if(UNIX)
   target_link_libraries(arch ${CMAKE_DL_LIBS} ${libs})
   if(NOT APPLE)
-    find_package(Qt6 COMPONENTS DBus)
+    find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS DBus)
     target_link_libraries(arch Qt6::DBus)
   endif()
 endif()

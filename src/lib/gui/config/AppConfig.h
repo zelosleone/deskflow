@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2008 Volker Lanz (vl@fidra.de)
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2008 Volker Lanz <vl@fidra.de>
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -109,6 +99,9 @@ private:
     // 41 = show dev thanks, obsolete
     kShowCloseReminder = 42,
     kEnableUpdateCheck = 43,
+    kLogExpanded = 44,
+    kColorfulIcon = 45,
+    kRequireClientCert = 46
   };
 
 public:
@@ -168,6 +161,7 @@ public:
   bool enableService() const override;
   bool closeToTray() const override;
   bool clientGroupChecked() const override;
+  bool requireClientCerts() const override;
 
   //
   // Getters (new methods)
@@ -183,6 +177,8 @@ public:
   std::optional<QPoint> mainWindowPosition() const;
   bool showCloseReminder() const;
   std::optional<bool> enableUpdateCheck() const;
+  bool logExpanded() const;
+  bool colorfulTrayIcon() const;
 
   //
   // Setters (overrides)
@@ -205,6 +201,7 @@ public:
   void setTlsCertPath(const QString &path) override;
   void setTlsKeyLength(int length) override;
   void setInvertConnection(bool value) override;
+  void setRequireClientCerts(bool requireClientCerts) override;
 
   //
   // Setters (new methods)
@@ -223,6 +220,8 @@ public:
   void setMainWindowPosition(const QPoint &position);
   void setShowCloseReminder(bool show);
   void setEnableUpdateCheck(bool value);
+  void setLogExpanded(bool expanded);
+  void setColorfulTrayIcon(bool color);
 
   /// @brief Sets the user preference to load from SystemScope.
   /// @param [in] value
@@ -328,6 +327,9 @@ private:
   bool m_LoadFromSystemScope = false;
   bool m_ShowCloseReminder = true;
   std::optional<bool> m_EnableUpdateCheck;
+  bool m_logExpanded = true;
+  bool m_colorfulTrayIcon = false;
+  bool m_RequireClientCert = true;
 
   /**
    * @brief Flag is set when any TLS is setting is changed, and is reset

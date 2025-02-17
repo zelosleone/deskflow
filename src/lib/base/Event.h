@@ -1,24 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "common/basic_types.h"
+#include "common/common.h"
 #include "common/stdmap.h"
 
 class EventData
@@ -39,7 +28,7 @@ A \c Event holds an event type and a pointer to event data.
 class Event
 {
 public:
-  typedef UInt32 Type;
+  using Type = uint32_t;
   enum
   {
     kUnknown, //!< The event type is unknown
@@ -49,7 +38,7 @@ public:
     kLast     //!< Must be last
   };
 
-  typedef UInt32 Flags;
+  using Flags = uint32_t;
   enum
   {
     kNone = 0x00,               //!< No flags

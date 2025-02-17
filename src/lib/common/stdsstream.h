@@ -1,23 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
+
 #pragma once
 
-#include "common/stdpre.h"
+#include "stdpre.h"
 
 #if HAVE_SSTREAM || !defined(__GNUC__) || (__GNUC__ >= 3)
 
@@ -63,10 +53,10 @@ namespace std {
 class stringbuf : public streambuf
 {
 public:
-  typedef char char_type;
-  typedef int int_type;
-  typedef streampos pos_type;
-  typedef streamoff off_type;
+  using char_type = char;
+  using int_type = int;
+  using pos_type = streampos;
+  using off_type = streamoff;
 
   explicit stringbuf(int which = ios::in | ios::out)
       : streambuf(),
@@ -231,10 +221,10 @@ private:
 class istringstream : public istream
 {
 public:
-  typedef char char_type;
-  typedef int int_type;
-  typedef streampos pos_type;
-  typedef streamoff off_type;
+  using char_type = char;
+  using int_type = int;
+  using pos_type = streampos;
+  using off_type = streamoff;
 
   explicit istringstream(int which = ios::in) : istream(&sb), sb(which | ios::in)
   {
@@ -265,10 +255,10 @@ private:
 class ostringstream : public ostream
 {
 public:
-  typedef char char_type;
-  typedef int int_type;
-  typedef streampos pos_type;
-  typedef streamoff off_type;
+  using char_type = char;
+  using int_type = int;
+  using pos_type = streampos;
+  using off_type = streamoff;
 
   explicit ostringstream(int which = ios::out) : ostream(&sb), sb(which | ios::out)
   {
@@ -300,10 +290,10 @@ private:
 class stringstream : public iostream
 {
 public:
-  typedef char char_type;
-  typedef int int_type;
-  typedef streampos pos_type;
-  typedef streamoff off_type;
+  using char_type = char;
+  using int_type = int;
+  using pos_type = streampos;
+  using off_type = streamoff;
 
   explicit stringstream(int which = ios::out | ios::in) : iostream(&sb), sb(which)
   {
@@ -339,6 +329,6 @@ private:
 
 #endif /* not g++ 2.95 and no <sstream> */
 
-#include "common/stdistream.h"
+#include "stdistream.h"
 
-#include "common/stdpost.h"
+#include "stdpost.h"

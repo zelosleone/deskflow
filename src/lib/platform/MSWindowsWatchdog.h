@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2009 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2009 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -54,11 +43,11 @@ private:
   HANDLE duplicateProcessToken(HANDLE process, LPSECURITY_ATTRIBUTES security);
   HANDLE getUserToken(LPSECURITY_ATTRIBUTES security);
   void startProcess();
-  BOOL startProcessAsUser(String &command, HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
-  BOOL startProcessInForeground(String &command);
+  BOOL startProcessAsUser(std::string &command, HANDLE userToken, LPSECURITY_ATTRIBUTES sa);
+  BOOL startProcessInForeground(std::string &command);
   void sendSas();
   void getActiveDesktop(LPSECURITY_ATTRIBUTES security);
-  void testOutput(String buffer);
+  void testOutput(std::string buffer);
   void setStartupInfo(STARTUPINFO &si);
   void checkChildren();
   /**
@@ -111,12 +100,12 @@ An error occured in the process watchdog.
 class XMSWindowsWatchdogError : public XDeskflow
 {
 public:
-  XMSWindowsWatchdogError(const String &msg) : XDeskflow(msg)
+  XMSWindowsWatchdogError(const std::string &msg) : XDeskflow(msg)
   {
   }
 
   // XBase overrides
-  virtual String getWhat() const throw()
+  virtual std::string getWhat() const throw()
   {
     return what();
   }

@@ -1,26 +1,14 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/EventQueue.h"
 #include "base/Log.h"
-#include "base/String.h"
 #include "common/common.h"
 #include "deskflow/IApp.h"
 #include "ipc/IpcClient.h"
@@ -56,7 +44,7 @@ public:
     }
   };
 
-  App(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver, deskflow::ArgsBase *args);
+  App(IEventQueue *events, deskflow::ArgsBase *args);
   App(App const &) = delete;
   App(App &&) = delete;
   virtual ~App();
@@ -67,7 +55,7 @@ public:
   virtual void help() = 0;
   virtual void parseArgs(int argc, const char *const *argv) = 0;
   virtual void loadConfig() = 0;
-  virtual bool loadConfig(const String &pathname) = 0;
+  virtual bool loadConfig(const std::string &pathname) = 0;
   virtual const char *daemonInfo() const = 0;
   virtual std::string configSection() const = 0;
 
@@ -111,11 +99,6 @@ public:
     m_socketMultiplexer = sm;
   }
 
-  virtual IArchTaskBarReceiver *taskBarReceiver() const
-  {
-    return m_taskBarReceiver;
-  }
-
   SocketMultiplexer *getSocketMultiplexer() const
   {
     return m_socketMultiplexer;
@@ -137,7 +120,6 @@ protected:
   void cleanupIpcClient();
   void runEventsLoop(void *);
 
-  IArchTaskBarReceiver *m_taskBarReceiver;
   bool m_suspended;
   IEventQueue *m_events;
 
@@ -165,7 +147,7 @@ public:
   virtual int foregroundStartup(int argc, char **argv) override;
   virtual deskflow::Screen *createScreen() override;
   virtual void loadConfig() override;
-  virtual bool loadConfig(const String &pathname) override;
+  virtual bool loadConfig(const std::string &pathname) override;
   virtual const char *daemonInfo() const override;
   virtual const char *daemonName() const override;
   virtual void parseArgs(int argc, const char *const *argv) override;
@@ -202,7 +184,6 @@ private:
   "  -1, --no-restart         do not try to restart on failure.\n"                                                     \
   "*     --restart            restart the server automatically if it fails.\n"                                         \
   "  -l  --log <file>         write log messages to file.\n"                                                           \
-  "      --no-tray            disable the system tray icon.\n"                                                         \
   "      --enable-drag-drop   enable file drag & drop.\n"                                                              \
   "      --enable-crypto      enable TLS encryption.\n"                                                                \
   "      --tls-cert           specify the path to the TLS certificate file.\n"

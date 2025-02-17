@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "server/ClientListener.h"
@@ -35,12 +25,12 @@
 //
 
 ClientListener::ClientListener(
-    const NetworkAddress &address, ISocketFactory *socketFactory, IEventQueue *events, bool enableCrypto
+    const NetworkAddress &address, ISocketFactory *socketFactory, IEventQueue *events, SecurityLevel securityLevel
 )
     : m_socketFactory(socketFactory),
       m_server(NULL),
       m_events(events),
-      m_useSecureNetwork(enableCrypto),
+      m_securityLevel(securityLevel),
       m_address(address)
 {
   assert(m_socketFactory != NULL);
@@ -84,7 +74,7 @@ ClientProxy *ClientListener::getNextClient()
 
 void ClientListener::start()
 {
-  m_listen = m_socketFactory->createListen(m_useSecureNetwork, ARCH->getAddrFamily(m_address.getAddress()));
+  m_listen = m_socketFactory->createListen(ARCH->getAddrFamily(m_address.getAddress()), m_securityLevel);
 
   // setup event handler
   m_events->adoptHandler(
@@ -158,7 +148,7 @@ void ClientListener::handleClientConnecting(const Event &, void *)
 
   // When using non SSL, server accepts clients immediately, while SSL
   // has to call secure accept which may require retry
-  if (!m_useSecureNetwork) {
+  if (m_securityLevel == SecurityLevel::PlainText) {
     m_events->addEvent(Event(m_events->forClientListener().accepted(), socket->getEventTarget()));
   }
 }
@@ -208,6 +198,11 @@ void ClientListener::handleUnknownClient(const Event &, void *vclient)
         m_events->forClientProxy().disconnected(), client,
         new TMethodEventJob<ClientListener>(this, &ClientListener::handleClientDisconnected, client)
     );
+  } else {
+    auto *stream = unknownClient->getStream();
+    if (stream) {
+      stream->close();
+    }
   }
 
   // now finished with unknown client

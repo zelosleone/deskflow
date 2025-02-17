@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "net/TCPSocket.h"
@@ -32,6 +21,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+
+static const std::size_t MAX_INPUT_BUFFER_SIZE = 1024 * 1024;
 
 //
 // TCPSocket
@@ -127,11 +118,11 @@ void *TCPSocket::getEventTarget() const
   return const_cast<void *>(static_cast<const void *>(this));
 }
 
-UInt32 TCPSocket::read(void *buffer, UInt32 n)
+uint32_t TCPSocket::read(void *buffer, uint32_t n)
 {
   // copy data directly from our input buffer
   Lock lock(&m_mutex);
-  UInt32 size = m_inputBuffer.getSize();
+  uint32_t size = m_inputBuffer.getSize();
   if (n > size) {
     n = size;
   }
@@ -149,7 +140,7 @@ UInt32 TCPSocket::read(void *buffer, UInt32 n)
   return n;
 }
 
-void TCPSocket::write(const void *buffer, UInt32 n)
+void TCPSocket::write(const void *buffer, uint32_t n)
 {
   bool wasEmpty;
   {
@@ -253,7 +244,7 @@ bool TCPSocket::isFatal() const
   return false;
 }
 
-UInt32 TCPSocket::getSize() const
+uint32_t TCPSocket::getSize() const
 {
   Lock lock(&m_mutex);
   return m_inputBuffer.getSize();
@@ -311,7 +302,7 @@ void TCPSocket::init()
 
 TCPSocket::EJobResult TCPSocket::doRead()
 {
-  UInt8 buffer[4096];
+  uint8_t buffer[4096];
   memset(buffer, 0, sizeof(buffer));
   size_t bytesRead = 0;
 
@@ -322,7 +313,11 @@ TCPSocket::EJobResult TCPSocket::doRead()
 
     // slurp up as much as possible
     do {
-      m_inputBuffer.write(buffer, static_cast<UInt32>(bytesRead));
+      m_inputBuffer.write(buffer, static_cast<uint32_t>(bytesRead));
+
+      if (m_inputBuffer.getSize() > MAX_INPUT_BUFFER_SIZE) {
+        break;
+      }
 
       bytesRead = ARCH->readSocket(m_socket, buffer, sizeof(buffer));
     } while (bytesRead > 0);
@@ -350,12 +345,12 @@ TCPSocket::EJobResult TCPSocket::doRead()
 TCPSocket::EJobResult TCPSocket::doWrite()
 {
   // write data
-  UInt32 bufferSize = 0;
+  uint32_t bufferSize = 0;
   int bytesWrote = 0;
 
   bufferSize = m_outputBuffer.getSize();
   const void *buffer = m_outputBuffer.peek(bufferSize);
-  bytesWrote = (UInt32)ARCH->writeSocket(m_socket, buffer, bufferSize);
+  bytesWrote = (uint32_t)ARCH->writeSocket(m_socket, buffer, bufferSize);
 
   if (bytesWrote > 0) {
     discardWrittenData(bytesWrote);

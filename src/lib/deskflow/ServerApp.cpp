@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/ServerApp.h"
@@ -28,7 +18,6 @@
 #include "deskflow/ArgParser.h"
 #include "deskflow/Screen.h"
 #include "deskflow/ServerArgs.h"
-#include "deskflow/ServerTaskBarReceiver.h"
 #include "deskflow/XScreen.h"
 #include "net/InverseSockets/InverseSocketFactory.h"
 #include "net/SocketMultiplexer.h"
@@ -81,8 +70,8 @@ using namespace deskflow::server;
 // ServerApp
 //
 
-ServerApp::ServerApp(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver)
-    : App(events, createTaskBarReceiver, new deskflow::ServerArgs()),
+ServerApp::ServerApp(IEventQueue *events)
+    : App(events, new deskflow::ServerArgs()),
       m_server(NULL),
       m_serverState(kUninitialized),
       m_serverScreen(NULL),
@@ -147,6 +136,9 @@ void ServerApp::help()
        << "  -a, --address <address>  listen for clients on the given address.\n"
        << "  -c, --config <pathname>  use the named configuration file "
        << "instead.\n" HELP_COMMON_INFO_1
+       << "      --disable-client-cert-check disable client SSL certificate \n"
+          "                                     checking (deprecated)\n"
+       << HELP_SYS_INFO HELP_COMMON_INFO_2 << "\n"
 
 #if WINAPI_XWINDOWS
        << "      --display <display>  when in X mode, connect to the X server\n"
@@ -236,7 +228,7 @@ void ServerApp::loadConfig()
   }
 }
 
-bool ServerApp::loadConfig(const String &pathname)
+bool ServerApp::loadConfig(const std::string &pathname)
 {
   try {
     // load configuration
@@ -325,11 +317,8 @@ void ServerApp::updateStatus()
   updateStatus("");
 }
 
-void ServerApp::updateStatus(const String &msg)
+void ServerApp::updateStatus(const std::string &msg)
 {
-  if (m_taskBarReceiver) {
-    m_taskBarReceiver->updateStatus(m_server, msg);
-  }
 }
 
 void ServerApp::closeClientListener(ClientListener *listen)
@@ -445,7 +434,7 @@ bool ServerApp::initServer()
   deskflow::Screen *serverScreen = NULL;
   PrimaryClient *primaryClient = NULL;
   try {
-    String name = args().m_config->getCanonicalName(args().m_name);
+    std::string name = args().m_config->getCanonicalName(args().m_name);
     serverScreen = openServerScreen();
     primaryClient = openPrimaryClient(name, serverScreen);
     m_serverScreen = serverScreen;
@@ -457,7 +446,7 @@ bool ServerApp::initServer()
     LOG((CLOG_WARN "primary screen unavailable: %s", e.what()));
     closePrimaryClient(primaryClient);
     closeServerScreen(serverScreen);
-    updateStatus(String("primary screen unavailable: ") + e.what());
+    updateStatus(std::string("primary screen unavailable: ") + e.what());
     retryTime = e.getRetryTime();
   } catch (XScreenOpenFailure &e) {
     LOG((CLOG_CRIT "failed to start server: %s", e.what()));
@@ -543,7 +532,7 @@ bool ServerApp::startServer()
       LOG((CLOG_CRIT "cannot listen for clients: %s", e.what()));
     }
     closeClientListener(listener);
-    updateStatus(String("cannot listen for clients: ") + e.what());
+    updateStatus(std::string("cannot listen for clients: ") + e.what());
   } catch (XBase &e) {
     LOG((CLOG_CRIT "failed to start server: %s", e.what()));
     closeClientListener(listener);
@@ -594,7 +583,7 @@ deskflow::Screen *ServerApp::createScreen()
 #endif
 }
 
-PrimaryClient *ServerApp::openPrimaryClient(const String &name, deskflow::Screen *screen)
+PrimaryClient *ServerApp::openPrimaryClient(const std::string &name, deskflow::Screen *screen)
 {
   LOG((CLOG_DEBUG1 "creating primary screen"));
   return new PrimaryClient(name, screen);
@@ -626,7 +615,10 @@ void ServerApp::handleResume(const Event &, void *)
 
 ClientListener *ServerApp::openClientListener(const NetworkAddress &address)
 {
-  ClientListener *listen = new ClientListener(getAddress(address), getSocketFactory(), m_events, args().m_enableCrypto);
+  auto securityLevel = args().m_enableCrypto ? args().m_chkPeerCert ? SecurityLevel::PeerAuth : SecurityLevel::Encrypted
+                                             : SecurityLevel::PlainText;
+
+  ClientListener *listen = new ClientListener(getAddress(address), getSocketFactory(), m_events, securityLevel);
 
   m_events->adoptHandler(
       m_events->forClientListener().connected(), listen,
@@ -714,7 +706,7 @@ int ServerApp::mainLoop()
   }
 
   // canonicalize the primary screen name
-  String primaryName = args().m_config->getCanonicalName(args().m_name);
+  std::string primaryName = args().m_config->getCanonicalName(args().m_name);
   if (primaryName.empty()) {
     LOG((CLOG_CRIT "unknown screen name `%s'", args().m_name.c_str()));
     return kExitFailed;
@@ -807,11 +799,6 @@ int ServerApp::runInner(int argc, char **argv, ILogOutputter *outputter, Startup
 
   // run
   int result = startup(argc, argv);
-
-  if (m_taskBarReceiver) {
-    // done with task bar receiver
-    delete m_taskBarReceiver;
-  }
 
   delete m_deskflowAddress;
   return result;

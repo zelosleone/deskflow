@@ -1,27 +1,17 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/EventTypes.h"
-#include "base/String.h"
 #include "common/stdmap.h"
 #include "common/stdvector.h"
+
+#include <string>
 
 #if X_DISPLAY_MISSING
 #error X11 is required to build deskflow
@@ -44,7 +34,7 @@ public:
   property is deleted after being read.
   */
   static bool getWindowProperty(
-      Display *, Window window, Atom property, String *data, Atom *type, SInt32 *format, bool deleteProperty
+      Display *, Window window, Atom property, std::string *data, Atom *type, int32_t *format, bool deleteProperty
   );
 
   //! Set property
@@ -52,8 +42,9 @@ public:
   Sets property \c property on \c window to \c size bytes of data from
   \c data.
   */
-  static bool
-  setWindowProperty(Display *, Window window, Atom property, const void *data, UInt32 size, Atom type, SInt32 format);
+  static bool setWindowProperty(
+      Display *, Window window, Atom property, const void *data, uint32_t size, Atom type, int32_t format
+  );
 
   //! Get X server time
   /*!
@@ -66,55 +57,55 @@ public:
   Converts a KeySym to the equivalent KeyID.  Returns kKeyNone if the
   KeySym cannot be mapped.
   */
-  static UInt32 mapKeySymToKeyID(KeySym);
+  static uint32_t mapKeySymToKeyID(KeySym);
 
   //! Convert KeySym to corresponding KeyModifierMask
   /*!
   Converts a KeySym to the corresponding KeyModifierMask, or 0 if the
   KeySym is not a modifier.
   */
-  static UInt32 getModifierBitForKeySym(KeySym keysym);
+  static uint32_t getModifierBitForKeySym(KeySym keysym);
 
   //! Convert Atom to its string
   /*!
   Converts \p atom to its string representation.
   */
-  static String atomToString(Display *, Atom atom);
+  static std::string atomToString(Display *, Atom atom);
 
   //! Convert several Atoms to a string
   /*!
   Converts each atom in \p atoms to its string representation and
   concatenates the results.
   */
-  static String atomsToString(Display *display, const Atom *atom, UInt32 num);
+  static std::string atomsToString(Display *display, const Atom *atom, uint32_t num);
 
   //! Prepare a property of atoms for use
   /*!
   64-bit systems may need to modify a property's data if it's a
   list of Atoms before using it.
   */
-  static void convertAtomProperty(String &data);
+  static void convertAtomProperty(std::string &data);
 
   //! Append an Atom to property data
   /*!
   Converts \p atom to a 32-bit on-the-wire format and appends it to
   \p data.
   */
-  static void appendAtomData(String &data, Atom atom);
+  static void appendAtomData(std::string &data, Atom atom);
 
   //! Replace an Atom in property data
   /*!
   Converts \p atom to a 32-bit on-the-wire format and replaces the atom
   at index \p index in \p data.
   */
-  static void replaceAtomData(String &data, UInt32 index, Atom atom);
+  static void replaceAtomData(std::string &data, uint32_t index, Atom atom);
 
   //! Append an Time to property data
   /*!
   Converts \p time to a 32-bit on-the-wire format and appends it to
   \p data.
   */
-  static void appendTimeData(String &data, Time time);
+  static void appendTimeData(std::string &data, Time time);
 
   //! X11 error handler
   /*!
@@ -183,7 +174,7 @@ private:
   static void initKeyMaps();
 
 private:
-  typedef std::map<KeySym, UInt32> KeySymMap;
+  typedef std::map<KeySym, uint32_t> KeySymMap;
 
   static KeySymMap s_keySymToUCS4;
 };

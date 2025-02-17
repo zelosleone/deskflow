@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/XWindowsClipboardUTF8Converter.h"
@@ -56,12 +45,12 @@ static bool isCR(char ch)
   return (ch == '\r');
 }
 
-String XWindowsClipboardUTF8Converter::fromIClipboard(const String &data) const
+std::string XWindowsClipboardUTF8Converter::fromIClipboard(const std::string &data) const
 {
   return data;
 }
 
-String XWindowsClipboardUTF8Converter::toIClipboard(const String &data) const
+std::string XWindowsClipboardUTF8Converter::toIClipboard(const std::string &data) const
 {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1547595
   // GTK normalizes the clipboard's line endings to CRLF (\r\n) internally.
@@ -74,7 +63,7 @@ String XWindowsClipboardUTF8Converter::toIClipboard(const String &data) const
   // When normalize clipboard is set, any \r present in the string is removed
 
   if (m_normalize) {
-    String copy = data;
+    std::string copy = data;
 
     copy.erase(std::remove_if(copy.begin(), copy.end(), isCR), copy.end());
     return copy;

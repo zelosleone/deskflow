@@ -1,27 +1,21 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "SecureSocket.h"
+#include "SecureUtils.h"
 
 #include "arch/XArch.h"
 #include "base/Log.h"
 #include "base/Path.h"
+#include "base/String.h"
 #include "base/TMethodEventJob.h"
+#include "common/constants.h"
 #include "mt/Lock.h"
+#include "net/FingerprintDatabase.h"
 #include "net/TCPSocket.h"
 #include "net/TSocketMultiplexerMethodJob.h"
 #include <net/InverseSockets/SslLogger.h>
@@ -41,6 +35,8 @@
 
 #define MAX_ERROR_SIZE 65535
 
+static const std::size_t MAX_INPUT_BUFFER_SIZE = 1024 * 1024;
+
 static const float s_retryDelay = 0.01f;
 
 enum
@@ -48,31 +44,37 @@ enum
   kMsgSize = 128
 };
 
-// TODO: Reduce duplication of these strings between here and TlsFingerprint.cpp
-static const char kFingerprintDirName[] = "tls";
-static const char kFingerprintTrustedServersFilename[] = "trusted-servers";
-
 struct Ssl
 {
   SSL_CTX *m_context;
   SSL *m_ssl;
 };
 
+static int verifyIgnoreCertCallback(X509_STORE_CTX *, void *)
+{
+  return 1;
+}
+
 SecureSocket::SecureSocket(
-    IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family
+    IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family,
+    SecurityLevel securityLevel
 )
     : TCPSocket(events, socketMultiplexer, family),
       m_ssl(nullptr),
       m_secureReady(false),
-      m_fatal(false)
+      m_fatal(false),
+      m_securityLevel{securityLevel}
 {
 }
 
-SecureSocket::SecureSocket(IEventQueue *events, SocketMultiplexer *socketMultiplexer, ArchSocket socket)
+SecureSocket::SecureSocket(
+    IEventQueue *events, SocketMultiplexer *socketMultiplexer, ArchSocket socket, SecurityLevel securityLevel
+)
     : TCPSocket(events, socketMultiplexer, socket),
       m_ssl(nullptr),
       m_secureReady(false),
-      m_fatal(false)
+      m_fatal(false),
+      m_securityLevel{securityLevel}
 {
 }
 
@@ -124,7 +126,7 @@ void SecureSocket::secureAccept()
 
 TCPSocket::EJobResult SecureSocket::doRead()
 {
-  static UInt8 buffer[4096];
+  static uint8_t buffer[4096];
   memset(buffer, 0, sizeof(buffer));
   int bytesRead = 0;
   int status = 0;
@@ -146,6 +148,10 @@ TCPSocket::EJobResult SecureSocket::doRead()
     // slurp up as much as possible
     do {
       m_inputBuffer.write(buffer, bytesRead);
+
+      if (m_inputBuffer.getSize() > MAX_INPUT_BUFFER_SIZE) {
+        break;
+      }
 
       status = secureRead(buffer, sizeof(buffer), bytesRead);
       if (status < 0) {
@@ -228,6 +234,8 @@ TCPSocket::EJobResult SecureSocket::doWrite()
 
 int SecureSocket::secureRead(void *buffer, int size, int &read)
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   if (m_ssl->m_ssl != NULL) {
     LOG((CLOG_DEBUG2 "reading secure socket"));
     read = SSL_read(m_ssl->m_ssl, buffer, size);
@@ -253,6 +261,8 @@ int SecureSocket::secureRead(void *buffer, int size, int &read)
 
 int SecureSocket::secureWrite(const void *buffer, int size, int &wrote)
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   if (m_ssl->m_ssl != NULL) {
     LOG((CLOG_DEBUG2 "writing secure socket: %p", this));
 
@@ -284,6 +294,8 @@ bool SecureSocket::isSecureReady()
 
 void SecureSocket::initSsl(bool server)
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   m_ssl = new Ssl();
   m_ssl->m_context = NULL;
   m_ssl->m_ssl = NULL;
@@ -291,8 +303,10 @@ void SecureSocket::initSsl(bool server)
   initContext(server);
 }
 
-bool SecureSocket::loadCertificates(String &filename)
+bool SecureSocket::loadCertificates(std::string &filename)
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   if (filename.empty()) {
     SslLogger::logError("tls certificate is not specified");
     return false;
@@ -302,7 +316,7 @@ bool SecureSocket::loadCertificates(String &filename)
     file.close();
 
     if (!exist) {
-      String errorMsg("tls certificate doesn't exist: ");
+      std::string errorMsg("tls certificate doesn't exist: ");
       errorMsg.append(filename);
       SslLogger::logError(errorMsg.c_str());
       return false;
@@ -361,6 +375,13 @@ void SecureSocket::initContext(bool server)
   if (m_ssl->m_context == NULL) {
     SslLogger::logError();
   }
+
+  if (m_securityLevel == SecurityLevel::PeerAuth) {
+    // We want to ask for peer certificate, but not verify it. If we don't ask for peer
+    // certificate, e.g. client won't send it.
+    SSL_CTX_set_verify(m_ssl->m_context, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, nullptr);
+    SSL_CTX_set_cert_verify_callback(m_ssl->m_context, verifyIgnoreCertCallback, nullptr);
+  }
 }
 
 void SecureSocket::createSSL()
@@ -375,6 +396,8 @@ void SecureSocket::createSSL()
 
 void SecureSocket::freeSSL()
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   isFatal(true);
   // take socket from multiplexer ASAP otherwise the race condition
   // could cause events to get called on a dead object. TCPSocket
@@ -398,6 +421,8 @@ void SecureSocket::freeSSL()
 
 int SecureSocket::secureAccept(int socket)
 {
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   createSSL();
 
   // set connection socket to SSL state
@@ -422,6 +447,16 @@ int SecureSocket::secureAccept(int socket)
 
   // If not fatal and no retry, state is good
   if (retry == 0) {
+    if (m_securityLevel == SecurityLevel::PeerAuth) {
+      std::string dbDir = deskflow::string::sprintf(
+          "%s/%s/%s", ARCH->getProfileDirectory().c_str(), kSslDir, kFingerprintTrustedClientsFilename
+      );
+      if (!verifyCertFingerprint(dbDir)) {
+        retry = 0;
+        disconnect();
+        return -1; // Fail
+      }
+    }
     m_secureReady = true;
     LOG((CLOG_INFO "accepted secure socket"));
     SslLogger::logSecureCipherInfo(m_ssl->m_ssl);
@@ -444,6 +479,18 @@ int SecureSocket::secureAccept(int socket)
 
 int SecureSocket::secureConnect(int socket)
 {
+
+  std::string certDir =
+      deskflow::string::sprintf("%s/%s/%s", ARCH->getProfileDirectory().c_str(), kSslDir, kCertificateFilename);
+
+  if (!loadCertificates(certDir)) {
+    LOG((CLOG_ERR "could not load client certificates"));
+    disconnect();
+    return -1;
+  }
+
+  std::lock_guard<std::mutex> ssl_lock{ssl_mutex_};
+
   createSSL();
 
   // attach the socket descriptor
@@ -477,7 +524,10 @@ int SecureSocket::secureConnect(int socket)
   retry = 0;
   // No error, set ready, process and return ok
   m_secureReady = true;
-  if (verifyCertFingerprint()) {
+  std::string dbDir = deskflow::string::sprintf(
+      "%s/%s/%s", ARCH->getProfileDirectory().c_str(), kSslDir, kFingerprintTrustedServersFilename
+  );
+  if (verifyCertFingerprint(dbDir)) {
     LOG((CLOG_INFO "connected to secure socket"));
     if (!showCertificate()) {
       disconnect();
@@ -600,70 +650,45 @@ void SecureSocket::disconnect()
   sendEvent(getEvents()->forIStream().inputShutdown());
 }
 
-void SecureSocket::formatFingerprint(String &fingerprint, bool hex, bool separator)
+bool SecureSocket::verifyCertFingerprint(const deskflow::fs::path &fingerprintDbPath)
 {
-  if (hex) {
-    // to hexidecimal
-    deskflow::string::toHex(fingerprint, 2);
-  }
-
-  // all uppercase
-  deskflow::string::uppercase(fingerprint);
-
-  if (separator) {
-    // add colon to separate each 2 charactors
-    size_t separators = fingerprint.size() / 2;
-    for (size_t i = 1; i < separators; i++) {
-      fingerprint.insert(i * 3 - 1, ":");
-    }
-  }
-}
-
-bool SecureSocket::verifyCertFingerprint()
-{
-  // calculate received certificate fingerprint
-  using AutoX509 = std::unique_ptr<X509, decltype(&X509_free)>;
-  AutoX509 cert(SSL_get_peer_certificate(m_ssl->m_ssl), &X509_free);
-
-  unsigned char tempFingerprint[EVP_MAX_MD_SIZE];
-  unsigned int tempFingerprintLen;
-  int digestResult = X509_digest(cert.get(), EVP_sha256(), tempFingerprint, &tempFingerprintLen);
-
-  if (digestResult <= 0) {
-    LOG((CLOG_ERR "failed to calculate fingerprint, digest result: %d", digestResult));
+  deskflow::FingerprintData sha1;
+  deskflow::FingerprintData sha256;
+  try {
+    auto cert = SSL_get_peer_certificate(m_ssl->m_ssl);
+    sha1 = deskflow::sslCertFingerprint(cert, deskflow::FingerprintType::SHA1);
+    sha256 = deskflow::sslCertFingerprint(cert, deskflow::FingerprintType::SHA256);
+  } catch (const std::exception &e) {
+    LOG((CLOG_ERR "%s", e.what()));
     return false;
   }
 
-  // format fingerprint into hexdecimal format with colon separator
-  String fingerprint(static_cast<char *>(static_cast<void *>(tempFingerprint)), tempFingerprintLen);
-  formatFingerprint(fingerprint);
-  LOG((CLOG_NOTE "server fingerprint: %s", fingerprint.c_str()));
-
-  String trustedServersFilename;
-  trustedServersFilename = deskflow::string::sprintf(
-      "%s/%s/%s", ARCH->getProfileDirectory().c_str(), kFingerprintDirName, kFingerprintTrustedServersFilename
+  // Gui Must Parse these two lines, DO NOT CHANGE
+  LOG(
+      (CLOG_NOTE "peer fingerprint: (SHA1) %s (SHA256) %s", deskflow::formatSSLFingerprint(sha1.data).c_str(),
+       deskflow::formatSSLFingerprint(sha256.data).c_str())
   );
 
   // check if this fingerprint exist
-  String fileLine;
   std::ifstream file;
-  file.open(deskflow::filesystem::path(trustedServersFilename));
 
-  bool isValid = false;
-  if (file.is_open()) {
-    while (!file.eof()) {
-      getline(file, fileLine);
-      if (!fileLine.empty() && !fileLine.compare(fingerprint)) {
-        isValid = true;
-        break;
-      }
-    }
+  deskflow::openUtf8Path(file, fingerprintDbPath);
+  deskflow::FingerprintDatabase db;
+  db.read(fingerprintDbPath);
+  if (!db.fingerprints().empty()) {
+    LOG((CLOG_NOTE "read %d fingerprints from %s", db.fingerprints().size(), fingerprintDbPath.c_str()));
   } else {
-    LOG((CLOG_ERR "fail to open trusted fingerprints file: %s", trustedServersFilename.c_str()));
+    LOG((CLOG_ERR "failed to open trusted fingerprints file: %s", fingerprintDbPath.c_str()));
+    return false;
   }
 
-  file.close();
-  return isValid;
+  if (!db.isTrusted(sha256)) {
+    LOG((CLOG_WARN "fingerprint does not match trusted fingerprint"));
+    return false;
+  }
+
+  LOG((CLOG_NOTE "fingerprint matches trusted fingerprint"));
+  return true;
 }
 
 ISocketMultiplexerJob *SecureSocket::serviceConnect(ISocketMultiplexerJob *job, bool, bool write, bool error)

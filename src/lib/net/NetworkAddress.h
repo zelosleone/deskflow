@@ -1,26 +1,14 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "arch/IArchNetwork.h"
 #include "base/EventTypes.h"
-#include "base/String.h"
 
 //! Network address type
 /*!
@@ -50,7 +38,7 @@ public:
   is thrown with an error of \c XSocketAddress::kBadPort.  The hostname
   is not resolved by the c'tor;  use \c resolve to do that.
   */
-  NetworkAddress(const String &hostname, int port = 0);
+  NetworkAddress(const std::string &hostname, int port = 0);
 
   NetworkAddress(const NetworkAddress &);
 
@@ -112,7 +100,7 @@ public:
   /*!
   Returns the hostname passed to the c'tor sans any port suffix.
   */
-  String getHostname() const;
+  std::string getHostname() const;
 
   //@}
 
@@ -121,6 +109,6 @@ private:
 
 private:
   ArchNetAddress m_address = nullptr;
-  String m_hostname;
+  std::string m_hostname;
   int m_port = 0;
 };

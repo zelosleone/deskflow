@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -91,12 +80,12 @@ public:
 
   // IClipboard overrides
   virtual bool empty();
-  virtual void add(EFormat, const String &data);
+  virtual void add(EFormat, const std::string &data);
   virtual bool open(Time) const;
   virtual void close() const;
   virtual Time getTime() const;
   virtual bool has(EFormat) const;
-  virtual String get(EFormat) const;
+  virtual std::string get(EFormat) const;
 
 private:
   // remove all converters from our list
@@ -145,7 +134,7 @@ protected:
     // convert the given selection to the given type.  returns
     // true iff the conversion was successful or the conversion
     // cannot be performed (in which case *actualTarget == None).
-    bool readClipboard(Display *display, Atom selection, Atom target, Atom *actualTarget, String *data);
+    bool readClipboard(Display *display, Atom selection, Atom target, Atom *actualTarget, std::string *data);
 
   private:
     bool processEvent(Display *display, XEvent *event);
@@ -166,7 +155,7 @@ protected:
     bool m_reading = false;
 
     // the converted selection data
-    String *m_data = nullptr;
+    std::string *m_data = nullptr;
 
     // the actual type of the data.  if this is None then the
     // selection owner cannot convert to the requested type.
@@ -183,7 +172,7 @@ protected:
   };
 
   // Motif structure IDs
-  enum class MotifClip : SInt32
+  enum class MotifClip : int32_t
   {
     Format = 1,
     Item = 2,
@@ -195,13 +184,13 @@ protected:
   {
   public:
     MotifClip m_id;
-    SInt32 m_pad1[3];
-    SInt32 m_item;
-    SInt32 m_pad2[4];
-    SInt32 m_numItems;
-    SInt32 m_pad3[3];
-    SInt32 m_selectionOwner; // a Window
-    SInt32 m_pad4[2];
+    int32_t m_pad1[3];
+    int32_t m_item;
+    int32_t m_pad2[4];
+    int32_t m_numItems;
+    int32_t m_pad3[3];
+    int32_t m_selectionOwner; // a Window
+    int32_t m_pad4[2];
   };
 
   // Motif clip item structure
@@ -209,11 +198,11 @@ protected:
   {
   public:
     MotifClip m_id;
-    SInt32 m_pad1[5];
-    SInt32 m_size;
-    SInt32 m_numFormats;
-    SInt32 m_numDeletedFormats;
-    SInt32 m_pad2[6];
+    int32_t m_pad1[5];
+    int32_t m_size;
+    int32_t m_numFormats;
+    int32_t m_numDeletedFormats;
+    int32_t m_pad2[6];
   };
 
   // Motif clip format structure
@@ -221,13 +210,13 @@ protected:
   {
   public:
     MotifClip m_id;
-    SInt32 m_pad1[6];
-    SInt32 m_length;
-    SInt32 m_data;
-    SInt32 m_type; // an Atom
-    SInt32 m_pad2[1];
-    SInt32 m_deleted;
-    SInt32 m_pad3[4];
+    int32_t m_pad1[6];
+    int32_t m_length;
+    int32_t m_data;
+    int32_t m_type; // an Atom
+    int32_t m_pad2[1];
+    int32_t m_deleted;
+    int32_t m_pad3[4];
   };
 
   // stores data needed to respond to a selection request
@@ -235,7 +224,7 @@ protected:
   {
   public:
     Reply(Window, Atom target, ::Time);
-    Reply(Window, Atom target, ::Time, Atom property, const String &data, Atom type, int format);
+    Reply(Window, Atom target, ::Time, Atom property, const std::string &data, Atom type, int format);
 
   public:
     // information about the request
@@ -251,20 +240,20 @@ protected:
     bool m_done;
 
     // the data to send and its type and format
-    String m_data;
+    std::string m_data;
     Atom m_type;
     int m_format;
 
     // index of next byte in m_data to send
-    UInt32 m_ptr;
+    uint32_t m_ptr;
   };
-  typedef std::list<Reply *> ReplyList;
-  typedef std::map<Window, ReplyList> ReplyMap;
-  typedef std::map<Window, long> ReplyEventMask;
+  using ReplyList = std::list<Reply *>;
+  using ReplyMap = std::map<Window, ReplyList>;
+  using ReplyEventMask = std::map<Window, long>;
 
   // ICCCM interoperability methods
   void icccmFillCache();
-  bool icccmGetSelection(Atom target, Atom *actualTarget, String *data) const;
+  bool icccmGetSelection(Atom target, Atom *actualTarget, std::string *data) const;
   Time icccmGetTime() const;
 
   // motif interoperability methods
@@ -272,7 +261,7 @@ protected:
   void motifUnlockClipboard() const;
   bool motifOwnsClipboard() const;
   void motifFillCache();
-  bool motifGetSelection(const MotifClipFormat *, Atom *actualTarget, String *data) const;
+  bool motifGetSelection(const MotifClipFormat *, Atom *actualTarget, std::string *data) const;
   Time motifGetTime() const;
 
   // reply methods
@@ -287,11 +276,11 @@ protected:
   bool wasOwnedAtTime(::Time) const;
 
   // data conversion methods
-  Atom getTargetsData(String &, int *format) const;
-  Atom getTimestampData(String &, int *format) const;
+  Atom getTargetsData(std::string &, int *format) const;
+  Atom getTimestampData(std::string &, int *format) const;
 
 private:
-  typedef std::vector<IXWindowsClipboardConverter *> ConverterList;
+  using ConverterList = std::vector<IXWindowsClipboardConverter *>;
 
   Display *m_display;
   Window m_window;
@@ -311,7 +300,7 @@ private:
   bool m_cached;
   Time m_cacheTime;
   bool m_added[kNumFormats];
-  String m_data[kNumFormats];
+  std::string m_data[kNumFormats];
 
   // conversion request replies
   ReplyMap m_replies;
@@ -373,14 +362,14 @@ public:
   getFormat().  The return data will be in the X selection
   format returned by getAtom().
   */
-  virtual String fromIClipboard(const String &) const = 0;
+  virtual std::string fromIClipboard(const std::string &) const = 0;
 
   //! Convert to IClipboard format
   /*!
   Convert from the X selection format to the IClipboard format
   (i.e., the reverse of fromIClipboard()).
   */
-  virtual String toIClipboard(const String &) const = 0;
+  virtual std::string toIClipboard(const std::string &) const = 0;
 
   //@}
 };

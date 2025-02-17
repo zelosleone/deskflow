@@ -1,26 +1,16 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/EventTypes.h"
-#include "base/String.h"
 #include "common/IInterface.h"
+
+#include <string>
 
 //! Clipboard interface
 /*!
@@ -35,7 +25,7 @@ public:
   arbitrary starting time.  Timestamps will wrap around to 0
   after about 49 3/4 days.
   */
-  typedef UInt32 Time;
+  using Time = uint32_t;
 
   //! Clipboard formats
   /*!
@@ -81,7 +71,7 @@ public:
   Add data in the given format to the clipboard.  May only be
   called after a successful empty().
   */
-  virtual void add(EFormat, const String &data) = 0;
+  virtual void add(EFormat, const std::string &data) = 0;
 
   //@}
   //! @name accessors
@@ -127,21 +117,21 @@ public:
   if there is no data in that format.  Must be called between
   a successful open() and close().
   */
-  virtual String get(EFormat) const = 0;
+  virtual std::string get(EFormat) const = 0;
 
   //! Marshall clipboard data
   /*!
   Merge \p clipboard's data into a single buffer that can be later
   unmarshalled to restore the clipboard and return the buffer.
   */
-  static String marshall(const IClipboard *clipboard);
+  static std::string marshall(const IClipboard *clipboard);
 
   //! Unmarshall clipboard data
   /*!
   Extract marshalled clipboard data and store it in \p clipboard.
   Sets the clipboard time to \c time.
   */
-  static void unmarshall(IClipboard *clipboard, const String &data, Time time);
+  static void unmarshall(IClipboard *clipboard, const std::string &data, Time time);
 
   //! Copy clipboard
   /*!
@@ -165,6 +155,6 @@ public:
   //@}
 
 private:
-  static UInt32 readUInt32(const char *);
-  static void writeUInt32(String *, UInt32);
+  static uint32_t readUInt32(const char *);
+  static void writeUInt32(std::string *, uint32_t);
 };

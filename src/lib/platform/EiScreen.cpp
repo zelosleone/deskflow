@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2022 Red Hat, Inc.
- * Copyright (C) 2024 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2022 Red Hat, Inc.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/EiScreen.h"
@@ -428,7 +418,10 @@ bool EiScreen::isPrimary() const
 
 void EiScreen::update_shape()
 {
-
+  w_ = 1;
+  h_ = 1;
+  x_ = std::numeric_limits<uint32_t>::max();
+  y_ = std::numeric_limits<uint32_t>::max();
   for (auto it = ei_devices_.begin(); it != ei_devices_.end(); it++) {
     auto idx = 0;
     struct ei_region *r;
@@ -440,7 +433,7 @@ void EiScreen::update_shape()
     }
   }
 
-  LOG_NOTE("logical output size: %dx%d@%d.%d", w_, h_, x_, y_);
+  LOG_DEBUG("logical output size: %dx%d@%d.%d", w_, h_, x_, y_);
   cursor_x_ = x_ + w_ / 2;
   cursor_y_ = y_ + h_ / 2;
 
@@ -712,7 +705,7 @@ void EiScreen::handle_connected_to_eis_event(const Event &event, void *)
 
   auto rc = ei_setup_backend_fd(ei_, fd);
   if (rc != 0) {
-    LOG_NOTE("failed to set up ei: %s", strerror(-rc));
+    LOG_WARN("failed to set up ei: %s", strerror(-rc));
   }
 }
 
@@ -846,7 +839,7 @@ IKeyState *EiScreen::getKeyState() const
   return key_state_;
 }
 
-String EiScreen::getSecureInputApp() const
+std::string EiScreen::getSecureInputApp() const
 {
   throw std::runtime_error("get security input app not implemented");
 }

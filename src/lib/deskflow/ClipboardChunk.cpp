@@ -1,23 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/ClipboardChunk.h"
 
 #include "base/Log.h"
+#include "base/String.h"
 #include "deskflow/ProtocolUtil.h"
 #include "deskflow/protocol_types.h"
 #include "io/IStream.h"
@@ -30,7 +20,7 @@ ClipboardChunk::ClipboardChunk(size_t size) : Chunk(size)
   m_dataSize = size - CLIPBOARD_CHUNK_META_SIZE;
 }
 
-ClipboardChunk *ClipboardChunk::start(ClipboardID id, UInt32 sequence, const String &size)
+ClipboardChunk *ClipboardChunk::start(ClipboardID id, uint32_t sequence, const std::string &size)
 {
   size_t sizeLength = size.size();
   ClipboardChunk *start = new ClipboardChunk(sizeLength + CLIPBOARD_CHUNK_META_SIZE);
@@ -45,7 +35,7 @@ ClipboardChunk *ClipboardChunk::start(ClipboardID id, UInt32 sequence, const Str
   return start;
 }
 
-ClipboardChunk *ClipboardChunk::data(ClipboardID id, UInt32 sequence, const String &data)
+ClipboardChunk *ClipboardChunk::data(ClipboardID id, uint32_t sequence, const std::string &data)
 {
   size_t dataSize = data.size();
   ClipboardChunk *chunk = new ClipboardChunk(dataSize + CLIPBOARD_CHUNK_META_SIZE);
@@ -60,7 +50,7 @@ ClipboardChunk *ClipboardChunk::data(ClipboardID id, UInt32 sequence, const Stri
   return chunk;
 }
 
-ClipboardChunk *ClipboardChunk::end(ClipboardID id, UInt32 sequence)
+ClipboardChunk *ClipboardChunk::end(ClipboardID id, uint32_t sequence)
 {
   ClipboardChunk *end = new ClipboardChunk(CLIPBOARD_CHUNK_META_SIZE);
   char *chunk = end->m_chunk;
@@ -73,10 +63,10 @@ ClipboardChunk *ClipboardChunk::end(ClipboardID id, UInt32 sequence)
   return end;
 }
 
-int ClipboardChunk::assemble(deskflow::IStream *stream, String &dataCached, ClipboardID &id, UInt32 &sequence)
+int ClipboardChunk::assemble(deskflow::IStream *stream, std::string &dataCached, ClipboardID &id, uint32_t &sequence)
 {
-  UInt8 mark;
-  String data;
+  uint8_t mark;
+  std::string data;
 
   if (!ProtocolUtil::readf(stream, kMsgDClipboard + 4, &id, &sequence, &mark, &data)) {
     return kError;
@@ -113,10 +103,10 @@ void ClipboardChunk::send(deskflow::IStream *stream, void *data)
 
   char *chunk = clipboardData->m_chunk;
   ClipboardID id = chunk[0];
-  UInt32 sequence;
+  uint32_t sequence;
   std::memcpy(&sequence, &chunk[1], 4);
-  UInt8 mark = chunk[5];
-  String dataChunk(&chunk[6], clipboardData->m_dataSize);
+  uint8_t mark = chunk[5];
+  std::string dataChunk(&chunk[6], clipboardData->m_dataSize);
 
   switch (mark) {
   case kDataStart:

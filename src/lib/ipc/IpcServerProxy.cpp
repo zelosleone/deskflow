@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2012 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2012 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "ipc/IpcServerProxy.h"
@@ -46,8 +35,8 @@ void IpcServerProxy::handleData(const Event &, void *)
 {
   LOG((CLOG_DEBUG "start ipc handle data"));
 
-  UInt8 code[4];
-  UInt32 n = m_stream.read(code, 4);
+  uint8_t code[4];
+  uint32_t n = m_stream.read(code, 4);
   while (n != 0) {
 
     LOG((CLOG_DEBUG "ipc read: %c%c%c%c", code[0], code[1], code[2], code[3]));
@@ -86,7 +75,7 @@ void IpcServerProxy::send(const IpcMessage &message)
 
   case IpcMessageType::Command: {
     const IpcCommandMessage &cm = static_cast<const IpcCommandMessage &>(message);
-    const String command = cm.command();
+    const std::string command = cm.command();
     ProtocolUtil::writef(&m_stream, kIpcMsgCommand, &command);
     break;
   }
@@ -99,7 +88,7 @@ void IpcServerProxy::send(const IpcMessage &message)
 
 IpcLogLineMessage *IpcServerProxy::parseLogLine()
 {
-  String logLine;
+  std::string logLine;
   ProtocolUtil::readf(&m_stream, kIpcMsgLogLine + 4, &logLine);
 
   // must be deleted by event handler.

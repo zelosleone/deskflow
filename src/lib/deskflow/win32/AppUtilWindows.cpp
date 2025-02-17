@@ -1,24 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/win32/AppUtilWindows.h"
 
-#include "arch/IArchTaskBarReceiver.h"
 #include "arch/win32/ArchMiscWindows.h"
 #include "arch/win32/XArchWindows.h"
 #include "base/Event.h"
@@ -169,16 +157,16 @@ void AppUtilWindows::startNode()
   app().startNode();
 }
 
-std::vector<String> AppUtilWindows::getKeyboardLayoutList()
+std::vector<std::string> AppUtilWindows::getKeyboardLayoutList()
 {
-  std::vector<String> layoutLangCodes;
+  std::vector<std::string> layoutLangCodes;
   {
     auto uLayouts = GetKeyboardLayoutList(0, NULL);
     auto lpList = (HKL *)LocalAlloc(LPTR, (uLayouts * sizeof(HKL)));
     uLayouts = GetKeyboardLayoutList(uLayouts, lpList);
 
     for (int i = 0; i < uLayouts; ++i) {
-      String code("", 2);
+      std::string code("", 2);
       GetLocaleInfoA(
           MAKELCID(((ULONG_PTR)lpList[i] & 0xffffffff), SORT_DEFAULT), LOCALE_SISO639LANGNAME, &code[0],
           static_cast<int>(code.size())
@@ -193,9 +181,9 @@ std::vector<String> AppUtilWindows::getKeyboardLayoutList()
   return layoutLangCodes;
 }
 
-String AppUtilWindows::getCurrentLanguageCode()
+std::string AppUtilWindows::getCurrentLanguageCode()
 {
-  String code("", 2);
+  std::string code("", 2);
 
   auto hklLayout = getCurrentKeyboardLayout();
   if (hklLayout) {
@@ -243,7 +231,7 @@ public:
 };
 #endif
 
-void AppUtilWindows::showNotification(const String &title, const String &text) const
+void AppUtilWindows::showNotification(const std::string &title, const std::string &text) const
 {
 #if HAVE_WINTOAST
   LOG((CLOG_INFO "showing notification, title=\"%s\", text=\"%s\"", title.c_str(), text.c_str()));
@@ -266,7 +254,7 @@ void AppUtilWindows::showNotification(const String &title, const String &text) c
     WinToastLib::WinToast::instance()->setAppUserModelId(aumi);
 
     if (!WinToastLib::WinToast::instance()->initialize()) {
-      LOG((CLOG_DEBUG "failed to initialize toast notifications"));
+      LOG((CLOG_WARN "failed to initialize toast notifications"));
       return;
     }
   }
@@ -279,7 +267,7 @@ void AppUtilWindows::showNotification(const String &title, const String &text) c
 
   const bool launched = WinToastLib::WinToast::instance()->showToast(templ, handler.get(), &error);
   if (!launched) {
-    LOG((CLOG_DEBUG "failed to show toast notification, error code: %d", error));
+    LOG((CLOG_WARN "failed to show toast notification, error code: %d", error));
     return;
   }
 #else

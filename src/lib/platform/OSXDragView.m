@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2013-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2013 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #import "platform/OSXDragView.h"
@@ -28,139 +17,132 @@
 @dynamic animatesToDestination;
 @dynamic numberOfValidItemsForDrop;
 
-- (id)
-initWithFrame:(NSRect)frame
+- (id)initWithFrame:(NSRect)frame
 {
-	self = [super initWithFrame:frame];
-	m_dropTarget = [[NSMutableString alloc] initWithCapacity:0];
-	m_dragFileExt = [[NSMutableString alloc] initWithCapacity:0];
-    return self;
+  self = [super initWithFrame:frame];
+  m_dropTarget = [[NSMutableString alloc] initWithCapacity:0];
+  m_dragFileExt = [[NSMutableString alloc] initWithCapacity:0];
+  return self;
 }
 
-- (void)
-drawRect:(NSRect)dirtyRect
+- (void)drawRect:(NSRect)dirtyRect
 {
 }
 
-- (BOOL)
-acceptsFirstMouse:(NSEvent *)theEvent
+- (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
 {
-	return YES;
+  return YES;
 }
 
-- (void)
-mouseDown:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent *)theEvent
 {
-	NSLog ( @"cocoa mouse down");
-	NSPoint dragPosition;
-	NSRect imageLocation;
-	dragPosition = [self convertPoint:[theEvent locationInWindow]
-							 fromView:nil];
-	
-	dragPosition.x -= 16;
-	dragPosition.y -= 16;
-	imageLocation.origin = dragPosition;
-	imageLocation.size = NSMakeSize(32,32);
-	[self dragPromisedFilesOfTypes:[NSArray arrayWithObject:m_dragFileExt]
-								fromRect:imageLocation
-								  source:self
-							   slideBack:NO
-								   event:theEvent];
+  NSLog(@"cocoa mouse down");
+  NSPoint dragPosition;
+  NSRect imageLocation;
+  dragPosition = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+
+  dragPosition.x -= 16;
+  dragPosition.y -= 16;
+  imageLocation.origin = dragPosition;
+  imageLocation.size = NSMakeSize(32, 32);
+  [self dragPromisedFilesOfTypes:[NSArray arrayWithObject:m_dragFileExt]
+                        fromRect:imageLocation
+                          source:self
+                       slideBack:NO
+                           event:theEvent];
 }
 
-- (NSArray*)
-namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination
+- (NSArray *)namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination
 {
-	[m_dropTarget setString:@""];
-	[m_dropTarget appendString:dropDestination.path];
-	NSLog ( @"cocoa drop target: %@", m_dropTarget);
-	return nil;
+  [m_dropTarget setString:@""];
+  [m_dropTarget appendString:dropDestination.path];
+  NSLog(@"cocoa drop target: %@", m_dropTarget);
+  return nil;
 }
 
-- (NSDragOperation)
-draggingSourceOperationMaskForLocal:(BOOL)flag
+- (NSDragOperation)draggingSourceOperationMaskForLocal:(BOOL)flag
 {
-	return NSDragOperationCopy;
+  return NSDragOperationCopy;
 }
 
-- (CFStringRef)
-getDropTarget
+- (CFStringRef)getDropTarget
 {
-	NSMutableString* string;
-	string = [[NSMutableString alloc] initWithCapacity:0];
-	[string appendString:m_dropTarget];
-	return (CFStringRef)string;
+  NSMutableString *string;
+  string = [[NSMutableString alloc] initWithCapacity:0];
+  [string appendString:m_dropTarget];
+  return (CFStringRef)string;
 }
 
-- (void)
-clearDropTarget
+- (void)clearDropTarget
 {
-	[m_dropTarget setString:@""];
+  [m_dropTarget setString:@""];
 }
 
-- (void)
-setFileExt:(NSString*) ext
+- (void)setFileExt:(NSString *)ext
 {
-	[ext retain];
-	[m_dragFileExt release];
-	m_dragFileExt = ext;
-	NSLog(@"drag file ext: %@", m_dragFileExt);
+  [ext retain];
+  [m_dragFileExt release];
+  m_dragFileExt = ext;
+  NSLog(@"drag file ext: %@", m_dragFileExt);
 }
 
-- (NSWindow *)
-draggingDestinationWindow
+- (NSWindow *)draggingDestinationWindow
 {
-	return nil;
+  return nil;
 }
 
-- (NSDragOperation)
-draggingSourceOperationMask
+- (NSDragOperation)draggingSourceOperationMask
 {
-	return NSDragOperationCopy;
+  return NSDragOperationCopy;
 }
 
 - (NSPoint)draggingLocation
 {
-	NSPoint point;
-	return point;
+  NSPoint point;
+  return point;
 }
 
 - (NSPoint)draggedImageLocation
 {
-	NSPoint point;
-	return point;
+  NSPoint point;
+  return point;
 }
 
 - (NSImage *)draggedImage
 {
-	return nil;
+  return nil;
 }
 
 - (NSPasteboard *)draggingPasteboard
 {
-	return nil;
+  return nil;
 }
 
 - (id)draggingSource
 {
-	return nil;
+  return nil;
 }
 
 - (NSInteger)draggingSequenceNumber
 {
-	return 0;
+  return 0;
 }
 
 - (void)slideDraggedImageTo:(NSPoint)screenPoint
 {
 }
 
-- (NSDragOperation)draggingSession:(NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
+- (NSDragOperation)draggingSession:(NSDraggingSession *)session
+    sourceOperationMaskForDraggingContext:(NSDraggingContext)context
 {
-	return NSDragOperationCopy;
+  return NSDragOperationCopy;
 }
 
-- (void)enumerateDraggingItemsWithOptions:(NSDraggingItemEnumerationOptions)enumOpts forView:(NSView *)view classes:(NSArray *)classArray searchOptions:(NSDictionary *)searchOptions usingBlock:(void (^)(NSDraggingItem *draggingItem, NSInteger idx, BOOL *stop))block
+- (void)enumerateDraggingItemsWithOptions:(NSDraggingItemEnumerationOptions)enumOpts
+                                  forView:(NSView *)view
+                                  classes:(NSArray *)classArray
+                            searchOptions:(NSDictionary *)searchOptions
+                               usingBlock:(void (^)(NSDraggingItem *draggingItem, NSInteger idx, BOOL *stop))block
 {
 }
 

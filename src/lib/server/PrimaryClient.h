@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -37,7 +26,7 @@ public:
   /*!
   \c name is the name of the server and \p screen is primary screen.
   */
-  PrimaryClient(const String &name, deskflow::Screen *screen);
+  PrimaryClient(const std::string &name, deskflow::Screen *screen);
   ~PrimaryClient();
 
 #ifdef TEST_ENV
@@ -53,20 +42,20 @@ public:
   /*!
   Handles reconfiguration of jump zones.
   */
-  virtual void reconfigure(UInt32 activeSides);
+  virtual void reconfigure(uint32_t activeSides);
 
   //! Register a system hotkey
   /*!
   Registers a system-wide hotkey for key \p key with modifiers \p mask.
   Returns an id used to unregister the hotkey.
   */
-  virtual UInt32 registerHotKey(KeyID key, KeyModifierMask mask);
+  virtual uint32_t registerHotKey(KeyID key, KeyModifierMask mask);
 
   //! Unregister a system hotkey
   /*!
   Unregisters a previously registered hot key.
   */
-  virtual void unregisterHotKey(UInt32 id);
+  virtual void unregisterHotKey(uint32_t id);
 
   //! Prepare to synthesize input on primary screen
   /*!
@@ -92,7 +81,7 @@ public:
   Return the jump zone size, the size of the regions on the edges of
   the screen that cause the cursor to jump to another screen.
   */
-  SInt32 getJumpZoneSize() const;
+  int32_t getJumpZoneSize() const;
 
   //! Get cursor center position
   /*!
@@ -100,7 +89,7 @@ public:
   cursor to compute cursor motion deltas and should be far from
   the edges of the screen, typically the center.
   */
-  void getCursorCenter(SInt32 &x, SInt32 &y) const;
+  void getCursorCenter(int32_t &x, int32_t &y) const;
 
   //! Get toggle key state
   /*!
@@ -123,30 +112,30 @@ public:
   // IScreen overrides
   void *getEventTarget() const override;
   bool getClipboard(ClipboardID id, IClipboard *) const override;
-  void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const override;
-  void getCursorPos(SInt32 &x, SInt32 &y) const override;
+  void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const override;
+  void getCursorPos(int32_t &x, int32_t &y) const override;
 
   // IClient overrides
-  void enter(SInt32 xAbs, SInt32 yAbs, UInt32 seqNum, KeyModifierMask mask, bool forScreensaver) override;
+  void enter(int32_t xAbs, int32_t yAbs, uint32_t seqNum, KeyModifierMask mask, bool forScreensaver) override;
   bool leave() override;
   void setClipboard(ClipboardID, const IClipboard *) override;
   void grabClipboard(ClipboardID) override;
   void setClipboardDirty(ClipboardID, bool) override;
-  void keyDown(KeyID, KeyModifierMask, KeyButton, const String &) override;
-  void keyRepeat(KeyID, KeyModifierMask, SInt32 count, KeyButton, const String &) override;
+  void keyDown(KeyID, KeyModifierMask, KeyButton, const std::string &) override;
+  void keyRepeat(KeyID, KeyModifierMask, int32_t count, KeyButton, const std::string &) override;
   void keyUp(KeyID, KeyModifierMask, KeyButton) override;
   void mouseDown(ButtonID) override;
   void mouseUp(ButtonID) override;
-  void mouseMove(SInt32 xAbs, SInt32 yAbs) override;
-  void mouseRelativeMove(SInt32 xRel, SInt32 yRel) override;
-  void mouseWheel(SInt32 xDelta, SInt32 yDelta) override;
+  void mouseMove(int32_t xAbs, int32_t yAbs) override;
+  void mouseRelativeMove(int32_t xRel, int32_t yRel) override;
+  void mouseWheel(int32_t xDelta, int32_t yDelta) override;
   void screensaver(bool activate) override;
   void resetOptions() override;
   void setOptions(const OptionsList &options) override;
-  void sendDragInfo(UInt32 fileCount, const char *info, size_t size) override;
-  void fileChunkSending(UInt8 mark, char *data, size_t dataSize) override;
-  String getSecureInputApp() const override;
-  void secureInputNotification(const String &app) const override;
+  void sendDragInfo(uint32_t fileCount, const char *info, size_t size) override;
+  void fileChunkSending(uint8_t mark, char *data, size_t dataSize) override;
+  std::string getSecureInputApp() const override;
+  void secureInputNotification(const std::string &app) const override;
 
   deskflow::IStream *getStream() const override
   {
@@ -160,5 +149,5 @@ public:
 private:
   deskflow::Screen *m_screen;
   bool m_clipboardDirty[kClipboardEnd];
-  SInt32 m_fakeInputCount;
+  int32_t m_fakeInputCount;
 };

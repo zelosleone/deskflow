@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -22,6 +11,7 @@
 #include "arch/IArchMultithread.h"
 #include "base/EventTypes.h"
 #include "base/String.h"
+#include "common/constants.h"
 #include "deskflow/App.h"
 #include "net/NetworkAddress.h"
 #include "server/Config.h"
@@ -55,7 +45,7 @@ class ServerApp : public App
   using ServerConfig = deskflow::server::Config;
 
 public:
-  ServerApp(IEventQueue *events, CreateTaskBarReceiverFunc createTaskBarReceiver);
+  ServerApp(IEventQueue *events);
   virtual ~ServerApp();
 
   //
@@ -67,7 +57,7 @@ public:
   const char *daemonName() const override;
   const char *daemonInfo() const override;
   void loadConfig() override;
-  bool loadConfig(const String &pathname) override;
+  bool loadConfig(const std::string &pathname) override;
   deskflow::Screen *createScreen() override;
   int mainLoop() override;
   int runInner(int argc, char **argv, ILogOutputter *outputter, StartupFunc startup) override;
@@ -96,7 +86,7 @@ public:
   void closeServer(Server *server);
   void stopRetryTimer();
   void updateStatus();
-  void updateStatus(const String &msg);
+  void updateStatus(const std::string &msg);
   void closeClientListener(ClientListener *listen);
   void stopServer();
   void closePrimaryClient(PrimaryClient *primaryClient);
@@ -105,7 +95,7 @@ public:
   bool initServer();
   void retryHandler(const Event &, void *);
   deskflow::Screen *openServerScreen();
-  PrimaryClient *openPrimaryClient(const String &name, deskflow::Screen *screen);
+  PrimaryClient *openPrimaryClient(const std::string &name, deskflow::Screen *screen);
   void handleScreenError(const Event &, void *);
   void handleSuspend(const Event &, void *);
   void handleResume(const Event &, void *);
@@ -146,8 +136,8 @@ private:
   EventQueueTimer *m_timer;
   NetworkAddress *m_deskflowAddress;
 #if SYSAPI_WIN32
-  inline static const std::string CONFIG_NAME = "%s.sgc", kAppName;
+  inline static const std::string CONFIG_NAME = std::string(kAppName) + ".sgc";
 #elif SYSAPI_UNIX
-  inline static const std::string CONFIG_NAME = "%s.conf", kAppName;
+  inline static const std::string CONFIG_NAME = std::string(kAppName) + ".conf";
 #endif
 };

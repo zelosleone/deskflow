@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2011 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2011 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "test/mock/deskflow/MockEventQueue.h"
@@ -35,8 +24,8 @@ void stubPollPressedKeys(IKeyState::KeyButtonSet &pressedKeys);
 void assertMaskIsOne(ForeachKeyCallback cb, void *userData);
 
 const deskflow::KeyMap::KeyItem *stubMapKey(
-    deskflow::KeyMap::Keystrokes &keys, KeyID id, SInt32 group, deskflow::KeyMap::ModifierToKeys &activeModifiers,
-    KeyModifierMask &currentState, KeyModifierMask desiredMask, bool isAutoRepeat, const String &lang
+    deskflow::KeyMap::Keystrokes &keys, KeyID id, int32_t group, deskflow::KeyMap::ModifierToKeys &activeModifiers,
+    KeyModifierMask &currentState, KeyModifierMask desiredMask, bool isAutoRepeat, const std::string &lang
 );
 
 deskflow::KeyMap::Keystroke s_stubKeystroke(1, false, false);
@@ -484,7 +473,7 @@ void assertMaskIsOne(ForeachKeyCallback cb, void *userData)
 }
 
 const deskflow::KeyMap::KeyItem *
-stubMapKey(deskflow::KeyMap::Keystrokes &keys, KeyID, SInt32, deskflow::KeyMap::ModifierToKeys &, KeyModifierMask &, KeyModifierMask, bool, const String &)
+stubMapKey(deskflow::KeyMap::Keystrokes &keys, KeyID, int32_t, deskflow::KeyMap::ModifierToKeys &, KeyModifierMask &, KeyModifierMask, bool, const std::string &)
 {
   keys.push_back(s_stubKeystroke);
   return &s_stubKeyItem;

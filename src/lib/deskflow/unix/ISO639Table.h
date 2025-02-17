@@ -1,30 +1,19 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
-
+#include <string>
+#include <vector>
 // copy from
 // https://www.loc.gov/standards/iso639-2/php/code_list.php
 // 10.06.2021
 // first param - ISO 639-2, second param - 639-1
-const std::vector<std::pair<String, String>> ISO_Table = {
+const std::vector<std::pair<std::string, std::string>> ISO_Table = {
     std::make_pair("aar", "aa"), std::make_pair("abk", "ab"), std::make_pair("afr", "af"), std::make_pair("aka", "ak"),
     std::make_pair("sqi", "sq"), std::make_pair("amh", "am"), std::make_pair("ara", "ar"), std::make_pair("arg", "an"),
     std::make_pair("hye", "hy"), std::make_pair("asm", "as"), std::make_pair("ava", "av"), std::make_pair("ave", "ae"),

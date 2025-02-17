@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2014-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2014 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 // TODO: fix integ tests masquerading as unit tests
@@ -26,7 +15,7 @@
 class OnlySystemFilter : public InputFilter::Condition {
 public:
   Condition *clone() const override { return new OnlySystemFilter(); }
-  String format() const override { return ""; }
+  std::string format() const override { return ""; }
 
   InputFilter::EFilterStatus match(const Event &ev) override {
     return ev.getType() == Event::kSystem ? InputFilter::kActivate
@@ -92,25 +81,25 @@ TEST(ServerConfigTests,
 
 TEST(NetworkAddress, hostname_valid_parsing) {
   const int validPort = 24900;
-  const String portStr = std::to_string(validPort);
+  const std::string portStr = std::to_string(validPort);
 
   // list of test cases. 1 param - hostname for parsing, 2 param - port, 3 param
   // - expected hostname
-  const std::initializer_list<std::tuple<String, int, String>> validTestCases = {
-      std::make_tuple(String("127.0.0.1"), validPort, "127.0.0.1"),
-      std::make_tuple(String("127.0.0.1:") + portStr, 0, "127.0.0.1"),
-      std::make_tuple(String("localhost"), validPort, "localhost"),
-      std::make_tuple(String("localhost:") + portStr, 0, "localhost"),
-      std::make_tuple(String(""), validPort, ""),
-      std::make_tuple(String(":") + portStr, 0, ""),
+  const std::initializer_list<std::tuple<std::string, int, std::string>> validTestCases = {
+      std::make_tuple(std::string("127.0.0.1"), validPort, "127.0.0.1"),
+      std::make_tuple(std::string("127.0.0.1:") + portStr, 0, "127.0.0.1"),
+      std::make_tuple(std::string("localhost"), validPort, "localhost"),
+      std::make_tuple(std::string("localhost:") + portStr, 0, "localhost"),
+      std::make_tuple(std::string(""), validPort, ""),
+      std::make_tuple(std::string(":") + portStr, 0, ""),
       // Temporary disabled tests for ipv6
-      // std::make_tuple(String("[::1]:") + portStr, 0,         "::1"),
-      // std::make_tuple(String("[fe80::a156:9f36:793:7bfb%14]:") + portStr,
+      // std::make_tuple(std::string("[::1]:") + portStr, 0,         "::1"),
+      // std::make_tuple(std::string("[fe80::a156:9f36:793:7bfb%14]:") + portStr,
       // 0,         "fe80::a156:9f36:793:7bfb%14"),
-      // std::make_tuple(String("::1"), validPort, "::1"),
-      // std::make_tuple(String("fe80::a156:9f36:793:7bfb%14"), validPort,
+      // std::make_tuple(std::string("::1"), validPort, "::1"),
+      // std::make_tuple(std::string("fe80::a156:9f36:793:7bfb%14"), validPort,
       // "fe80::a156:9f36:793:7bfb%14"),
-      // std::make_tuple(String("fe80:0000:0000:0000:a156:9f36:793:7bfb%14"),
+      // std::make_tuple(std::string("fe80:0000:0000:0000:a156:9f36:793:7bfb%14"),
       // validPort, "fe80:0000:0000:0000:a156:9f36:793:7bfb%14"),
   };
 
@@ -124,7 +113,7 @@ TEST(NetworkAddress, hostname_valid_parsing) {
   }
 
   // list of non valid hostnames
-  const std::initializer_list<String> nonValidTestCases = {
+  const std::initializer_list<std::string> nonValidTestCases = {
       ":nonValidPort", ":",
       // Temporary disabled tests for ipv6
       //"[::1]:",

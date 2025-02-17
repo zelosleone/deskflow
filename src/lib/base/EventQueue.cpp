@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "base/EventQueue.h"
@@ -224,7 +213,7 @@ retry:
   }
 
   // get the event
-  UInt32 dataID;
+  uint32_t dataID;
   IEventQueueBuffer::Type type = m_buffer->getEvent(event, dataID);
   switch (type) {
   case IEventQueueBuffer::kNone:
@@ -293,7 +282,7 @@ void EventQueue::addEventToBuffer(const Event &event)
   ArchMutexLock lock(m_mutex);
 
   // store the event's data locally
-  UInt32 eventID = saveEvent(event);
+  uint32_t eventID = saveEvent(event);
 
   // add it
   if (!m_buffer->addEvent(eventID)) {
@@ -420,17 +409,17 @@ IEventJob *EventQueue::getHandler(Event::Type type, void *target) const
   return NULL;
 }
 
-UInt32 EventQueue::saveEvent(const Event &event)
+uint32_t EventQueue::saveEvent(const Event &event)
 {
   // choose id
-  UInt32 id;
+  uint32_t id;
   if (!m_oldEventIDs.empty()) {
     // reuse an id
     id = m_oldEventIDs.back();
     m_oldEventIDs.pop_back();
   } else {
     // make a new id
-    id = static_cast<UInt32>(m_events.size());
+    id = static_cast<uint32_t>(m_events.size());
   }
 
   // save data
@@ -438,7 +427,7 @@ UInt32 EventQueue::saveEvent(const Event &event)
   return id;
 }
 
-Event EventQueue::removeEvent(UInt32 eventID)
+Event EventQueue::removeEvent(uint32_t eventID)
 {
   // look up id
   EventTable::iterator index = m_events.find(eventID);
@@ -510,7 +499,7 @@ double EventQueue::getNextTimerTimeout() const
   return m_timerQueue.top();
 }
 
-Event::Type EventQueue::getRegisteredType(const String &name) const
+Event::Type EventQueue::getRegisteredType(const std::string &name) const
 {
   NameMap::const_iterator found = m_nameMap.find(name);
   if (found != m_nameMap.end())
@@ -592,7 +581,7 @@ void EventQueue::Timer::fillEvent(TimerEvent &event) const
   event.m_timer = m_timer;
   event.m_count = 0;
   if (m_time <= 0.0) {
-    event.m_count = static_cast<UInt32>((m_timeout - m_time) / m_timeout);
+    event.m_count = static_cast<uint32_t>((m_timeout - m_time) / m_timeout);
   }
 }
 

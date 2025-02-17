@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "ipc/IpcClientProxy.h"
@@ -89,8 +78,8 @@ void IpcClientProxy::handleData(const Event &, void *)
 
   LOG((CLOG_DEBUG "start ipc handle data"));
 
-  UInt8 code[4];
-  UInt32 n = m_stream.read(code, 4);
+  uint8_t code[4];
+  uint32_t n = m_stream.read(code, 4);
   while (n != 0) {
 
     LOG((CLOG_DEBUG "ipc read: %c%c%c%c", code[0], code[1], code[2], code[3]));
@@ -130,7 +119,7 @@ void IpcClientProxy::send(const IpcMessage &message)
   switch (message.type()) {
   case IpcMessageType::LogLine: {
     const IpcLogLineMessage &llm = static_cast<const IpcLogLineMessage &>(message);
-    const String logLine = llm.logLine();
+    const std::string logLine = llm.logLine();
     ProtocolUtil::writef(&m_stream, kIpcMsgLogLine, &logLine);
     break;
   }
@@ -151,7 +140,7 @@ void IpcClientProxy::send(const IpcMessage &message)
 
 IpcHelloMessage *IpcClientProxy::parseHello()
 {
-  UInt8 type;
+  uint8_t type;
   ProtocolUtil::readf(&m_stream, kIpcMsgHello + 4, &type);
 
   m_clientType = static_cast<IpcClientType>(type);
@@ -162,8 +151,8 @@ IpcHelloMessage *IpcClientProxy::parseHello()
 
 IpcCommandMessage *IpcClientProxy::parseCommand()
 {
-  String command;
-  UInt8 elevate;
+  std::string command;
+  uint8_t elevate;
   ProtocolUtil::readf(&m_stream, kIpcMsgCommand + 4, &command, &elevate);
 
   // must be deleted by event handler.
@@ -172,8 +161,8 @@ IpcCommandMessage *IpcClientProxy::parseCommand()
 
 IpcSettingMessage *IpcClientProxy::parseSetting() const
 {
-  String name;
-  String value;
+  std::string name;
+  std::string value;
 
   ProtocolUtil::readf(&m_stream, kIpcMsgSetting + 4, &name, &value);
 

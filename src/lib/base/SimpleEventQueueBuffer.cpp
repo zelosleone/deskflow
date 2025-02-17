@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "base/SimpleEventQueueBuffer.h"
@@ -57,7 +46,7 @@ void SimpleEventQueueBuffer::waitForEvent(double timeout)
   }
 }
 
-IEventQueueBuffer::Type SimpleEventQueueBuffer::getEvent(Event &, UInt32 &dataID)
+IEventQueueBuffer::Type SimpleEventQueueBuffer::getEvent(Event &, uint32_t &dataID)
 {
   ArchMutexLock lock(m_queueMutex);
   if (!m_queueReady) {
@@ -69,7 +58,7 @@ IEventQueueBuffer::Type SimpleEventQueueBuffer::getEvent(Event &, UInt32 &dataID
   return kUser;
 }
 
-bool SimpleEventQueueBuffer::addEvent(UInt32 dataID)
+bool SimpleEventQueueBuffer::addEvent(uint32_t dataID)
 {
   ArchMutexLock lock(m_queueMutex);
   m_queue.push_front(dataID);

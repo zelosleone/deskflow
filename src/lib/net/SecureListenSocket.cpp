@@ -1,24 +1,15 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "SecureListenSocket.h"
 
 #include "SecureSocket.h"
 #include "arch/XArch.h"
+#include "base/String.h"
 #include "common/constants.h"
 #include "deskflow/ArgParser.h"
 #include "deskflow/ArgsBase.h"
@@ -35,9 +26,12 @@ static const char s_certificateFileExt[] = {"pem"};
 //
 
 SecureListenSocket::SecureListenSocket(
-    IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family
+    IEventQueue *events, SocketMultiplexer *socketMultiplexer, IArchNetwork::EAddressFamily family,
+    SecurityLevel securityLevel
 )
-    : TCPListenSocket(events, socketMultiplexer, family)
+    : TCPListenSocket(events, socketMultiplexer, family),
+      m_securityLevel{securityLevel}
+
 {
 }
 
@@ -45,7 +39,7 @@ IDataSocket *SecureListenSocket::accept()
 {
   SecureSocket *socket = NULL;
   try {
-    socket = new SecureSocket(m_events, m_socketMultiplexer, ARCH->acceptSocket(m_socket, NULL));
+    socket = new SecureSocket(m_events, m_socketMultiplexer, ARCH->acceptSocket(m_socket, NULL), m_securityLevel);
     socket->initSsl(true);
 
     if (socket != NULL) {
@@ -53,7 +47,7 @@ IDataSocket *SecureListenSocket::accept()
     }
 
     // default location of the TLS cert file in users dir
-    String certificateFilename = deskflow::string::sprintf(
+    std::string certificateFilename = deskflow::string::sprintf(
         "%s/%s/%s.%s", ARCH->getProfileDirectory().c_str(), s_certificateDir, kAppId, s_certificateFileExt
     );
 

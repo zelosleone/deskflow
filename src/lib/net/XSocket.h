@@ -1,26 +1,14 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "base/XBase.h"
-#include "common/basic_types.h"
+#include "common/common.h"
 #include "io/XIO.h"
 
 //! Generic socket exception
@@ -43,7 +31,7 @@ public:
     kBadPort      //!< The port is invalid
   };
 
-  XSocketAddress(EError, const String &hostname, int port) _NOEXCEPT;
+  XSocketAddress(EError, const std::string &hostname, int port) _NOEXCEPT;
   virtual ~XSocketAddress() _NOEXCEPT
   {
   }
@@ -54,7 +42,7 @@ public:
   //! Get the error code
   EError getError() const throw();
   //! Get the hostname
-  String getHostname() const throw();
+  std::string getHostname() const throw();
   //! Get the port
   int getPort() const throw();
 
@@ -62,11 +50,11 @@ public:
 
 protected:
   // XBase overrides
-  virtual String getWhat() const throw();
+  virtual std::string getWhat() const throw();
 
 private:
   EError m_error;
-  String m_hostname;
+  std::string m_hostname;
   int m_port;
 };
 

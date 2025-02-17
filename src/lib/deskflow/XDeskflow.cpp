@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/XDeskflow.h"
@@ -23,7 +12,7 @@
 // XBadClient
 //
 
-String XBadClient::getWhat() const throw()
+std::string XBadClient::getWhat() const throw()
 {
   return "XBadClient";
 }
@@ -32,7 +21,7 @@ String XBadClient::getWhat() const throw()
 // XInvalidProtocol
 //
 
-String XInvalidProtocol::getWhat() const throw()
+std::string XInvalidProtocol::getWhat() const throw()
 {
   return "XInvalidProtocol";
 }
@@ -56,7 +45,7 @@ int XIncompatibleClient::getMinor() const throw()
   return m_minor;
 }
 
-String XIncompatibleClient::getWhat() const throw()
+std::string XIncompatibleClient::getWhat() const throw()
 {
   return format(
       "XIncompatibleClient", "incompatible client %{1}.%{2}", deskflow::string::sprintf("%d", m_major).c_str(),
@@ -68,17 +57,17 @@ String XIncompatibleClient::getWhat() const throw()
 // XDuplicateClient
 //
 
-XDuplicateClient::XDuplicateClient(const String &name) : m_name(name)
+XDuplicateClient::XDuplicateClient(const std::string &name) : m_name(name)
 {
   // do nothing
 }
 
-const String &XDuplicateClient::getName() const throw()
+const std::string &XDuplicateClient::getName() const throw()
 {
   return m_name;
 }
 
-String XDuplicateClient::getWhat() const throw()
+std::string XDuplicateClient::getWhat() const throw()
 {
   return format("XDuplicateClient", "duplicate client %{1}", m_name.c_str());
 }
@@ -87,17 +76,17 @@ String XDuplicateClient::getWhat() const throw()
 // XUnknownClient
 //
 
-XUnknownClient::XUnknownClient(const String &name) : m_name(name)
+XUnknownClient::XUnknownClient(const std::string &name) : m_name(name)
 {
   // do nothing
 }
 
-const String &XUnknownClient::getName() const throw()
+const std::string &XUnknownClient::getName() const throw()
 {
   return m_name;
 }
 
-String XUnknownClient::getWhat() const throw()
+std::string XUnknownClient::getWhat() const throw()
 {
   return format("XUnknownClient", "unknown client %{1}", m_name.c_str());
 }
@@ -116,7 +105,7 @@ int XExitApp::getCode() const throw()
   return m_code;
 }
 
-String XExitApp::getWhat() const throw()
+std::string XExitApp::getWhat() const throw()
 {
   return format("XExitApp", "exiting with code %{1}", deskflow::string::sprintf("%d", m_code).c_str());
 }

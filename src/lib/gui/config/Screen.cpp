@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2008 Volker Lanz (vl@fidra.de)
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Chris Rizzitello <sithlord48@gmail.com>
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2008 Volker Lanz <vl@fidra.de>
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "Screen.h"
@@ -87,40 +77,40 @@ void Screen::saveSettings(QSettingsProxy &settings) const
   writeSettings(settings, fixes(), "fix");
 }
 
-QTextStream &Screen::writeScreensSection(QTextStream &outStream) const
+QString Screen::screensSection() const
 {
-  outStream << "\t" << name() << ":" << Qt::endl;
+  const QString lineTemplate = QStringLiteral("\t\t%1 = %2\n");
 
-  for (int i = 0; i < modifiers().size(); i++)
+  QString out = QStringLiteral("\t%1:\n").arg(name());
+  for (int i = 0; i < modifiers().size(); i++) {
     if (modifier(i) != i)
-      outStream << "\t\t" << modifierName(i) << " = " << modifierName(modifier(i)) << Qt::endl;
-
-  for (int i = 0; i < fixes().size(); i++)
-    outStream << "\t\t" << fixName(i) << " = " << (fixes()[i] ? "true" : "false") << Qt::endl;
-
-  outStream << "\t\t"
-            << "switchCorners = none ";
-  for (int i = 0; i < switchCorners().size(); i++)
-    if (switchCorners()[i])
-      outStream << "+" << switchCornerName(i) << " ";
-  outStream << Qt::endl;
-
-  outStream << "\t\t"
-            << "switchCornerSize = " << switchCornerSize() << Qt::endl;
-
-  return outStream;
-}
-
-QTextStream &Screen::writeAliasesSection(QTextStream &outStream) const
-{
-  if (!aliases().isEmpty()) {
-    outStream << "\t" << name() << ":" << Qt::endl;
-
-    for (const QString &alias : aliases())
-      outStream << "\t\t" << alias << Qt::endl;
+      out.append(lineTemplate.arg(modifierName(i), modifierName(modifier(i))));
   }
 
-  return outStream;
+  for (int i = 0; i < fixes().size(); i++)
+    out.append(lineTemplate.arg(fixName(i), fixes().at(i) ? QStringLiteral("true") : QStringLiteral("false")));
+
+  out.append(QStringLiteral("\t\tswitchCorners = none"));
+  for (int i = 0; i < switchCorners().size(); i++)
+    if (switchCorners()[i])
+      out.append(QStringLiteral("+%1 ").arg(switchCornerName(i)));
+
+  out.append("\n");
+  out.append(lineTemplate.arg(QStringLiteral("switchCornerSize"), QString::number(switchCornerSize())));
+
+  return out;
+}
+
+QString Screen::aliasesSection() const
+{
+  QString out;
+  if (!aliases().isEmpty()) {
+    out = QStringLiteral("\t%1:\n").arg(name());
+
+    for (const QString &alias : aliases())
+      out.append(QStringLiteral("\t\t%1\n").arg(alias));
+  }
+  return out;
 }
 
 bool Screen::operator==(const Screen &screen) const

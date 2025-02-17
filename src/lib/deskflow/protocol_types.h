@@ -1,24 +1,15 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/EventTypes.h"
+
+#include <cstdint>
 
 // protocol version number
 // 1.0:  initial protocol
@@ -32,14 +23,14 @@
 // 1.7   adds security input notifications
 // 1.8   adds language synchronization functionality
 // NOTE: with new version, deskflow minor version should increment
-static const SInt16 kProtocolMajorVersion = 1;
-static const SInt16 kProtocolMinorVersion = 8;
+static const int16_t kProtocolMajorVersion = 1;
+static const int16_t kProtocolMinorVersion = 8;
 
 // default contact port number
-static const UInt16 kDefaultPort = 24800;
+static const uint16_t kDefaultPort = 24800;
 
 // maximum total length for greeting returned by client
-static const UInt32 kMaxHelloLength = 1024;
+static const uint32_t kMaxHelloLength = 1024;
 
 // time between kMsgCKeepAlive (in seconds).  a non-positive value disables
 // keep alives.  this is the default rate that can be overridden using an
@@ -52,6 +43,12 @@ static const double kKeepAlivesUntilDeath = 3.0;
 // obsolete heartbeat stuff
 static const double kHeartRate = -1.0;
 static const double kHeartBeatsUntilDeath = 3.0;
+
+// Messages of very large size indicate a likely protocol error. We don't parse such messages and
+// drop connection instead. Note that e.g. the clipboard messages are already limited to 32kB.
+static constexpr uint32_t PROTOCOL_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
+static constexpr uint32_t PROTOCOL_MAX_LIST_LENGTH = 1024 * 1024;
+static constexpr uint32_t PROTOCOL_MAX_STRING_LENGTH = 1024 * 1024;
 
 // direction constants
 enum EDirection
@@ -356,20 +353,20 @@ public:
   The position of the upper-left corner of the screen.  This is
   typically 0,0.
   */
-  SInt32 m_x, m_y;
+  int32_t m_x, m_y;
 
   //! Screen size
   /*!
   The size of the screen in pixels.
   */
-  SInt32 m_w, m_h;
+  int32_t m_w, m_h;
 
   //! Obsolete (jump zone size)
-  SInt32 obsolete1;
+  int32_t obsolete1;
 
   //! Mouse position
   /*!
   The current location of the mouse cursor.
   */
-  SInt32 m_mx, m_my;
+  int32_t m_mx, m_my;
 };

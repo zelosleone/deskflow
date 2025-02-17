@@ -1,24 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2005 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2005 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "common/stdmap.h"
 #include "common/stdset.h"
 #include "deskflow/IPlatformScreen.h"
@@ -50,7 +38,7 @@ public:
     virtual ~Condition();
 
     virtual Condition *clone() const = 0;
-    virtual String format() const = 0;
+    virtual std::string format() const = 0;
 
     virtual EFilterStatus match(const Event &) = 0;
 
@@ -71,13 +59,13 @@ public:
 
     // Condition overrides
     virtual Condition *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual EFilterStatus match(const Event &);
     virtual void enablePrimary(PrimaryClient *);
     virtual void disablePrimary(PrimaryClient *);
 
   private:
-    UInt32 m_id;
+    uint32_t m_id;
     KeyID m_key;
     KeyModifierMask m_mask;
     IEventQueue *m_events;
@@ -96,7 +84,7 @@ public:
 
     // Condition overrides
     virtual Condition *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual EFilterStatus match(const Event &);
 
   private:
@@ -109,16 +97,16 @@ public:
   class ScreenConnectedCondition : public Condition
   {
   public:
-    ScreenConnectedCondition(IEventQueue *events, const String &screen);
+    ScreenConnectedCondition(IEventQueue *events, const std::string &screen);
     virtual ~ScreenConnectedCondition();
 
     // Condition overrides
     virtual Condition *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual EFilterStatus match(const Event &);
 
   private:
-    String m_screen;
+    std::string m_screen;
     IEventQueue *m_events;
   };
 
@@ -133,7 +121,7 @@ public:
     virtual ~Action();
 
     virtual Action *clone() const = 0;
-    virtual String format() const = 0;
+    virtual std::string format() const = 0;
 
     virtual void perform(const Event &) = 0;
   };
@@ -155,7 +143,7 @@ public:
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   private:
@@ -177,7 +165,7 @@ public:
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   private:
@@ -189,17 +177,17 @@ public:
   class SwitchToScreenAction : public Action
   {
   public:
-    SwitchToScreenAction(IEventQueue *events, const String &screen);
+    SwitchToScreenAction(IEventQueue *events, const std::string &screen);
 
-    String getScreen() const;
+    std::string getScreen() const;
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   private:
-    String m_screen;
+    std::string m_screen;
     IEventQueue *m_events;
   };
 
@@ -213,7 +201,7 @@ public:
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   private:
@@ -233,19 +221,19 @@ public:
     };
 
     KeyboardBroadcastAction(IEventQueue *events, Mode = kToggle);
-    KeyboardBroadcastAction(IEventQueue *events, Mode, const std::set<String> &screens);
+    KeyboardBroadcastAction(IEventQueue *events, Mode, const std::set<std::string> &screens);
 
     Mode getMode() const;
-    std::set<String> getScreens() const;
+    std::set<std::string> getScreens() const;
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   private:
     Mode m_mode;
-    String m_screens;
+    std::string m_screens;
     IEventQueue *m_events;
   };
 
@@ -267,7 +255,7 @@ public:
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   protected:
@@ -296,7 +284,7 @@ public:
 
     // Action overrides
     virtual Action *clone() const;
-    virtual String format() const;
+    virtual std::string format() const;
     virtual void perform(const Event &);
 
   protected:
@@ -325,10 +313,10 @@ public:
     void adoptAction(Action *, bool onActivation);
 
     // remove an action from the rule
-    void removeAction(bool onActivation, UInt32 index);
+    void removeAction(bool onActivation, uint32_t index);
 
     // replace an action in the rule
-    void replaceAction(Action *adopted, bool onActivation, UInt32 index);
+    void replaceAction(Action *adopted, bool onActivation, uint32_t index);
 
     // enable/disable
     void enable(PrimaryClient *);
@@ -338,23 +326,23 @@ public:
     bool handleEvent(const Event &);
 
     // convert rule to a string
-    String format() const;
+    std::string format() const;
 
     // get the rule's condition
     const Condition *getCondition() const;
 
     // get number of actions
-    UInt32 getNumActions(bool onActivation) const;
+    uint32_t getNumActions(bool onActivation) const;
 
     // get action by index
-    const Action &getAction(bool onActivation, UInt32 index) const;
+    const Action &getAction(bool onActivation, uint32_t index) const;
 
   private:
     void clear();
     void copy(const Rule &);
 
   private:
-    typedef std::vector<Action *> ActionList;
+    using ActionList = std::vector<Action *>;
 
     Condition *m_condition;
     ActionList m_activateActions;
@@ -364,7 +352,7 @@ public:
   // -------------------------------------------------------------------------
   // Input Filter Class
   // -------------------------------------------------------------------------
-  typedef std::vector<Rule> RuleList;
+  using RuleList = std::vector<Rule>;
 
   InputFilter(IEventQueue *events);
   InputFilter(const InputFilter &);
@@ -382,20 +370,20 @@ public:
   void addFilterRule(const Rule &rule);
 
   // remove a rule
-  void removeFilterRule(UInt32 index);
+  void removeFilterRule(uint32_t index);
 
   // get rule by index
-  Rule &getRule(UInt32 index);
+  Rule &getRule(uint32_t index);
 
   // enable event filtering using the given primary client.  disable
   // if client is NULL.
   virtual void setPrimaryClient(PrimaryClient *client);
 
   // convert rules to a string
-  String format(const String &linePrefix) const;
+  std::string format(const std::string &linePrefix) const;
 
   // get number of rules
-  UInt32 getNumRules() const;
+  uint32_t getNumRules() const;
 
   //! Compare filters
   bool operator==(const InputFilter &) const;

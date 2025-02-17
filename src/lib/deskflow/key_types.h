@@ -1,24 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "common/basic_types.h"
+#include "common/common.h"
 
 //! Key ID
 /*!
@@ -26,7 +15,12 @@ Type to hold a key symbol identifier.  The encoding is UTF-32, using
 U+E000 through U+EFFF for the various control keys (e.g. arrow
 keys, function keys, modifier keys, etc).
 */
-typedef UInt32 KeyID;
+// Typedef has to be used on mac os as this is used in objective-C
+#if __APPLE__
+typedef uint32_t KeyID;
+#else
+using KeyID = uint32_t;
+#endif
 
 //! Key Code
 /*!
@@ -35,19 +29,31 @@ physical key on the keyboard.  KeyButton 0 is reserved to be an
 invalid key;  platforms that use 0 as a physical key identifier
 will have to remap that value to some arbitrary unused id.
 */
-typedef UInt16 KeyButton;
+#if __APPLE__
+typedef uint16_t KeyButton;
+#else
+using KeyButton = uint16_t;
+#endif
 
 //! Modifier key mask
 /*!
 Type to hold a bitmask of key modifiers (e.g. shift keys).
 */
-typedef UInt32 KeyModifierMask;
+#if __APPLE__
+typedef uint32_t KeyModifierMask;
+#else
+using KeyModifierMask = uint32_t;
+#endif
 
 //! Modifier key ID
 /*!
 Type to hold the id of a key modifier (e.g. a shift key).
 */
-typedef UInt32 KeyModifierID;
+#if __APPLE__
+typedef uint32_t KeyModifierID;
+#else
+using KeyModifierID = uint32_t;
+#endif
 
 //! @name Modifier key masks
 //@{
@@ -65,18 +71,18 @@ static const KeyModifierMask KeyModifierScrollLock = 0x4000;
 
 //! @name Modifier key bits
 //@{
-static const UInt32 kKeyModifierBitNone = 16;
-static const UInt32 kKeyModifierBitShift = 0;
-static const UInt32 kKeyModifierBitControl = 1;
-static const UInt32 kKeyModifierBitAlt = 2;
-static const UInt32 kKeyModifierBitMeta = 3;
-static const UInt32 kKeyModifierBitSuper = 4;
-static const UInt32 kKeyModifierBitAltGr = 5;
-static const UInt32 kKeyModifierBitLevel5Lock = 6;
-static const UInt32 kKeyModifierBitCapsLock = 12;
-static const UInt32 kKeyModifierBitNumLock = 13;
-static const UInt32 kKeyModifierBitScrollLock = 14;
-static const SInt32 kKeyModifierNumBits = 16;
+static const uint32_t kKeyModifierBitNone = 16;
+static const uint32_t kKeyModifierBitShift = 0;
+static const uint32_t kKeyModifierBitControl = 1;
+static const uint32_t kKeyModifierBitAlt = 2;
+static const uint32_t kKeyModifierBitMeta = 3;
+static const uint32_t kKeyModifierBitSuper = 4;
+static const uint32_t kKeyModifierBitAltGr = 5;
+static const uint32_t kKeyModifierBitLevel5Lock = 6;
+static const uint32_t kKeyModifierBitCapsLock = 12;
+static const uint32_t kKeyModifierBitNumLock = 13;
+static const uint32_t kKeyModifierBitScrollLock = 14;
+static const int32_t kKeyModifierNumBits = 16;
 //@}
 
 //! @name Modifier key identifiers

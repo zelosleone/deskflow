@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/MSWindowsScreen.h"
@@ -22,7 +11,6 @@
 #include "arch/win32/ArchMiscWindows.h"
 #include "base/IEventQueue.h"
 #include "base/Log.h"
-#include "base/String.h"
 #include "base/TMethodEventJob.h"
 #include "base/TMethodJob.h"
 #include "client/Client.h"
@@ -119,7 +107,7 @@ MSWindowsScreen::MSWindowsScreen(
       m_screensaverNotify(false),
       m_screensaverActive(false),
       m_window(NULL),
-      m_nextClipboardWindow(NULL),
+      m_clipboardSequenceNumber(0),
       m_ownClipboard(false),
       m_desks(NULL),
       m_keyState(NULL),
@@ -157,7 +145,7 @@ MSWindowsScreen::MSWindowsScreen(
     // SHGetFolderPath is deprecated in vista, but use it for xp support.
     char desktopPath[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_DESKTOP, NULL, 0, desktopPath))) {
-      m_desktopPath = String(desktopPath);
+      m_desktopPath = std::string(desktopPath);
       LOG((CLOG_DEBUG "using desktop for file drag-drop target: %s", m_desktopPath.c_str()));
     } else {
       LOG((CLOG_DEBUG "unable to use desktop as file drag-drop target, code=%d", GetLastError()));
@@ -237,7 +225,9 @@ void MSWindowsScreen::enable()
   );
 
   // install our clipboard snooper
-  m_nextClipboardWindow = SetClipboardViewer(m_window);
+  if (!AddClipboardFormatListener(m_window)) {
+    LOG((CLOG_WARN "failed to add the clipboard format listener: %d", GetLastError()));
+  }
 
   // track the active desk and (re)install the hooks
   m_desks->enable();
@@ -268,8 +258,9 @@ void MSWindowsScreen::disable()
   m_keyState->disable();
 
   // stop snooping the clipboard
-  ChangeClipboardChain(m_window, m_nextClipboardWindow);
-  m_nextClipboardWindow = NULL;
+  if (!RemoveClipboardFormatListener(m_window)) {
+    LOG((CLOG_WARN "failed to remove the clipboard format listener: %d", GetLastError()));
+  }
 
   // uninstall fix timer
   if (m_fixTimer != NULL) {
@@ -376,13 +367,13 @@ void MSWindowsScreen::leave()
 
 void MSWindowsScreen::sendDragThread(void *)
 {
-  String &draggingFilename = getDraggingFilename();
+  std::string &draggingFilename = getDraggingFilename();
   size_t size = draggingFilename.size();
 
   if (draggingFilename.empty() == false) {
     ClientApp &app = ClientApp::instance();
     Client *client = app.getClientPtr();
-    UInt32 fileCount = 1;
+    uint32_t fileCount = 1;
     LOG((CLOG_DEBUG "send dragging info to server: %s", draggingFilename.c_str()));
     client->sendDragInfo(fileCount, draggingFilename, size);
     LOG((CLOG_DEBUG "send dragging file to server"));
@@ -477,7 +468,7 @@ void MSWindowsScreen::setOptions(const OptionsList &options)
   m_desks->setOptions(options);
 }
 
-void MSWindowsScreen::setSequenceNumber(UInt32 seqNum)
+void MSWindowsScreen::setSequenceNumber(uint32_t seqNum)
 {
   m_sequenceNumber = seqNum;
 }
@@ -499,7 +490,7 @@ bool MSWindowsScreen::getClipboard(ClipboardID, IClipboard *dst) const
   return true;
 }
 
-void MSWindowsScreen::getShape(SInt32 &x, SInt32 &y, SInt32 &w, SInt32 &h) const
+void MSWindowsScreen::getShape(int32_t &x, int32_t &y, int32_t &w, int32_t &h) const
 {
   assert(m_class != 0);
 
@@ -509,7 +500,7 @@ void MSWindowsScreen::getShape(SInt32 &x, SInt32 &y, SInt32 &w, SInt32 &h) const
   h = m_h;
 }
 
-void MSWindowsScreen::getCursorPos(SInt32 &x, SInt32 &y) const
+void MSWindowsScreen::getCursorPos(int32_t &x, int32_t &y) const
 {
   m_desks->getCursorPos(x, y);
 }
@@ -552,7 +543,7 @@ bool MSWindowsScreen::setThisCursorPos(int x, int y)
 
 void MSWindowsScreen::updateDesktopThread()
 {
-  LOG((CLOG_DEBUG3 "failed to set cursor while attempting to switch desktop"));
+  LOG((CLOG_WARN "failed to set cursor while attempting to switch desktop"));
   SetLastError(0);
   HDESK cur_hdesk = OpenInputDesktop(0, true, GENERIC_ALL);
 
@@ -565,7 +556,7 @@ void MSWindowsScreen::updateDesktopThread()
   CloseDesktop(cur_hdesk);
 }
 
-void MSWindowsScreen::reconfigure(UInt32 activeSides)
+void MSWindowsScreen::reconfigure(uint32_t activeSides)
 {
   assert(m_isPrimary);
 
@@ -573,7 +564,7 @@ void MSWindowsScreen::reconfigure(UInt32 activeSides)
   m_hook.setSides(activeSides);
 }
 
-void MSWindowsScreen::warpCursor(SInt32 x, SInt32 y)
+void MSWindowsScreen::warpCursor(int32_t x, int32_t y)
 {
   // warp mouse
   warpCursorNoFlush(x, y);
@@ -588,7 +579,7 @@ void MSWindowsScreen::warpCursor(SInt32 x, SInt32 y)
   saveMousePosition(x, y);
 }
 
-void MSWindowsScreen::saveMousePosition(SInt32 x, SInt32 y)
+void MSWindowsScreen::saveMousePosition(int32_t x, int32_t y)
 {
   m_xCursor = x;
   m_yCursor = y;
@@ -596,7 +587,7 @@ void MSWindowsScreen::saveMousePosition(SInt32 x, SInt32 y)
   LOG((CLOG_DEBUG5 "saved mouse position for next delta: %+d,%+d", x, y));
 }
 
-UInt32 MSWindowsScreen::registerHotKey(KeyID key, KeyModifierMask mask)
+uint32_t MSWindowsScreen::registerHotKey(KeyID key, KeyModifierMask mask)
 {
   // only allow certain modifiers
   if ((mask & ~(KeyModifierShift | KeyModifierControl | KeyModifierAlt | KeyModifierSuper)) != 0) {
@@ -635,13 +626,13 @@ UInt32 MSWindowsScreen::registerHotKey(KeyID key, KeyModifierMask mask)
   }
 
   // choose hotkey id
-  UInt32 id;
+  uint32_t id;
   if (!m_oldHotKeyIDs.empty()) {
     id = m_oldHotKeyIDs.back();
     m_oldHotKeyIDs.pop_back();
   } else {
     // id = m_hotKeys.size() + 1;
-    id = (UInt32)m_hotKeys.size() + 1;
+    id = (uint32_t)m_hotKeys.size() + 1;
   }
 
   // if this hot key has modifiers only then we'll handle it specially
@@ -674,7 +665,7 @@ UInt32 MSWindowsScreen::registerHotKey(KeyID key, KeyModifierMask mask)
   return id;
 }
 
-void MSWindowsScreen::unregisterHotKey(UInt32 id)
+void MSWindowsScreen::unregisterHotKey(uint32_t id)
 {
   // look up hotkey
   HotKeyMap::iterator i = m_hotKeys.find(id);
@@ -721,17 +712,17 @@ void MSWindowsScreen::fakeInputEnd()
   }
 }
 
-SInt32 MSWindowsScreen::getJumpZoneSize() const
+int32_t MSWindowsScreen::getJumpZoneSize() const
 {
   return 1;
 }
 
-bool MSWindowsScreen::isAnyMouseButtonDown(UInt32 &buttonID) const
+bool MSWindowsScreen::isAnyMouseButtonDown(uint32_t &buttonID) const
 {
   static const char *buttonToName[] = {"<invalid>",    "Left Button", "Middle Button",
                                        "Right Button", "X Button 1",  "X Button 2"};
 
-  for (UInt32 i = 1; i < sizeof(m_buttons) / sizeof(m_buttons[0]); ++i) {
+  for (uint32_t i = 1; i < sizeof(m_buttons) / sizeof(m_buttons[0]); ++i) {
     if (m_buttons[i]) {
       buttonID = i;
       LOG((CLOG_DEBUG "locked by \"%s\"", buttonToName[i]));
@@ -742,7 +733,7 @@ bool MSWindowsScreen::isAnyMouseButtonDown(UInt32 &buttonID) const
   return false;
 }
 
-void MSWindowsScreen::getCursorCenter(SInt32 &x, SInt32 &y) const
+void MSWindowsScreen::getCursorCenter(int32_t &x, int32_t &y) const
 {
   x = m_xCenter;
   y = m_yCenter;
@@ -763,7 +754,7 @@ void MSWindowsScreen::fakeMouseButton(ButtonID id, bool press)
   }
 }
 
-void MSWindowsScreen::fakeMouseMove(SInt32 x, SInt32 y)
+void MSWindowsScreen::fakeMouseMove(int32_t x, int32_t y)
 {
   m_desks->fakeMouseMove(x, y);
   if (m_buttons[kButtonLeft]) {
@@ -771,12 +762,12 @@ void MSWindowsScreen::fakeMouseMove(SInt32 x, SInt32 y)
   }
 }
 
-void MSWindowsScreen::fakeMouseRelativeMove(SInt32 dx, SInt32 dy) const
+void MSWindowsScreen::fakeMouseRelativeMove(int32_t dx, int32_t dy) const
 {
   m_desks->fakeMouseRelativeMove(dx, dy);
 }
 
-void MSWindowsScreen::fakeMouseWheel(SInt32 xDelta, SInt32 yDelta) const
+void MSWindowsScreen::fakeMouseWheel(int32_t xDelta, int32_t yDelta) const
 {
   xDelta = mapClientScrollDirection(xDelta);
   yDelta = mapClientScrollDirection(yDelta);
@@ -788,13 +779,15 @@ void MSWindowsScreen::updateKeys()
   m_desks->updateKeys();
 }
 
-void MSWindowsScreen::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang)
+void MSWindowsScreen::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang)
 {
   PlatformScreen::fakeKeyDown(id, mask, button, lang);
   updateForceShowCursor();
 }
 
-bool MSWindowsScreen::fakeKeyRepeat(KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang)
+bool MSWindowsScreen::fakeKeyRepeat(
+    KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang
+)
 {
   bool result = PlatformScreen::fakeKeyRepeat(id, mask, count, button, lang);
   updateForceShowCursor();
@@ -821,8 +814,8 @@ MSWindowsScreen::createBlankCursor() const
   int cw = GetSystemMetrics(SM_CXCURSOR);
   int ch = GetSystemMetrics(SM_CYCURSOR);
 
-  UInt8 *cursorAND = new UInt8[ch * ((cw + 31) >> 2)];
-  UInt8 *cursorXOR = new UInt8[ch * ((cw + 31) >> 2)];
+  uint8_t *cursorAND = new uint8_t[ch * ((cw + 31) >> 2)];
+  uint8_t *cursorXOR = new uint8_t[ch * ((cw + 31) >> 2)];
   memset(cursorAND, 0xff, ch * ((cw + 31) >> 2));
   memset(cursorXOR, 0x00, ch * ((cw + 31) >> 2));
   HCURSOR c = CreateCursor(s_windowInstance, 0, 0, cw, ch, cursorAND, cursorXOR);
@@ -972,7 +965,7 @@ bool MSWindowsScreen::onPreDispatchPrimary(HWND, UINT message, WPARAM wParam, LP
   // handle event
   switch (message) {
   case DESKFLOW_MSG_MARK:
-    return onMark(static_cast<UInt32>(wParam));
+    return onMark(static_cast<uint32_t>(wParam));
 
   case DESKFLOW_MSG_KEY:
     return onKey(wParam, lParam);
@@ -981,15 +974,15 @@ bool MSWindowsScreen::onPreDispatchPrimary(HWND, UINT message, WPARAM wParam, LP
     return onMouseButton(wParam, lParam);
 
   case DESKFLOW_MSG_MOUSE_MOVE:
-    return onMouseMove(static_cast<SInt32>(wParam), static_cast<SInt32>(lParam));
+    return onMouseMove(static_cast<int32_t>(wParam), static_cast<int32_t>(lParam));
 
   case DESKFLOW_MSG_MOUSE_WHEEL:
     // XXX -- support x-axis scrolling
-    return onMouseWheel(0, static_cast<SInt32>(wParam));
+    return onMouseWheel(0, static_cast<int32_t>(wParam));
 
   case DESKFLOW_MSG_PRE_WARP: {
     // save position to compute delta of next motion
-    saveMousePosition(static_cast<SInt32>(wParam), static_cast<SInt32>(lParam));
+    saveMousePosition(static_cast<int32_t>(wParam), static_cast<int32_t>(lParam));
 
     // we warped the mouse.  discard events until we find the
     // matching post warp event.  see warpCursorNoFlush() for
@@ -1021,23 +1014,20 @@ bool MSWindowsScreen::onPreDispatchPrimary(HWND, UINT message, WPARAM wParam, LP
 bool MSWindowsScreen::onEvent(HWND, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT *result)
 {
   switch (msg) {
-  case WM_DRAWCLIPBOARD:
-    // first pass on the message
-    if (m_nextClipboardWindow != NULL) {
-      SendMessage(m_nextClipboardWindow, msg, wParam, lParam);
-    }
 
-    // now handle the message
-    return onClipboardChange();
+  case WM_CLIPBOARDUPDATE: {
+    DWORD clipboardSequenceNumber = GetClipboardSequenceNumber();
+    LOG(
+        (CLOG_DEBUG "clipboard update: sequence number %d, current %d", clipboardSequenceNumber,
+         m_clipboardSequenceNumber)
+    );
 
-  case WM_CHANGECBCHAIN:
-    if (m_nextClipboardWindow == (HWND)wParam) {
-      m_nextClipboardWindow = (HWND)lParam;
-      LOG((CLOG_DEBUG "clipboard chain: new next: 0x%08x", m_nextClipboardWindow));
-    } else if (m_nextClipboardWindow != NULL) {
-      SendMessage(m_nextClipboardWindow, msg, wParam, lParam);
+    if (clipboardSequenceNumber && (clipboardSequenceNumber != m_clipboardSequenceNumber)) {
+      m_clipboardSequenceNumber = clipboardSequenceNumber;
+      onClipboardChange();
     }
-    return true;
+    return 0; // message processed
+  }
 
   case WM_DISPLAYCHANGE:
     return onDisplayChange();
@@ -1077,7 +1067,7 @@ bool MSWindowsScreen::onEvent(HWND, UINT msg, WPARAM wParam, LPARAM lParam, LRES
   return false;
 }
 
-bool MSWindowsScreen::onMark(UInt32 mark)
+bool MSWindowsScreen::onMark(uint32_t mark)
 {
   m_markReceived = mark;
   return true;
@@ -1200,7 +1190,7 @@ bool MSWindowsScreen::onKey(WPARAM wParam, LPARAM lParam)
       // do it
       m_keyState->sendKeyEvent(
           getEventTarget(), ((lParam & 0x80000000u) == 0), ((lParam & 0x40000000u) != 0), key, mask,
-          (SInt32)(lParam & 0xffff), button
+          (int32_t)(lParam & 0xffff), button
       );
     } else {
       LOG((CLOG_DEBUG1 "cannot map key"));
@@ -1304,12 +1294,12 @@ bool MSWindowsScreen::onMouseButton(WPARAM wParam, LPARAM lParam)
 //      seems)
 //   5. sends the delta movement to the client (could be +1,+1 or -1,+4 for
 //   example)
-bool MSWindowsScreen::onMouseMove(SInt32 mx, SInt32 my)
+bool MSWindowsScreen::onMouseMove(int32_t mx, int32_t my)
 {
   // compute motion delta (relative to the last known
   // mouse position)
-  SInt32 x = mx - m_xCursor;
-  SInt32 y = my - m_yCursor;
+  int32_t x = mx - m_xCursor;
+  int32_t y = my - m_yCursor;
 
   LOG((CLOG_DEBUG3 "mouse move - motion delta: %+d=(%+d - %+d),%+d=(%+d - %+d)", x, mx, m_xCursor, y, my, m_yCursor));
 
@@ -1343,7 +1333,7 @@ bool MSWindowsScreen::onMouseMove(SInt32 mx, SInt32 my)
     // it's probably a bogus motion that we want to
     // ignore (see warpCursorNoFlush() for a further
     // description).
-    static SInt32 bogusZoneSize = 10;
+    static int32_t bogusZoneSize = 10;
     if (-x + bogusZoneSize > m_xCenter - m_x || x + bogusZoneSize > m_x + m_w - m_xCenter ||
         -y + bogusZoneSize > m_yCenter - m_y || y + bogusZoneSize > m_y + m_h - m_yCenter) {
 
@@ -1357,7 +1347,7 @@ bool MSWindowsScreen::onMouseMove(SInt32 mx, SInt32 my)
   return true;
 }
 
-bool MSWindowsScreen::onMouseWheel(SInt32 xDelta, SInt32 yDelta)
+bool MSWindowsScreen::onMouseWheel(int32_t xDelta, int32_t yDelta)
 {
   // ignore message if posted prior to last mark change
   if (!ignore()) {
@@ -1400,7 +1390,7 @@ bool MSWindowsScreen::onScreensaver(bool activated)
 bool MSWindowsScreen::onDisplayChange()
 {
   // screen resolution may have changed.  save old shape.
-  SInt32 xOld = m_x, yOld = m_y, wOld = m_w, hOld = m_h;
+  int32_t xOld = m_x, yOld = m_y, wOld = m_w, hOld = m_h;
 
   // update shape
   updateScreenShape();
@@ -1430,7 +1420,7 @@ bool MSWindowsScreen::onDisplayChange()
   return true;
 }
 
-bool MSWindowsScreen::onClipboardChange()
+void MSWindowsScreen::onClipboardChange()
 {
   // now notify client that somebody changed the clipboard (unless
   // we're the owner).
@@ -1445,11 +1435,9 @@ bool MSWindowsScreen::onClipboardChange()
     LOG((CLOG_DEBUG "clipboard changed: %s owned", kAppId));
     m_ownClipboard = true;
   }
-
-  return true;
 }
 
-void MSWindowsScreen::warpCursorNoFlush(SInt32 x, SInt32 y)
+void MSWindowsScreen::warpCursorNoFlush(int32_t x, int32_t y)
 {
   // send an event that we can recognize before the mouse warp
   PostThreadMessage(GetCurrentThreadId(), DESKFLOW_MSG_PRE_WARP, x, y);
@@ -1779,7 +1767,7 @@ void MSWindowsScreen::fakeDraggingFiles(DragFileList fileList)
   // exception from being thrown.
 }
 
-String &MSWindowsScreen::getDraggingFilename()
+std::string &MSWindowsScreen::getDraggingFilename()
 {
   if (m_draggingStarted) {
     m_dropTarget->clearDraggingFilename();
@@ -1787,8 +1775,8 @@ String &MSWindowsScreen::getDraggingFilename()
 
     int halfSize = m_dropWindowSize / 2;
 
-    SInt32 xPos = m_isPrimary ? m_xCursor : m_xCenter;
-    SInt32 yPos = m_isPrimary ? m_yCursor : m_yCenter;
+    int32_t xPos = m_isPrimary ? m_xCursor : m_xCenter;
+    int32_t yPos = m_isPrimary ? m_yCursor : m_yCenter;
     xPos = (xPos - halfSize) < 0 ? 0 : xPos - halfSize;
     yPos = (yPos - halfSize) < 0 ? 0 : yPos - halfSize;
     SetWindowPos(m_dropWindow, HWND_TOPMOST, xPos, yPos, m_dropWindowSize, m_dropWindowSize, SWP_SHOWWINDOW);
@@ -1798,7 +1786,7 @@ String &MSWindowsScreen::getDraggingFilename()
     fakeKeyUp(1);
     fakeMouseButton(kButtonLeft, false);
 
-    String filename;
+    std::string filename;
     DOUBLE timeout = ARCH->time() + .5f;
     while (ARCH->time() < timeout) {
       ARCH->sleep(.05f);
@@ -1819,19 +1807,18 @@ String &MSWindowsScreen::getDraggingFilename()
     }
 
     if (m_draggingFilename.empty()) {
-      LOG((CLOG_DEBUG "failed to get drag file name from OLE"));
+      LOG((CLOG_WARN "failed to get drag file name from OLE"));
     }
   }
-
   return m_draggingFilename;
 }
 
-const String &MSWindowsScreen::getDropTarget() const
+const std::string &MSWindowsScreen::getDropTarget() const
 {
   return m_desktopPath;
 }
 
-String MSWindowsScreen::getSecureInputApp() const
+std::string MSWindowsScreen::getSecureInputApp() const
 {
   // ignore on Windows
   return "";

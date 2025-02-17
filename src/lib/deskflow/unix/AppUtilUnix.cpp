@@ -1,23 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/unix/AppUtilUnix.h"
 #include "deskflow/ArgsBase.h"
+#include <filesystem>
 #include <thread>
 
 #if WINAPI_XWINDOWS
@@ -60,12 +50,17 @@ void AppUtilUnix::startNode()
   app().startNode();
 }
 
-std::vector<String> AppUtilUnix::getKeyboardLayoutList()
+std::vector<std::string> AppUtilUnix::getKeyboardLayoutList()
 {
-  std::vector<String> layoutLangCodes;
+  std::vector<std::string> layoutLangCodes;
 
 #if WINAPI_XWINDOWS
-  layoutLangCodes = X11LayoutsParser::getX11LanguageList("/usr/share/X11/xkb/rules/evdev.xml");
+  // Check /usr/local first used on bsd and some systems
+  m_evdev = "/usr/local/share/X11/xkb/rules/evdev.xml";
+  if (!std::filesystem::exists(m_evdev))
+    m_evdev = "/usr/share/X11/xkb/rules/evdev.xml";
+  layoutLangCodes = X11LayoutsParser::getX11LanguageList(m_evdev);
+
 #elif WINAPI_CARBON
   CFStringRef keys[] = {kTISPropertyInputSourceCategory};
   CFStringRef values[] = {kTISCategoryKeyboardInputSource};
@@ -97,9 +92,9 @@ std::vector<String> AppUtilUnix::getKeyboardLayoutList()
   return layoutLangCodes;
 }
 
-String AppUtilUnix::getCurrentLanguageCode()
+std::string AppUtilUnix::getCurrentLanguageCode()
 {
-  String result = "";
+  std::string result = "";
 #if WINAPI_XWINDOWS
 
   auto display = XOpenDisplay(nullptr);
@@ -146,7 +141,7 @@ String AppUtilUnix::getCurrentLanguageCode()
   XFree(kbdDescr);
   XCloseDisplay(display);
 
-  result = X11LayoutsParser::convertLayotToISO("/usr/share/X11/xkb/rules/evdev.xml", result);
+  result = X11LayoutsParser::convertLayotToISO(m_evdev, result);
 
 #elif WINAPI_CARBON
   auto layoutLanguages =
@@ -165,24 +160,24 @@ String AppUtilUnix::getCurrentLanguageCode()
   return result;
 }
 
-void AppUtilUnix::showNotification(const String &title, const String &text) const
+void AppUtilUnix::showNotification(const std::string &title, const std::string &text) const
 {
 #if HAVE_LIBNOTIFY
   LOG((CLOG_INFO "showing notification, title=\"%s\", text=\"%s\"", title.c_str(), text.c_str()));
   if (!notify_init(kAppName)) {
-    LOG((CLOG_INFO "failed to initialize libnotify"));
+    LOG((CLOG_WARN "failed to initialize libnotify"));
     return;
   }
 
   auto notification = notify_notification_new(title.c_str(), text.c_str(), nullptr);
   if (notification == nullptr) {
-    LOG((CLOG_INFO "failed to create notification"));
+    LOG((CLOG_WARN "failed to create notification"));
     return;
   }
   notify_notification_set_timeout(notification, 10000);
 
   if (!notify_notification_show(notification, nullptr)) {
-    LOG((CLOG_INFO "failed to show notification"));
+    LOG((CLOG_WARN "failed to show notification"));
   }
 
   g_object_unref(G_OBJECT(notification));

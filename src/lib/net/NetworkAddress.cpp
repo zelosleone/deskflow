@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "net/NetworkAddress.h"
@@ -43,7 +32,7 @@ NetworkAddress::NetworkAddress(const NetworkAddress &addr) : m_hostname(addr.m_h
   *this = addr;
 }
 
-NetworkAddress::NetworkAddress(const String &hostname, int port) : m_hostname(hostname), m_port(port)
+NetworkAddress::NetworkAddress(const std::string &hostname, int port) : m_hostname(hostname), m_port(port)
 {
   // detect internet protocol version with colom count
   auto isColomPredicate = [](char c) { return c == ':'; };
@@ -64,11 +53,11 @@ NetworkAddress::NetworkAddress(const String &hostname, int port) : m_hostname(ho
     // ipv6 part
     if (m_hostname[0] == '[') {
       // ipv6 with port part
-      String portDelimeter = "]:";
+      std::string portDelimeter = "]:";
       auto hostIt = m_hostname.find(portDelimeter);
 
       // bad syntax of ipv6 with port
-      if (hostIt == String::npos) {
+      if (hostIt == std::string::npos) {
         throw XSocketAddress(XSocketAddress::kUnknown, m_hostname, m_port);
       }
 
@@ -89,7 +78,7 @@ NetworkAddress::NetworkAddress(const String &hostname, int port) : m_hostname(ho
     }
 
     // ensure that ipv6 link-local adress ended with scope id
-    if (m_hostname.rfind("fe80:", 0) == 0 && m_hostname.find('%') == String::npos) {
+    if (m_hostname.rfind("fe80:", 0) == 0 && m_hostname.find('%') == std::string::npos) {
       throw XSocketAddress(XSocketAddress::kUnknown, m_hostname, m_port);
     }
   }
@@ -208,7 +197,7 @@ int NetworkAddress::getPort() const
   return m_port;
 }
 
-String NetworkAddress::getHostname() const
+std::string NetworkAddress::getHostname() const
 {
   return m_hostname;
 }

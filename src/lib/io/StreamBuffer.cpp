@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "io/StreamBuffer.h"
@@ -23,7 +12,7 @@
 // StreamBuffer
 //
 
-const UInt32 StreamBuffer::kChunkSize = 4096;
+const uint32_t StreamBuffer::kChunkSize = 4096;
 
 StreamBuffer::StreamBuffer() : m_size(0), m_headUsed(0)
 {
@@ -35,7 +24,7 @@ StreamBuffer::~StreamBuffer()
   // do nothing
 }
 
-const void *StreamBuffer::peek(UInt32 n)
+const void *StreamBuffer::peek(uint32_t n)
 {
   assert(n <= m_size);
 
@@ -60,7 +49,7 @@ const void *StreamBuffer::peek(UInt32 n)
   return static_cast<const void *>(&(head->begin()[m_headUsed]));
 }
 
-void StreamBuffer::pop(UInt32 n)
+void StreamBuffer::pop(uint32_t n)
 {
   // discard all chunks if n is greater than or equal to m_size
   if (n >= m_size) {
@@ -77,7 +66,7 @@ void StreamBuffer::pop(UInt32 n)
   ChunkList::iterator scan = m_chunks.begin();
   assert(scan != m_chunks.end());
   while (scan->size() - m_headUsed <= n) {
-    n -= (UInt32)scan->size() - m_headUsed;
+    n -= (uint32_t)scan->size() - m_headUsed;
     m_headUsed = 0;
     scan = m_chunks.erase(scan);
     assert(scan != m_chunks.end());
@@ -89,7 +78,7 @@ void StreamBuffer::pop(UInt32 n)
   }
 }
 
-void StreamBuffer::write(const void *vdata, UInt32 n)
+void StreamBuffer::write(const void *vdata, uint32_t n)
 {
   assert(vdata != NULL);
 
@@ -100,7 +89,7 @@ void StreamBuffer::write(const void *vdata, UInt32 n)
   m_size += n;
 
   // cast data to bytes
-  const UInt8 *data = static_cast<const UInt8 *>(vdata);
+  const uint8_t *data = static_cast<const uint8_t *>(vdata);
 
   // point to last chunk if it has space, otherwise append an empty chunk
   ChunkList::iterator scan = m_chunks.end();
@@ -118,7 +107,7 @@ void StreamBuffer::write(const void *vdata, UInt32 n)
   while (n > 0) {
     // choose number of bytes for next chunk
     assert(scan->size() <= kChunkSize);
-    UInt32 count = kChunkSize - (UInt32)scan->size();
+    uint32_t count = kChunkSize - (uint32_t)scan->size();
     if (count > n)
       count = n;
 
@@ -135,7 +124,7 @@ void StreamBuffer::write(const void *vdata, UInt32 n)
   }
 }
 
-UInt32 StreamBuffer::getSize() const
+uint32_t StreamBuffer::getSize() const
 {
   return m_size;
 }

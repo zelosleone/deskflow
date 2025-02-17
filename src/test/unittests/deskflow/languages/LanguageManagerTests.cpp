@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2014-2021 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2014 - 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/languages/LanguageManager.h"
@@ -27,13 +16,13 @@ TEST(LanguageManager, RemoteLanguagesTest)
   manager.setRemoteLanguages(remoteLanguages);
   EXPECT_EQ((std::vector<std::string>{"ru", "en", "uk"}), manager.getRemoteLanguages());
 
-  manager.setRemoteLanguages(String());
+  manager.setRemoteLanguages(std::string());
   EXPECT_TRUE(manager.getRemoteLanguages().empty());
 }
 
 TEST(LanguageManager, LocalLanguagesTest)
 {
-  std::vector<String> localLanguages = {"ru", "en", "uk"};
+  std::vector<std::string> localLanguages = {"ru", "en", "uk"};
   deskflow::languages::LanguageManager manager(localLanguages);
 
   EXPECT_EQ((std::vector<std::string>{"ru", "en", "uk"}), manager.getLocalLanguages());
@@ -41,8 +30,8 @@ TEST(LanguageManager, LocalLanguagesTest)
 
 TEST(LanguageManager, MissedLanguagesTest)
 {
-  String remoteLanguages = "ruenuk";
-  std::vector<String> localLanguages = {"en"};
+  std::string remoteLanguages = "ruenuk";
+  std::vector<std::string> localLanguages = {"en"};
   deskflow::languages::LanguageManager manager(localLanguages);
 
   manager.setRemoteLanguages(remoteLanguages);
@@ -51,7 +40,7 @@ TEST(LanguageManager, MissedLanguagesTest)
 
 TEST(LanguageManager, SerializeLocalLanguagesTest)
 {
-  std::vector<String> localLanguages = {"ru", "en", "uk"};
+  std::vector<std::string> localLanguages = {"ru", "en", "uk"};
   deskflow::languages::LanguageManager manager(localLanguages);
 
   EXPECT_EQ("ruenuk", manager.getSerializedLocalLanguages());
@@ -59,7 +48,7 @@ TEST(LanguageManager, SerializeLocalLanguagesTest)
 
 TEST(LanguageManager, LanguageInstalledTest)
 {
-  std::vector<String> localLanguages = {"ru", "en", "uk"};
+  std::vector<std::string> localLanguages = {"ru", "en", "uk"};
   deskflow::languages::LanguageManager manager(localLanguages);
 
   EXPECT_FALSE(manager.isLanguageInstalled("us"));

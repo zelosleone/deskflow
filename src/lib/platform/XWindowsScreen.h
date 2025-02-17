@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -54,25 +43,25 @@ public:
   // IScreen overrides
   void *getEventTarget() const override;
   bool getClipboard(ClipboardID id, IClipboard *) const override;
-  void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const override;
-  void getCursorPos(SInt32 &x, SInt32 &y) const override;
+  void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const override;
+  void getCursorPos(int32_t &x, int32_t &y) const override;
 
   // IPrimaryScreen overrides
-  void reconfigure(UInt32 activeSides) override;
-  void warpCursor(SInt32 x, SInt32 y) override;
-  UInt32 registerHotKey(KeyID key, KeyModifierMask mask) override;
-  void unregisterHotKey(UInt32 id) override;
+  void reconfigure(uint32_t activeSides) override;
+  void warpCursor(int32_t x, int32_t y) override;
+  uint32_t registerHotKey(KeyID key, KeyModifierMask mask) override;
+  void unregisterHotKey(uint32_t id) override;
   void fakeInputBegin() override;
   void fakeInputEnd() override;
-  SInt32 getJumpZoneSize() const override;
-  bool isAnyMouseButtonDown(UInt32 &buttonID) const override;
-  void getCursorCenter(SInt32 &x, SInt32 &y) const override;
+  int32_t getJumpZoneSize() const override;
+  bool isAnyMouseButtonDown(uint32_t &buttonID) const override;
+  void getCursorCenter(int32_t &x, int32_t &y) const override;
 
   // ISecondaryScreen overrides
   void fakeMouseButton(ButtonID id, bool press) override;
-  void fakeMouseMove(SInt32 x, SInt32 y) override;
-  void fakeMouseRelativeMove(SInt32 dx, SInt32 dy) const override;
-  void fakeMouseWheel(SInt32 xDelta, SInt32 yDelta) const override;
+  void fakeMouseMove(int32_t x, int32_t y) override;
+  void fakeMouseRelativeMove(int32_t dx, int32_t dy) const override;
+  void fakeMouseWheel(int32_t xDelta, int32_t yDelta) const override;
 
   // IPlatformScreen overrides
   void enable() override;
@@ -87,9 +76,9 @@ public:
   void screensaver(bool activate) override;
   void resetOptions() override;
   void setOptions(const OptionsList &options) override;
-  void setSequenceNumber(UInt32) override;
+  void setSequenceNumber(uint32_t) override;
   bool isPrimary() const override;
-  String getSecureInputApp() const override;
+  std::string getSecureInputApp() const override;
 
 protected:
   // IPlatformScreen overrides
@@ -131,7 +120,7 @@ private:
 
   Display *openDisplay(const char *displayName);
   void saveShape();
-  void setShape(SInt32 width, SInt32 height);
+  void setShape(int32_t width, int32_t height);
   Window openWindow() const;
   void openIM();
 
@@ -154,7 +143,7 @@ private:
   ButtonID mapButtonFromX(const XButtonEvent *) const;
   unsigned int mapButtonToX(ButtonID id) const;
 
-  void warpCursorNoFlush(SInt32 x, SInt32 y);
+  void warpCursorNoFlush(int32_t x, int32_t y);
 
   void refreshKeyboard(XEvent *);
 
@@ -172,11 +161,11 @@ private:
     int m_keycode;
     unsigned int m_mask;
   };
-  typedef std::set<bool> FilteredKeycodes;
-  typedef std::vector<std::pair<int, unsigned int>> HotKeyList;
-  typedef std::map<UInt32, HotKeyList> HotKeyMap;
-  typedef std::vector<UInt32> HotKeyIDList;
-  typedef std::map<HotKeyItem, UInt32> HotKeyToIDMap;
+  using FilteredKeycodes = std::set<bool>;
+  using HotKeyList = std::vector<std::pair<int, unsigned int>>;
+  using HotKeyMap = std::map<uint32_t, HotKeyList>;
+  using HotKeyIDList = std::vector<uint32_t>;
+  using HotKeyToIDMap = std::map<HotKeyItem, uint32_t>;
 
   // true if screen is being used as a primary screen, false otherwise
   bool m_isPrimary;
@@ -190,12 +179,12 @@ private:
   bool m_isOnScreen;
 
   // screen shape stuff
-  SInt32 m_x, m_y;
-  SInt32 m_w, m_h;
-  SInt32 m_xCenter, m_yCenter;
+  int32_t m_x, m_y;
+  int32_t m_w, m_h;
+  int32_t m_xCenter, m_yCenter;
 
   // last mouse position
-  SInt32 m_xCursor, m_yCursor;
+  int32_t m_xCursor, m_yCursor;
 
   // keyboard stuff
   XWindowsKeyState *m_keyState;
@@ -217,7 +206,7 @@ private:
 
   // clipboards
   XWindowsClipboard *m_clipboard[kClipboardEnd];
-  UInt32 m_sequenceNumber;
+  uint32_t m_sequenceNumber;
 
   // screen saver stuff
   XWindowsScreenSaver *m_screensaver;

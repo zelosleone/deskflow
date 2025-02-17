@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/MSWindowsKeyState.h"
@@ -22,7 +11,6 @@
 #include "base/FunctionJob.h"
 #include "base/IEventQueue.h"
 #include "base/Log.h"
-#include "base/String.h"
 #include "base/TMethodEventJob.h"
 #include "mt/Thread.h"
 #include "platform/MSWindowsDesks.h"
@@ -569,7 +557,8 @@ static const Win32Modifiers s_modifiers[] = {{VK_SHIFT, KeyModifierShift},      
                                              {VK_RWIN, KeyModifierSuper}};
 
 MSWindowsKeyState::MSWindowsKeyState(
-    MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, std::vector<String> layouts, bool isLangSyncEnabled
+    MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, std::vector<std::string> layouts,
+    bool isLangSyncEnabled
 )
     : KeyState(events, std::move(layouts), isLangSyncEnabled),
       m_eventTarget(eventTarget),
@@ -587,7 +576,7 @@ MSWindowsKeyState::MSWindowsKeyState(
 
 MSWindowsKeyState::MSWindowsKeyState(
     MSWindowsDesks *desks, void *eventTarget, IEventQueue *events, deskflow::KeyMap &keyMap,
-    std::vector<String> layouts, bool isLangSyncEnabled
+    std::vector<std::string> layouts, bool isLangSyncEnabled
 )
     : KeyState(events, keyMap, std::move(layouts), isLangSyncEnabled),
       m_eventTarget(eventTarget),
@@ -729,7 +718,7 @@ void MSWindowsKeyState::onKey(KeyButton button, bool down, KeyModifierMask newSt
 }
 
 void MSWindowsKeyState::sendKeyEvent(
-    void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, SInt32 count, KeyButton button
+    void *target, bool press, bool isAutoRepeat, KeyID key, KeyModifierMask mask, int32_t count, KeyButton button
 )
 {
   if (press || isAutoRepeat) {
@@ -749,13 +738,13 @@ void MSWindowsKeyState::sendKeyEvent(
   }
 }
 
-void MSWindowsKeyState::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const String &lang)
+void MSWindowsKeyState::fakeKeyDown(KeyID id, KeyModifierMask mask, KeyButton button, const std::string &lang)
 {
   KeyState::fakeKeyDown(id, mask, button, lang);
 }
 
 bool MSWindowsKeyState::fakeKeyRepeat(
-    KeyID id, KeyModifierMask mask, SInt32 count, KeyButton button, const String &lang
+    KeyID id, KeyModifierMask mask, int32_t count, KeyButton button, const std::string &lang
 )
 {
   return KeyState::fakeKeyRepeat(id, mask, count, button, lang);
@@ -824,7 +813,7 @@ KeyModifierMask MSWindowsKeyState::pollActiveModifiers() const
   return state;
 }
 
-SInt32 MSWindowsKeyState::pollActiveGroup() const
+int32_t MSWindowsKeyState::pollActiveGroup() const
 {
   // determine the thread that'll receive this event
   HWND targetWindow = GetForegroundWindow();
@@ -874,8 +863,8 @@ void MSWindowsKeyState::getKeyMap(deskflow::KeyMap &keyMap)
   // update keyboard groups
   if (getGroups(m_groups)) {
     m_groupMap.clear();
-    SInt32 numGroups = (SInt32)m_groups.size();
-    for (SInt32 g = 0; g < numGroups; ++g) {
+    int32_t numGroups = (int32_t)m_groups.size();
+    for (int32_t g = 0; g < numGroups; ++g) {
       m_groupMap[m_groups[g]] = g;
     }
   }
@@ -886,8 +875,8 @@ void MSWindowsKeyState::getKeyMap(deskflow::KeyMap &keyMap)
   m_keyToVKMap.clear();
 
   deskflow::KeyMap::KeyItem item;
-  SInt32 numGroups = (SInt32)m_groups.size();
-  for (SInt32 g = 0; g < numGroups; ++g) {
+  int32_t numGroups = (int32_t)m_groups.size();
+  for (int32_t g = 0; g < numGroups; ++g) {
     item.m_group = g;
     ActivateKeyboardLayout(m_groups[g], 0);
 
@@ -1240,7 +1229,7 @@ KeyModifierMask &MSWindowsKeyState::getActiveModifiersRValue()
 bool MSWindowsKeyState::getGroups(GroupList &groups) const
 {
   // get keyboard layouts
-  UInt32 newNumLayouts = GetKeyboardLayoutList(0, NULL);
+  uint32_t newNumLayouts = GetKeyboardLayoutList(0, NULL);
   if (newNumLayouts == 0) {
     LOG((CLOG_DEBUG1 "can't get keyboard layouts"));
     return false;
@@ -1259,7 +1248,7 @@ bool MSWindowsKeyState::getGroups(GroupList &groups) const
   return true;
 }
 
-void MSWindowsKeyState::setWindowGroup(SInt32 group)
+void MSWindowsKeyState::setWindowGroup(int32_t group)
 {
   HWND targetWindow = GetForegroundWindow();
 

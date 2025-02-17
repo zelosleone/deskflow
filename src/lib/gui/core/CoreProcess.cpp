@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2024 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "CoreProcess.h"
@@ -22,6 +11,7 @@
 #include "gui/core/CoreTool.h"
 #include "gui/paths.h"
 #include "tls/TlsUtility.h"
+#include <qlogging.h>
 
 #if defined(Q_OS_MAC)
 #include "OSXHelpers.h"
@@ -269,7 +259,7 @@ void CoreProcess::onProcessFinished(int exitCode, QProcess::ExitStatus)
   }
 }
 
-void CoreProcess::startDesktop(const QString &app, const QStringList &args)
+void CoreProcess::startForegroundProcess(const QString &app, const QStringList &args)
 {
   using enum ProcessState;
 
@@ -292,7 +282,7 @@ void CoreProcess::startDesktop(const QString &app, const QStringList &args)
   }
 }
 
-void CoreProcess::startService(const QString &app, const QStringList &args)
+void CoreProcess::startProcessFromDaemon(const QString &app, const QStringList &args)
 {
   using enum ProcessState;
 
@@ -314,7 +304,7 @@ void CoreProcess::startService(const QString &app, const QStringList &args)
   setProcessState(Started);
 }
 
-void CoreProcess::stopDesktop() const
+void CoreProcess::stopForegroundProcess() const
 {
   if (m_processState != ProcessState::Stopping) {
     qFatal("core process must be in stopping state");
@@ -334,7 +324,7 @@ void CoreProcess::stopDesktop() const
   }
 }
 
-void CoreProcess::stopService()
+void CoreProcess::stopProcessFromDaemon()
 {
   if (m_processState != ProcessState::Stopping) {
     qFatal("core process must be in stopping state");
@@ -406,10 +396,10 @@ void CoreProcess::start(std::optional<ProcessMode> processModeOption)
   addGenericArgs(args, processMode);
 
   if (mode() == Mode::Server && !addServerArgs(args, app)) {
-    qDebug("failed to add server args for core process, aborting start");
+    qWarning("failed to add server args for core process, aborting start");
     return;
   } else if (mode() == Mode::Client && !addClientArgs(args, app)) {
-    qDebug("failed to add client args for core process, aborting start");
+    qWarning("failed to add client args for core process, aborting start");
     return;
   }
 
@@ -419,9 +409,9 @@ void CoreProcess::start(std::optional<ProcessMode> processModeOption)
     qInfo("log file: %s", qPrintable(m_appConfig.logFilename()));
 
   if (processMode == ProcessMode::kDesktop) {
-    startDesktop(app, args);
+    startForegroundProcess(app, args);
   } else if (processMode == ProcessMode::kService) {
-    startService(app, args);
+    startProcessFromDaemon(app, args);
   }
 
   m_lastProcessMode = processMode;
@@ -442,9 +432,9 @@ void CoreProcess::stop(std::optional<ProcessMode> processModeOption)
     setProcessState(ProcessState::Stopping);
 
     if (processMode == ProcessMode::kService) {
-      stopService();
+      stopProcessFromDaemon();
     } else if (processMode == ProcessMode::kDesktop) {
-      stopDesktop();
+      stopForegroundProcess();
     }
 
   } else {
@@ -498,7 +488,6 @@ void CoreProcess::cleanup()
 bool CoreProcess::addGenericArgs(QStringList &args, const ProcessMode processMode) const
 {
   args << "-f"
-       << "--no-tray"
        << "--debug" << m_appConfig.logLevelText();
 
   args << "--name" << m_appConfig.screenName();
@@ -563,6 +552,10 @@ bool CoreProcess::addServerArgs(QStringList &args, QString &app)
     m_appConfig.persistLogDir();
 
     args << "--log" << m_appConfig.logFilename();
+  }
+
+  if (!m_appConfig.requireClientCerts()) {
+    args << "--disable-client-cert-check";
   }
 
   QString configFilename = persistServerConfig();

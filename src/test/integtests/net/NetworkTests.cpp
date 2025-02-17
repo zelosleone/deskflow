@@ -1,18 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2013-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2013 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #define TEST_ENV
@@ -52,13 +42,13 @@ using ::testing::Return;
 #define TEST_HOST "localhost"
 
 const size_t kMockDataSize = 1024 * 1024 * 10; // 10MB
-const UInt16 kMockDataChunkIncrement = 1024;   // 1KB
+const uint16_t kMockDataChunkIncrement = 1024;   // 1KB
 const char *kMockFilename = "tmp/test/NetworkTests.mock";
 const size_t kMockFileSize = 1024 * 1024 * 10; // 10MB
 
-void getScreenShape(SInt32 &x, SInt32 &y, SInt32 &w, SInt32 &h);
-void getCursorPos(SInt32 &x, SInt32 &y);
-UInt8 *newMockData(size_t size);
+void getScreenShape(int32_t &x, int32_t &y, int32_t &w, int32_t &h);
+void getCursorPos(int32_t &x, int32_t &y);
+uint8_t *newMockData(size_t size);
 void createFile(fstream &file, const char *filename, size_t size);
 
 class NetworkTests : public ::testing::Test {
@@ -93,7 +83,7 @@ public:
 
 public:
   TestEventQueue m_events;
-  UInt8 *m_mockData;
+  uint8_t *m_mockData;
   size_t m_mockDataSize;
   fstream m_mockFile;
   size_t m_mockFileSize;
@@ -109,7 +99,7 @@ TEST_F(NetworkTests, sendToClient_mockData) {
   SocketMultiplexer serverSocketMultiplexer;
   TCPSocketFactory *serverSocketFactory =
       new TCPSocketFactory(&m_events, &serverSocketMultiplexer);
-  ClientListener listener(serverAddress, serverSocketFactory, &m_events, false);
+  ClientListener listener(serverAddress, serverSocketFactory, &m_events, SecurityLevel::PlainText);
   NiceMock<MockScreen> serverScreen;
   NiceMock<MockPrimaryClient> primaryClient;
   NiceMock<MockConfig> serverConfig;
@@ -173,7 +163,7 @@ TEST_F(NetworkTests, sendToClient_mockFile) {
   SocketMultiplexer serverSocketMultiplexer;
   TCPSocketFactory *serverSocketFactory =
       new TCPSocketFactory(&m_events, &serverSocketMultiplexer);
-  ClientListener listener(serverAddress, serverSocketFactory, &m_events, false);
+  ClientListener listener(serverAddress, serverSocketFactory, &m_events, SecurityLevel::PlainText);
   NiceMock<MockScreen> serverScreen;
   NiceMock<MockPrimaryClient> primaryClient;
   NiceMock<MockConfig> serverConfig;
@@ -236,7 +226,7 @@ TEST_F(NetworkTests, sendToServer_mockData) {
   SocketMultiplexer serverSocketMultiplexer;
   TCPSocketFactory *serverSocketFactory =
       new TCPSocketFactory(&m_events, &serverSocketMultiplexer);
-  ClientListener listener(serverAddress, serverSocketFactory, &m_events, false);
+  ClientListener listener(serverAddress, serverSocketFactory, &m_events, SecurityLevel::PlainText);
   NiceMock<MockScreen> serverScreen;
   NiceMock<MockPrimaryClient> primaryClient;
   NiceMock<MockConfig> serverConfig;
@@ -300,7 +290,7 @@ TEST_F(NetworkTests, sendToServer_mockFile) {
   SocketMultiplexer serverSocketMultiplexer;
   TCPSocketFactory *serverSocketFactory =
       new TCPSocketFactory(&m_events, &serverSocketMultiplexer);
-  ClientListener listener(serverAddress, serverSocketFactory, &m_events, false);
+  ClientListener listener(serverAddress, serverSocketFactory, &m_events, SecurityLevel::PlainText);
   NiceMock<MockScreen> serverScreen;
   NiceMock<MockPrimaryClient> primaryClient;
   NiceMock<MockConfig> serverConfig;
@@ -499,7 +489,7 @@ void NetworkTests::sendToServer_mockFile_fileRecieveCompleted(
 
 void NetworkTests::sendMockData(void *eventTarget) {
   // send first message (file size)
-  String size = deskflow::string::sizeTypeToString(kMockDataSize);
+  std::string size = deskflow::string::sizeTypeToString(kMockDataSize);
   FileChunk *sizeMessage = FileChunk::start(size);
 
   m_events.addEvent(
@@ -535,15 +525,15 @@ void NetworkTests::sendMockData(void *eventTarget) {
       m_events.forFile().fileChunkSending(), eventTarget, transferFinished));
 }
 
-UInt8 *newMockData(size_t size) {
-  UInt8 *buffer = new UInt8[size];
+uint8_t *newMockData(size_t size) {
+  uint8_t *buffer = new uint8_t[size];
 
-  UInt8 *data = buffer;
-  const UInt8 head[] = "mock head... ";
+  uint8_t *data = buffer;
+  const uint8_t head[] = "mock head... ";
   size_t headSize = sizeof(head) - 1;
-  const UInt8 tail[] = "... mock tail";
+  const uint8_t tail[] = "... mock tail";
   size_t tailSize = sizeof(tail) - 1;
-  const UInt8 deskflowRocks[] = "deskflow\0 rocks! ";
+  const uint8_t deskflowRocks[] = "deskflow\0 rocks! ";
   size_t deskflowRocksSize = sizeof(deskflowRocks) - 1;
 
   memcpy(data, head, headSize);
@@ -566,7 +556,7 @@ UInt8 *newMockData(size_t size) {
 }
 
 void createFile(fstream &file, const char *filename, size_t size) {
-  UInt8 *buffer = newMockData(size);
+  uint8_t *buffer = newMockData(size);
 
   file.open(filename, ios::out | ios::binary);
   if (!file.is_open()) {
@@ -579,14 +569,14 @@ void createFile(fstream &file, const char *filename, size_t size) {
   delete[] buffer;
 }
 
-void getScreenShape(SInt32 &x, SInt32 &y, SInt32 &w, SInt32 &h) {
+void getScreenShape(int32_t &x, int32_t &y, int32_t &w, int32_t &h) {
   x = 0;
   y = 0;
   w = 1;
   h = 1;
 }
 
-void getCursorPos(SInt32 &x, SInt32 &y) {
+void getCursorPos(int32_t &x, int32_t &y) {
   x = 0;
   y = 0;
 }

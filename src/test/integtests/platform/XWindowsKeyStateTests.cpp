@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2011 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2011 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 // TODO: fix  Assertion `s_instance != nullptr' failed.
@@ -176,7 +165,7 @@ TEST_F(XWindowsKeyStateTests, pollActiveGroup_defaultState_returnsZero) {
   MockEventQueue eventQueue;
   XWindowsKeyState keyState(m_display, true, &eventQueue, keyMap);
 
-  SInt32 actual = keyState.pollActiveGroup();
+  int32_t actual = keyState.pollActiveGroup();
 
   ASSERT_EQ(0, actual);
 }
@@ -188,7 +177,7 @@ TEST_F(XWindowsKeyStateTests, pollActiveGroup_positiveGroup_returnsGroup) {
 
   keyState.group(3);
 
-  SInt32 actual = keyState.pollActiveGroup();
+  int32_t actual = keyState.pollActiveGroup();
 
   ASSERT_EQ(3, actual);
 }
@@ -206,7 +195,7 @@ TEST_F(XWindowsKeyStateTests, pollActiveGroup_xkb_areEqual) {
 
   // compare pollActiveGroup() with XkbGetState()
   if (XkbGetState(m_display, XkbUseCoreKbd, &state) == Success) {
-    SInt32 actual = keyState.pollActiveGroup();
+    int32_t actual = keyState.pollActiveGroup();
 
     ASSERT_EQ(state.group, actual);
   } else {

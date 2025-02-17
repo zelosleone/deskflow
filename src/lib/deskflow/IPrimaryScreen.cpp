@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/IPrimaryScreen.h"
@@ -50,7 +39,7 @@ bool IPrimaryScreen::ButtonInfo::equal(const ButtonInfo *a, const ButtonInfo *b)
 // IPrimaryScreen::MotionInfo
 //
 
-IPrimaryScreen::MotionInfo *IPrimaryScreen::MotionInfo::alloc(SInt32 x, SInt32 y)
+IPrimaryScreen::MotionInfo *IPrimaryScreen::MotionInfo::alloc(int32_t x, int32_t y)
 {
   MotionInfo *info = (MotionInfo *)malloc(sizeof(MotionInfo));
   info->m_x = x;
@@ -62,7 +51,7 @@ IPrimaryScreen::MotionInfo *IPrimaryScreen::MotionInfo::alloc(SInt32 x, SInt32 y
 // IPrimaryScreen::WheelInfo
 //
 
-IPrimaryScreen::WheelInfo *IPrimaryScreen::WheelInfo::alloc(SInt32 xDelta, SInt32 yDelta)
+IPrimaryScreen::WheelInfo *IPrimaryScreen::WheelInfo::alloc(int32_t xDelta, int32_t yDelta)
 {
   WheelInfo *info = (WheelInfo *)malloc(sizeof(WheelInfo));
   info->m_xDelta = xDelta;
@@ -74,7 +63,7 @@ IPrimaryScreen::WheelInfo *IPrimaryScreen::WheelInfo::alloc(SInt32 xDelta, SInt3
 // IPrimaryScreen::HotKeyInfo
 //
 
-IPrimaryScreen::HotKeyInfo *IPrimaryScreen::HotKeyInfo::alloc(UInt32 id)
+IPrimaryScreen::HotKeyInfo *IPrimaryScreen::HotKeyInfo::alloc(uint32_t id)
 {
   HotKeyInfo *info = (HotKeyInfo *)malloc(sizeof(HotKeyInfo));
   info->m_id = id;

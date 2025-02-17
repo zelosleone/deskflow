@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2003 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2003 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -36,7 +25,7 @@ public:
   {
   public:
     ClipboardID m_id;
-    UInt32 m_sequenceNumber;
+    uint32_t m_sequenceNumber;
   };
 
   //! @name accessors
@@ -60,13 +49,13 @@ public:
   Return the position of the upper-left corner of the screen in \c x and
   \c y and the size of the screen in \c width and \c height.
   */
-  virtual void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const = 0;
+  virtual void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const = 0;
 
   //! Get cursor position
   /*!
   Return the current position of the cursor in \c x and \c y.
   */
-  virtual void getCursorPos(SInt32 &x, SInt32 &y) const = 0;
+  virtual void getCursorPos(int32_t &x, int32_t &y) const = 0;
 
   //@}
 };

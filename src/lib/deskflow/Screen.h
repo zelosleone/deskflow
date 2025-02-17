@@ -1,24 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "deskflow/DragInformation.h"
 #include "deskflow/IScreen.h"
 #include "deskflow/clipboard_types.h"
@@ -91,7 +79,7 @@ public:
   is a bitmask of EDirectionMask indicating which sides of the
   primary screen are linked to clients.
   */
-  void reconfigure(UInt32 activeSides);
+  void reconfigure(uint32_t activeSides);
 
   //! Warp cursor
   /*!
@@ -99,7 +87,7 @@ public:
   discards input events up to and including the warp before
   returning.
   */
-  void warpCursor(SInt32 x, SInt32 y);
+  void warpCursor(int32_t x, int32_t y);
 
   //! Set clipboard
   /*!
@@ -130,14 +118,14 @@ public:
   synthesize an up or repeat for the same client key synthesized by
   keyDown().
   */
-  void keyDown(KeyID id, KeyModifierMask, KeyButton, const String &);
+  void keyDown(KeyID id, KeyModifierMask, KeyButton, const std::string &);
 
   //! Notify of key repeat
   /*!
   Synthesize key events to generate a press and release of key \c id
   \c count times.  If possible match the given modifier mask.
   */
-  void keyRepeat(KeyID id, KeyModifierMask, SInt32 count, KeyButton, const String &lang);
+  void keyRepeat(KeyID id, KeyModifierMask, int32_t count, KeyButton, const std::string &lang);
 
   //! Notify of key release
   /*!
@@ -163,14 +151,14 @@ public:
   Synthesize mouse events to generate mouse motion to the absolute
   screen position \c xAbs,yAbs.
   */
-  void mouseMove(SInt32 xAbs, SInt32 yAbs);
+  void mouseMove(int32_t xAbs, int32_t yAbs);
 
   //! Notify of mouse motion
   /*!
   Synthesize mouse events to generate mouse motion by the relative
   amount \c xRel,yRel.
   */
-  void mouseRelativeMove(SInt32 xRel, SInt32 yRel);
+  void mouseRelativeMove(int32_t xRel, int32_t yRel);
 
   //! Notify of mouse wheel motion
   /*!
@@ -179,7 +167,7 @@ public:
   to the right and negative for motion towards the user or to the left.
   Each wheel click should generate a delta of +/-120.
   */
-  void mouseWheel(SInt32 xDelta, SInt32 yDelta) const;
+  void mouseWheel(int32_t xDelta, int32_t yDelta) const;
 
   //! Notify of options changes
   /*!
@@ -198,20 +186,20 @@ public:
   /*!
   Sets the sequence number to use in subsequent clipboard events.
   */
-  void setSequenceNumber(UInt32);
+  void setSequenceNumber(uint32_t);
 
   //! Register a system hotkey
   /*!
   Registers a system-wide hotkey for key \p key with modifiers \p mask.
   Returns an id used to unregister the hotkey.
   */
-  UInt32 registerHotKey(KeyID key, KeyModifierMask mask);
+  uint32_t registerHotKey(KeyID key, KeyModifierMask mask);
 
   //! Unregister a system hotkey
   /*!
   Unregisters a previously registered hot key.
   */
-  void unregisterHotKey(UInt32 id);
+  void unregisterHotKey(uint32_t id);
 
   //! Prepare to synthesize input on primary screen
   /*!
@@ -241,7 +229,7 @@ public:
   On MacOS check which app causes a secure input state to be enabled. No
   alternative on other platforms
   */
-  String getSecureInputApp() const;
+  std::string getSecureInputApp() const;
 
   //@}
   //! @name accessors
@@ -267,7 +255,7 @@ public:
   Return the jump zone size, the size of the regions on the edges of
   the screen that cause the cursor to jump to another screen.
   */
-  SInt32 getJumpZoneSize() const;
+  int32_t getJumpZoneSize() const;
 
   //! Get cursor center position
   /*!
@@ -275,7 +263,7 @@ public:
   cursor to compute cursor motion deltas and should be far from
   the edges of the screen, typically the center.
   */
-  void getCursorCenter(SInt32 &x, SInt32 &y) const;
+  void getCursorCenter(int32_t &x, int32_t &y) const;
 
   //! Get the active modifiers
   /*!
@@ -298,21 +286,21 @@ public:
   bool isFakeDraggingStarted() const;
 
   //! Get the filename of the file being dragged
-  String &getDraggingFilename() const;
+  std::string &getDraggingFilename() const;
 
   //! Clear the filename of the file that was dragged
   void clearDraggingFilename();
 
   //! Get the drop target directory
-  const String &getDropTarget() const;
+  const std::string &getDropTarget() const;
 
   //@}
 
   // IScreen overrides
   virtual void *getEventTarget() const;
   virtual bool getClipboard(ClipboardID id, IClipboard *) const;
-  virtual void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const;
-  virtual void getCursorPos(SInt32 &x, SInt32 &y) const;
+  virtual void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const;
+  virtual void getCursorPos(int32_t &x, int32_t &y) const;
 
   IPlatformScreen *getPlatformScreen()
   {

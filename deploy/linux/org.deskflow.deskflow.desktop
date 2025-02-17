@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2024 Deskflow Developers
+# SPDX-License-Identifier: MIT
+
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Deskflow
+Comment=Mouse and keyboard sharing utility
+Exec=deskflow
+Icon=org.deskflow.deskflow
+Terminal=false
+Categories=Utility;
+Keywords=keyboard;mouse;sharing;network;share;

@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/MSWindowsEventQueueBuffer.h"
@@ -80,7 +69,7 @@ void MSWindowsEventQueueBuffer::waitForEvent(double timeout)
   MsgWaitForMultipleObjects(0, dummy, FALSE, t, QS_ALLPOSTMESSAGE);
 }
 
-IEventQueueBuffer::Type MSWindowsEventQueueBuffer::getEvent(Event &event, UInt32 &dataID)
+IEventQueueBuffer::Type MSWindowsEventQueueBuffer::getEvent(Event &event, uint32_t &dataID)
 {
   // NOTE: QS_ALLINPUT was replaced with QS_ALLPOSTMESSAGE.
   //
@@ -103,7 +92,7 @@ IEventQueueBuffer::Type MSWindowsEventQueueBuffer::getEvent(Event &event, UInt32
     event = Event(Event::kQuit);
     return kSystem;
   } else if (m_event.message == m_userEvent) {
-    dataID = static_cast<UInt32>(m_event.wParam);
+    dataID = static_cast<uint32_t>(m_event.wParam);
     return kUser;
   } else {
     event = Event(Event::kSystem, m_events->getSystemTarget(), &m_event);
@@ -111,7 +100,7 @@ IEventQueueBuffer::Type MSWindowsEventQueueBuffer::getEvent(Event &event, UInt32
   }
 }
 
-bool MSWindowsEventQueueBuffer::addEvent(UInt32 dataID)
+bool MSWindowsEventQueueBuffer::addEvent(uint32_t dataID)
 {
   return (PostThreadMessage(m_thread, m_userEvent, static_cast<WPARAM>(dataID), 0) != 0);
 }

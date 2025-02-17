@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2014-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2014 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -26,13 +15,13 @@
 class MockApp : public App
 {
 public:
-  MockApp() : App(NULL, NULL, NULL)
+  MockApp() : App(NULL, NULL)
   {
   }
 
   MOCK_METHOD(void, help, (), (override));
   MOCK_METHOD(void, loadConfig, (), (override));
-  MOCK_METHOD(bool, loadConfig, (const String &), (override));
+  MOCK_METHOD(bool, loadConfig, (const std::string &), (override));
   MOCK_METHOD(const char *, daemonInfo, (), (const, override));
   MOCK_METHOD(const char *, daemonName, (), (const, override));
   MOCK_METHOD(void, parseArgs, (int, const char *const *), (override));

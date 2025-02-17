@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2022 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2022 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -49,14 +38,14 @@ public:
   void *getEventTarget() const override;
 
   // IStream overrides
-  UInt32 read(void *buffer, UInt32 n) override;
-  void write(const void *buffer, UInt32 n) override;
+  uint32_t read(void *buffer, uint32_t n) override;
+  void write(const void *buffer, uint32_t n) override;
   void flush() override;
   void shutdownInput() override;
   void shutdownOutput() override;
   bool isReady() const override;
   bool isFatal() const override;
-  UInt32 getSize() const override;
+  uint32_t getSize() const override;
 
   // IDataSocket overrides
   void connect(const NetworkAddress &) override;

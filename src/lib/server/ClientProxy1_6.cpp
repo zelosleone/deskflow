@@ -1,18 +1,7 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015-2016 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2015 - 2016 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "server/ClientProxy1_6.h"
@@ -29,7 +18,7 @@
 // ClientProxy1_6
 //
 
-ClientProxy1_6::ClientProxy1_6(const String &name, deskflow::IStream *stream, Server *server, IEventQueue *events)
+ClientProxy1_6::ClientProxy1_6(const std::string &name, deskflow::IStream *stream, Server *server, IEventQueue *events)
     : ClientProxy1_5(name, stream, server, events),
       m_events(events)
 {
@@ -51,7 +40,7 @@ void ClientProxy1_6::setClipboard(ClipboardID id, const IClipboard *clipboard)
     m_clipboard[id].m_dirty = false;
     Clipboard::copy(&m_clipboard[id].m_clipboard, clipboard);
 
-    String data = m_clipboard[id].m_clipboard.marshall();
+    std::string data = m_clipboard[id].m_clipboard.marshall();
 
     size_t size = data.size();
     LOG((CLOG_DEBUG "sending clipboard %d to \"%s\"", id, getName().c_str()));
@@ -68,9 +57,9 @@ void ClientProxy1_6::handleClipboardSendingEvent(const Event &event, void *)
 bool ClientProxy1_6::recvClipboard()
 {
   // parse message
-  static String dataCached;
+  static std::string dataCached;
   ClipboardID id;
-  UInt32 seq;
+  uint32_t seq;
 
   int r = ClipboardChunk::assemble(getStream(), dataCached, id, seq);
 

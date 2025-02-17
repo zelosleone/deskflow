@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2022 Red Hat, Inc.
- * Copyright (C) 2024 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2022 Red Hat, Inc.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -49,7 +39,7 @@ private:
   void cb_init_input_capture_session(GObject *object, GAsyncResult *res);
   void cb_set_pointer_barriers(GObject *object, GAsyncResult *res);
   void cb_session_closed(XdpSession *session);
-  void cb_disabled(XdpInputCaptureSession *session);
+  void cb_disabled(XdpInputCaptureSession *session, GVariant *option);
   void cb_activated(XdpInputCaptureSession *session, std::uint32_t activation_id, GVariant *options);
   void cb_deactivated(XdpInputCaptureSession *session, std::uint32_t activation_id, GVariant *options);
   void cb_zones_changed(XdpInputCaptureSession *session, GVariant *options);
@@ -59,9 +49,9 @@ private:
   {
     reinterpret_cast<PortalInputCapture *>(data)->cb_session_closed(session);
   }
-  static void cb_disabled_cb(XdpInputCaptureSession *session, gpointer data)
+  static void cb_disabled_cb(XdpInputCaptureSession *session, GVariant *options, gpointer data)
   {
-    reinterpret_cast<PortalInputCapture *>(data)->cb_disabled(session);
+    reinterpret_cast<PortalInputCapture *>(data)->cb_disabled(session, options);
   }
   static void
   cb_activated_cb(XdpInputCaptureSession *session, std::uint32_t activation_id, GVariant *options, gpointer data)

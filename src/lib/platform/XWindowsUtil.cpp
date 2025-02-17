@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/XWindowsUtil.h"
@@ -79,7 +68,7 @@
 struct codepair
 {
   KeySym keysym;
-  UInt32 ucs4;
+  uint32_t ucs4;
 } s_keymap[] = {
     {XK_Aogonek, 0x0104},      /* LATIN CAPITAL LETTER A WITH OGONEK */
     {XK_breve, 0x02d8},        /* BREVE */
@@ -1515,7 +1504,7 @@ static const KeySym s_map1008FF[] = {
 XWindowsUtil::KeySymMap XWindowsUtil::s_keySymToUCS4;
 
 bool XWindowsUtil::getWindowProperty(
-    Display *display, Window window, Atom property, String *data, Atom *type, SInt32 *format, bool deleteProperty
+    Display *display, Window window, Atom property, std::string *data, Atom *type, int32_t *format, bool deleteProperty
 )
 {
   assert(display != NULL);
@@ -1587,7 +1576,7 @@ bool XWindowsUtil::getWindowProperty(
     *type = actualType;
   }
   if (format != NULL) {
-    *format = static_cast<SInt32>(actualDatumSize);
+    *format = static_cast<int32_t>(actualDatumSize);
   }
 
   if (okay) {
@@ -1601,12 +1590,12 @@ bool XWindowsUtil::getWindowProperty(
 }
 
 bool XWindowsUtil::setWindowProperty(
-    Display *display, Window window, Atom property, const void *vdata, UInt32 size, Atom type, SInt32 format
+    Display *display, Window window, Atom property, const void *vdata, uint32_t size, Atom type, int32_t format
 )
 {
-  const UInt32 length = 4 * XMaxRequestSize(display);
+  const uint32_t length = 4 * XMaxRequestSize(display);
   const unsigned char *data = static_cast<const unsigned char *>(vdata);
-  UInt32 datumSize = static_cast<UInt32>(format / 8);
+  uint32_t datumSize = static_cast<uint32_t>(format / 8);
   // format 32 on 64bit systems is 8 bytes not 4.
   if (format == 32) {
     datumSize = sizeof(Atom);
@@ -1617,7 +1606,7 @@ bool XWindowsUtil::setWindowProperty(
   XWindowsUtil::ErrorLock lock(display, &error);
 
   // how much data to send in first chunk?
-  UInt32 chunkSize = size;
+  uint32_t chunkSize = size;
   if (chunkSize > length) {
     chunkSize = length;
   }
@@ -1768,7 +1757,7 @@ KeyID XWindowsUtil::mapKeySymToKeyID(KeySym k)
   }
 }
 
-UInt32 XWindowsUtil::getModifierBitForKeySym(KeySym keysym)
+uint32_t XWindowsUtil::getModifierBitForKeySym(KeySym keysym)
 {
   switch (keysym) {
   case XK_Shift_L:
@@ -1816,7 +1805,7 @@ UInt32 XWindowsUtil::getModifierBitForKeySym(KeySym keysym)
   }
 }
 
-String XWindowsUtil::atomToString(Display *display, Atom atom)
+std::string XWindowsUtil::atomToString(Display *display, Atom atom)
 {
   if (atom == 0) {
     return "None";
@@ -1828,25 +1817,25 @@ String XWindowsUtil::atomToString(Display *display, Atom atom)
   if (error) {
     return deskflow::string::sprintf("<UNKNOWN> (%d)", (int)atom);
   } else {
-    String msg = deskflow::string::sprintf("%s (%d)", name, (int)atom);
+    std::string msg = deskflow::string::sprintf("%s (%d)", name, (int)atom);
     XFree(name);
     return msg;
   }
 }
 
-String XWindowsUtil::atomsToString(Display *display, const Atom *atom, UInt32 num)
+std::string XWindowsUtil::atomsToString(Display *display, const Atom *atom, uint32_t num)
 {
   char **names = new char *[num];
   bool error = false;
   XWindowsUtil::ErrorLock lock(display, &error);
   XGetAtomNames(display, const_cast<Atom *>(atom), (int)num, names);
-  String msg;
+  std::string msg;
   if (error) {
-    for (UInt32 i = 0; i < num; ++i) {
+    for (uint32_t i = 0; i < num; ++i) {
       msg += deskflow::string::sprintf("<UNKNOWN> (%d), ", (int)atom[i]);
     }
   } else {
-    for (UInt32 i = 0; i < num; ++i) {
+    for (uint32_t i = 0; i < num; ++i) {
       msg += deskflow::string::sprintf("%s (%d), ", names[i], (int)atom[i]);
       XFree(names[i]);
     }
@@ -1858,7 +1847,7 @@ String XWindowsUtil::atomsToString(Display *display, const Atom *atom, UInt32 nu
   return msg;
 }
 
-void XWindowsUtil::convertAtomProperty(String &data)
+void XWindowsUtil::convertAtomProperty(std::string &data)
 {
   // as best i can tell, 64-bit systems don't pack Atoms into properties
   // as 32-bit numbers but rather as the 64-bit numbers they are.  that
@@ -1867,22 +1856,22 @@ void XWindowsUtil::convertAtomProperty(String &data)
   // should all be 0.  since we're going to reference the Atoms as
   // 64-bit numbers we have to ensure the last number is a full 64 bits.
   if (sizeof(Atom) != 4 && ((data.size() / 4) & 1) != 0) {
-    UInt32 zero = 0;
+    uint32_t zero = 0;
     data.append(reinterpret_cast<char *>(&zero), sizeof(zero));
   }
 }
 
-void XWindowsUtil::appendAtomData(String &data, Atom atom)
+void XWindowsUtil::appendAtomData(std::string &data, Atom atom)
 {
   data.append(reinterpret_cast<char *>(&atom), sizeof(Atom));
 }
 
-void XWindowsUtil::replaceAtomData(String &data, UInt32 index, Atom atom)
+void XWindowsUtil::replaceAtomData(std::string &data, uint32_t index, Atom atom)
 {
   data.replace(index * sizeof(Atom), sizeof(Atom), reinterpret_cast<const char *>(&atom), sizeof(Atom));
 }
 
-void XWindowsUtil::appendTimeData(String &data, Time time)
+void XWindowsUtil::appendTimeData(std::string &data, Time time)
 {
   data.append(reinterpret_cast<char *>(&time), sizeof(Time));
 }

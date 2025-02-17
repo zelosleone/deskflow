@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "deskflow/Clipboard.h"
@@ -39,7 +28,7 @@ bool Clipboard::empty()
   assert(m_open);
 
   // clear all data
-  for (SInt32 index = 0; index < kNumFormats; ++index) {
+  for (int32_t index = 0; index < kNumFormats; ++index) {
     m_data[index] = "";
     m_added[index] = false;
   }
@@ -53,7 +42,7 @@ bool Clipboard::empty()
   return true;
 }
 
-void Clipboard::add(EFormat format, const String &data)
+void Clipboard::add(EFormat format, const std::string &data)
 {
   assert(m_open);
   assert(m_owner);
@@ -90,18 +79,18 @@ bool Clipboard::has(EFormat format) const
   return m_added[format];
 }
 
-String Clipboard::get(EFormat format) const
+std::string Clipboard::get(EFormat format) const
 {
   assert(m_open);
   return m_data[format];
 }
 
-void Clipboard::unmarshall(const String &data, Time time)
+void Clipboard::unmarshall(const std::string &data, Time time)
 {
   IClipboard::unmarshall(this, data, time);
 }
 
-String Clipboard::marshall() const
+std::string Clipboard::marshall() const
 {
   return IClipboard::marshall(this);
 }

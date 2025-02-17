@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2012 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2012 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "ipc/IpcLogOutputter.h"
@@ -108,7 +97,7 @@ bool IpcLogOutputter::write(ELevel, const char *text)
   return true;
 }
 
-void IpcLogOutputter::appendBuffer(const String &text)
+void IpcLogOutputter::appendBuffer(const std::string &text)
 {
   ArchMutexLock lock(m_bufferMutex);
 
@@ -166,7 +155,7 @@ void IpcLogOutputter::notifyBuffer()
   ARCH->broadcastCondVar(m_notifyCond);
 }
 
-String IpcLogOutputter::getChunk(size_t count)
+std::string IpcLogOutputter::getChunk(size_t count)
 {
   ArchMutexLock lock(m_bufferMutex);
 
@@ -174,7 +163,7 @@ String IpcLogOutputter::getChunk(size_t count)
     count = m_buffer.size();
   }
 
-  String chunk;
+  std::string chunk;
   for (size_t i = 0; i < count; i++) {
     chunk.append(m_buffer.front());
     chunk.append("\n");
@@ -195,17 +184,17 @@ void IpcLogOutputter::sendBuffer()
   m_sending = false;
 }
 
-void IpcLogOutputter::bufferMaxSize(UInt16 bufferMaxSize)
+void IpcLogOutputter::bufferMaxSize(uint16_t bufferMaxSize)
 {
   m_bufferMaxSize = bufferMaxSize;
 }
 
-UInt16 IpcLogOutputter::bufferMaxSize() const
+uint16_t IpcLogOutputter::bufferMaxSize() const
 {
   return m_bufferMaxSize;
 }
 
-void IpcLogOutputter::bufferRateLimit(UInt16 writeLimit, double timeLimit)
+void IpcLogOutputter::bufferRateLimit(uint16_t writeLimit, double timeLimit)
 {
   m_bufferRateWriteLimit = writeLimit;
   m_bufferRateTimeLimit = timeLimit;

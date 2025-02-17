@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "server/ClientProxyUnknown.h"
@@ -121,6 +110,10 @@ void ClientProxyUnknown::addStreamHandlers()
       new TMethodEventJob<ClientProxyUnknown>(this, &ClientProxyUnknown::handleDisconnect)
   );
   m_events->adoptHandler(
+      m_events->forIStream().inputFormatError(), m_stream->getEventTarget(),
+      new TMethodEventJob<ClientProxyUnknown>(this, &ClientProxyUnknown::handleDisconnect)
+  );
+  m_events->adoptHandler(
       m_events->forIStream().outputShutdown(), m_stream->getEventTarget(),
       new TMethodEventJob<ClientProxyUnknown>(this, &ClientProxyUnknown::handleWriteError)
   );
@@ -146,6 +139,7 @@ void ClientProxyUnknown::removeHandlers()
     m_events->removeHandler(m_events->forIStream().inputReady(), m_stream->getEventTarget());
     m_events->removeHandler(m_events->forIStream().outputError(), m_stream->getEventTarget());
     m_events->removeHandler(m_events->forIStream().inputShutdown(), m_stream->getEventTarget());
+    m_events->removeHandler(m_events->forIStream().inputFormatError(), m_stream->getEventTarget());
     m_events->removeHandler(m_events->forIStream().outputShutdown(), m_stream->getEventTarget());
   }
   if (m_proxy != NULL) {
@@ -163,7 +157,7 @@ void ClientProxyUnknown::removeTimer()
   }
 }
 
-void ClientProxyUnknown::initProxy(const String &name, int major, int minor)
+void ClientProxyUnknown::initProxy(const std::string &name, int major, int minor)
 {
   if (major == 1) {
     switch (minor) {
@@ -215,18 +209,18 @@ void ClientProxyUnknown::handleData(const Event &, void *)
 {
   LOG((CLOG_DEBUG1 "parsing hello reply"));
 
-  String name("<unknown>");
+  std::string name("<unknown>");
 
   try {
     // limit the maximum length of the hello
-    UInt32 n = m_stream->getSize();
+    uint32_t n = m_stream->getSize();
     if (n > kMaxHelloLength) {
       LOG((CLOG_DEBUG1 "hello reply too long"));
       throw XBadClient();
     }
 
     // parse the reply to hello
-    SInt16 major, minor;
+    int16_t major, minor;
     std::string protocolName;
     if (!ProtocolUtil::readf(m_stream, kMsgHelloBack, &protocolName, &major, &minor, &name)) {
       throw XBadClient();

@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012 Symless Ltd.
- * Copyright (C) 2008 Volker Lanz (vl@fidra.de)
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2008 Volker Lanz <vl@fidra.de>
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "AppConfig.h"
@@ -86,6 +76,9 @@ const char *const AppConfig::m_SettingsName[] = {
     "", // 41 = Show dev thanks, obsolete
     "showCloseReminder",
     "enableUpdateCheck",
+    "logExpanded",
+    "colorfulIcon",
+    "requireClientCerts",
 };
 
 AppConfig::AppConfig(deskflow::gui::IConfigScopes &scopes, std::shared_ptr<Deps> deps)
@@ -146,11 +139,14 @@ void AppConfig::recallFromCurrentScope()
   m_TlsEnabled = getFromCurrentScope(kTlsEnabled, m_TlsEnabled).toBool();
   m_TlsCertPath = getFromCurrentScope(kTlsCertPath, m_TlsCertPath).toString();
   m_TlsKeyLength = getFromCurrentScope(kTlsKeyLength, m_TlsKeyLength).toInt();
+  m_RequireClientCert = getFromCurrentScope(kRequireClientCert, m_RequireClientCert).toBool();
   m_MainWindowPosition =
       getFromCurrentScope<QPoint>(kMainWindowPosition, [](const QVariant &v) { return v.toPoint(); });
   m_MainWindowSize = getFromCurrentScope<QSize>(kMainWindowSize, [](const QVariant &v) { return v.toSize(); });
   m_ShowCloseReminder = getFromCurrentScope(kShowCloseReminder, m_ShowCloseReminder).toBool();
   m_EnableUpdateCheck = getFromCurrentScope<bool>(kEnableUpdateCheck, [](const QVariant &v) { return v.toBool(); });
+  m_logExpanded = getFromCurrentScope(kLogExpanded, m_logExpanded).toBool();
+  m_colorfulTrayIcon = getFromCurrentScope(kColorfulIcon, m_colorfulTrayIcon).toBool();
 }
 
 void AppConfig::recallScreenName()
@@ -208,6 +204,9 @@ void AppConfig::commit()
     setInCurrentScope(kMainWindowPosition, m_MainWindowPosition);
     setInCurrentScope(kShowCloseReminder, m_ShowCloseReminder);
     setInCurrentScope(kEnableUpdateCheck, m_EnableUpdateCheck);
+    setInCurrentScope(kLogExpanded, m_logExpanded);
+    setInCurrentScope(kColorfulIcon, m_colorfulTrayIcon);
+    setInCurrentScope(kRequireClientCert, m_RequireClientCert);
   }
 
   if (m_TlsChanged) {
@@ -559,6 +558,11 @@ bool AppConfig::clientGroupChecked() const
   return m_ClientGroupChecked;
 }
 
+bool AppConfig::requireClientCerts() const
+{
+  return m_RequireClientCert;
+}
+
 const QString &AppConfig::serverHostname() const
 {
   return m_ServerHostname;
@@ -582,6 +586,16 @@ bool AppConfig::showCloseReminder() const
 std::optional<bool> AppConfig::enableUpdateCheck() const
 {
   return m_EnableUpdateCheck;
+}
+
+bool AppConfig::logExpanded() const
+{
+  return m_logExpanded;
+}
+
+bool AppConfig::colorfulTrayIcon() const
+{
+  return m_colorfulTrayIcon;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -737,6 +751,13 @@ void AppConfig::setInvertConnection(bool value)
   Q_EMIT invertConnectionChanged();
 }
 
+void AppConfig::setRequireClientCerts(bool requireClientCerts)
+{
+  if (requireClientCerts == m_RequireClientCert)
+    return;
+  m_RequireClientCert = requireClientCerts;
+}
+
 void AppConfig::setMainWindowSize(const QSize &size)
 {
   m_MainWindowSize = size;
@@ -755,6 +776,20 @@ void AppConfig::setShowCloseReminder(bool value)
 void AppConfig::setEnableUpdateCheck(bool value)
 {
   m_EnableUpdateCheck = value;
+}
+
+void AppConfig::setLogExpanded(bool expanded)
+{
+  if (expanded == m_logExpanded)
+    return;
+  m_logExpanded = expanded;
+}
+
+void AppConfig::setColorfulTrayIcon(bool colorful)
+{
+  if (colorful == m_colorfulTrayIcon)
+    return;
+  m_colorfulTrayIcon = colorful;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

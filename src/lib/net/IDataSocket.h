@@ -1,25 +1,13 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/EventTypes.h"
-#include "base/String.h"
 #include "io/IStream.h"
 #include "net/ISocket.h"
 
@@ -37,7 +25,7 @@ public:
     ConnectionFailedInfo(const char *what) : m_what(what)
     {
     }
-    String m_what;
+    std::string m_what;
   };
 
   IDataSocket(IEventQueue *events)
@@ -68,12 +56,12 @@ public:
   virtual void *getEventTarget() const;
 
   // IStream overrides
-  virtual UInt32 read(void *buffer, UInt32 n) = 0;
-  virtual void write(const void *buffer, UInt32 n) = 0;
+  virtual uint32_t read(void *buffer, uint32_t n) = 0;
+  virtual void write(const void *buffer, uint32_t n) = 0;
   virtual void flush() = 0;
   virtual void shutdownInput() = 0;
   virtual void shutdownOutput() = 0;
   virtual bool isReady() const = 0;
   virtual bool isFatal() const = 0;
-  virtual UInt32 getSize() const = 0;
+  virtual uint32_t getSize() const = 0;
 };

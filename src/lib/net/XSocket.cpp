@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "net/XSocket.h"
@@ -23,9 +12,9 @@
 // XSocketAddress
 //
 
-XSocketAddress::XSocketAddress(EError error, const String &hostname, int port) _NOEXCEPT : m_error(error),
-                                                                                           m_hostname(hostname),
-                                                                                           m_port(port)
+XSocketAddress::XSocketAddress(EError error, const std::string &hostname, int port) _NOEXCEPT : m_error(error),
+                                                                                                m_hostname(hostname),
+                                                                                                m_port(port)
 {
   // do nothing
 }
@@ -35,7 +24,7 @@ XSocketAddress::EError XSocketAddress::getError() const throw()
   return m_error;
 }
 
-String XSocketAddress::getHostname() const throw()
+std::string XSocketAddress::getHostname() const throw()
 {
   return m_hostname;
 }
@@ -45,7 +34,7 @@ int XSocketAddress::getPort() const throw()
   return m_port;
 }
 
-String XSocketAddress::getWhat() const throw()
+std::string XSocketAddress::getWhat() const throw()
 {
   static const char *s_errorID[] = {
       "XSocketAddressUnknown", "XSocketAddressNotFound", "XSocketAddressNoAddress", "XSocketAddressUnsupported",
@@ -65,7 +54,7 @@ String XSocketAddress::getWhat() const throw()
 // XSocketIOClose
 //
 
-String XSocketIOClose::getWhat() const throw()
+std::string XSocketIOClose::getWhat() const throw()
 {
   return format("XSocketIOClose", "close: %{1}", what());
 }
@@ -74,7 +63,7 @@ String XSocketIOClose::getWhat() const throw()
 // XSocketBind
 //
 
-String XSocketBind::getWhat() const throw()
+std::string XSocketBind::getWhat() const throw()
 {
   return format("XSocketBind", "cannot bind address: %{1}", what());
 }
@@ -83,7 +72,7 @@ String XSocketBind::getWhat() const throw()
 // XSocketConnect
 //
 
-String XSocketConnect::getWhat() const throw()
+std::string XSocketConnect::getWhat() const throw()
 {
   return format("XSocketConnect", "cannot connect socket: %{1}", what());
 }
@@ -92,7 +81,7 @@ String XSocketConnect::getWhat() const throw()
 // XSocketCreate
 //
 
-String XSocketCreate::getWhat() const throw()
+std::string XSocketCreate::getWhat() const throw()
 {
   return format("XSocketCreate", "cannot create socket: %{1}", what());
 }

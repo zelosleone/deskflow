@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2012 Nick Bolton
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2012 Nick Bolton
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -62,13 +51,13 @@ public:
   Set the maximum size of the buffer to protect memory
   from runaway logging.
   */
-  void bufferMaxSize(UInt16 bufferMaxSize);
+  void bufferMaxSize(uint16_t bufferMaxSize);
 
   //! Set the rate limit
   /*!
   Set the maximum number of \p writeRate for every \p timeRate in seconds.
   */
-  void bufferRateLimit(UInt16 writeLimit, double timeLimit);
+  void bufferRateLimit(uint16_t writeLimit, double timeLimit);
 
   //! Send the buffer
   /*!
@@ -86,19 +75,19 @@ public:
   /*!
   Returns the maximum size of the buffer.
   */
-  UInt16 bufferMaxSize() const;
+  uint16_t bufferMaxSize() const;
 
   //@}
 
 private:
   void init();
   void bufferThread(void *);
-  String getChunk(size_t count);
-  void appendBuffer(const String &text);
+  std::string getChunk(size_t count);
+  void appendBuffer(const std::string &text);
   bool isRunning();
 
 private:
-  typedef std::deque<String> Buffer;
+  using Buffer = std::deque<std::string>;
 
   IpcServer &m_ipcServer;
   Buffer m_buffer;
@@ -110,10 +99,10 @@ private:
   ArchMutex m_notifyMutex;
   bool m_bufferWaiting;
   IArchMultithread::ThreadID m_bufferThreadId;
-  UInt16 m_bufferMaxSize;
-  UInt16 m_bufferRateWriteLimit;
+  uint16_t m_bufferMaxSize;
+  uint16_t m_bufferRateWriteLimit;
   double m_bufferRateTimeLimit;
-  UInt16 m_bufferWriteCount;
+  uint16_t m_bufferWriteCount;
   double m_bufferRateStart;
   IpcClientType m_clientType;
   ArchMutex m_runningMutex;

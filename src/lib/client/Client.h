@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -59,7 +48,7 @@ public:
     {
     }
     bool m_retry;
-    String m_what;
+    std::string m_what;
   };
 
 public:
@@ -69,7 +58,7 @@ public:
   to create the socket.  \p screen is    the local screen.
   */
   Client(
-      IEventQueue *events, const String &name, const NetworkAddress &address, ISocketFactory *socketFactory,
+      IEventQueue *events, const std::string &name, const NetworkAddress &address, ISocketFactory *socketFactory,
       deskflow::Screen *screen, deskflow::ClientArgs const &args
   );
   Client(Client const &) = delete;
@@ -109,13 +98,13 @@ public:
   virtual void handshakeComplete();
 
   //! Received drag information
-  void dragInfoReceived(UInt32 fileNum, String data);
+  void dragInfoReceived(uint32_t fileNum, std::string data);
 
   //! Create a new thread and use it to send file to Server
   void sendFileToServer(const char *filename);
 
   //! Send dragging file information back to server
-  void sendDragInfo(UInt32 fileCount, String &info, size_t size);
+  void sendDragInfo(uint32_t fileCount, std::string &info, size_t size);
 
   //@}
   //! @name accessors
@@ -151,7 +140,7 @@ public:
   }
 
   //! Return received file data
-  String &getReceivedFileData()
+  std::string &getReceivedFileData()
   {
     return m_receivedFileData;
   }
@@ -173,27 +162,27 @@ public:
   // IScreen overrides
   virtual void *getEventTarget() const;
   virtual bool getClipboard(ClipboardID id, IClipboard *) const;
-  virtual void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const;
-  virtual void getCursorPos(SInt32 &x, SInt32 &y) const;
+  virtual void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const;
+  virtual void getCursorPos(int32_t &x, int32_t &y) const;
 
   // IClient overrides
-  virtual void enter(SInt32 xAbs, SInt32 yAbs, UInt32 seqNum, KeyModifierMask mask, bool forScreensaver);
+  virtual void enter(int32_t xAbs, int32_t yAbs, uint32_t seqNum, KeyModifierMask mask, bool forScreensaver);
   virtual bool leave();
   virtual void setClipboard(ClipboardID, const IClipboard *);
   virtual void grabClipboard(ClipboardID);
   virtual void setClipboardDirty(ClipboardID, bool);
-  virtual void keyDown(KeyID, KeyModifierMask, KeyButton, const String &);
-  virtual void keyRepeat(KeyID, KeyModifierMask, SInt32 count, KeyButton, const String &lang);
+  virtual void keyDown(KeyID, KeyModifierMask, KeyButton, const std::string &);
+  virtual void keyRepeat(KeyID, KeyModifierMask, int32_t count, KeyButton, const std::string &lang);
   virtual void keyUp(KeyID, KeyModifierMask, KeyButton);
   virtual void mouseDown(ButtonID);
   virtual void mouseUp(ButtonID);
-  virtual void mouseMove(SInt32 xAbs, SInt32 yAbs);
-  virtual void mouseRelativeMove(SInt32 xRel, SInt32 yRel);
-  virtual void mouseWheel(SInt32 xDelta, SInt32 yDelta);
+  virtual void mouseMove(int32_t xAbs, int32_t yAbs);
+  virtual void mouseRelativeMove(int32_t xRel, int32_t yRel);
+  virtual void mouseWheel(int32_t xDelta, int32_t yDelta);
   virtual void screensaver(bool activate);
   virtual void resetOptions();
   virtual void setOptions(const OptionsList &options);
-  virtual String getName() const;
+  virtual std::string getName() const;
 
 private:
   void sendClipboard(ClipboardID);
@@ -233,7 +222,7 @@ public:
   bool m_mock;
 
 private:
-  String m_name;
+  std::string m_name;
   NetworkAddress m_serverAddress;
   ISocketFactory *m_socketFactory;
   deskflow::Screen *m_screen;
@@ -247,12 +236,12 @@ private:
   bool m_ownClipboard[kClipboardEnd];
   bool m_sentClipboard[kClipboardEnd];
   IClipboard::Time m_timeClipboard[kClipboardEnd];
-  String m_dataClipboard[kClipboardEnd];
+  std::string m_dataClipboard[kClipboardEnd];
   IEventQueue *m_events;
   std::size_t m_expectedFileSize;
-  String m_receivedFileData;
+  std::string m_receivedFileData;
   DragFileList m_dragFileList;
-  String m_dragFileExt;
+  std::string m_dragFileExt;
   using AutoThread = std::unique_ptr<Thread>;
   AutoThread m_sendFileThread;
   AutoThread m_writeToDropDirThread;

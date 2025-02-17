@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "platform/MSWindowsClipboard.h"
@@ -70,7 +59,7 @@ bool MSWindowsClipboard::emptyUnowned()
   if (!EmptyClipboard()) {
     // unable to cause this in integ tests, but this error has never
     // actually been reported by users.
-    LOG((CLOG_DEBUG "failed to grab clipboard"));
+    LOG((CLOG_WARN "failed to grab clipboard"));
     return false;
   }
 
@@ -86,7 +75,7 @@ bool MSWindowsClipboard::empty()
   // mark clipboard as being owned by deskflow
   HGLOBAL data = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, 1);
   if (NULL == SetClipboardData(getOwnershipFormat(), data)) {
-    LOG((CLOG_DEBUG "failed to set clipboard data"));
+    LOG((CLOG_WARN "failed to set clipboard data"));
     GlobalFree(data);
     return false;
   }
@@ -94,8 +83,13 @@ bool MSWindowsClipboard::empty()
   return true;
 }
 
-void MSWindowsClipboard::add(EFormat format, const String &data)
+void MSWindowsClipboard::add(EFormat format, const std::string &data)
 {
+  // exit early if there is no data to prevent spurious "failed to convert clipboard data" errors
+  if (data.empty()) {
+    LOG((CLOG_DEBUG "not adding 0 bytes to clipboard format: %d", format));
+    return;
+  }
   bool isSucceeded = false;
   // convert data to win32 form
   for (ConverterList::const_iterator index = m_converters.begin(); index != m_converters.end(); ++index) {
@@ -158,7 +152,7 @@ bool MSWindowsClipboard::has(EFormat format) const
   return false;
 }
 
-String MSWindowsClipboard::get(EFormat format) const
+std::string MSWindowsClipboard::get(EFormat format) const
 {
   // find the converter for the first clipboard format we can handle
   IMSWindowsClipboardConverter *converter = NULL;
@@ -174,7 +168,7 @@ String MSWindowsClipboard::get(EFormat format) const
   // if no converter then we don't recognize any formats
   if (converter == NULL) {
     LOG((CLOG_WARN "no converter for format %d", format));
-    return String();
+    return std::string();
   }
 
   // get a handle to the clipboard data
@@ -183,7 +177,7 @@ String MSWindowsClipboard::get(EFormat format) const
     // nb: can't cause this using integ tests; this is only caused when
     // the selected converter returns an invalid format -- which you
     // cannot cause using public functions.
-    return String();
+    return std::string();
   }
 
   // convert

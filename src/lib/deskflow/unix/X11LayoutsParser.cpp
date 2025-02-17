@@ -1,20 +1,10 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
+
 #if WINAPI_XWINDOWS
 #include <algorithm>
 #include <fstream>
@@ -28,11 +18,11 @@
 
 namespace {
 
-void splitLine(std::vector<String> &parts, const String &line, char delimiter)
+void splitLine(std::vector<std::string> &parts, const std::string &line, char delimiter)
 {
   std::stringstream stream(line);
   while (stream.good()) {
-    String part;
+    std::string part;
     getline(stream, part, delimiter);
     parts.push_back(part);
   }
@@ -64,7 +54,7 @@ bool X11LayoutsParser::readXMLConfigItemElem(const pugi::xml_node *root, std::ve
   return true;
 }
 
-std::vector<X11LayoutsParser::Lang> X11LayoutsParser::getAllLanguageData(const String &pathToEvdevFile)
+std::vector<X11LayoutsParser::Lang> X11LayoutsParser::getAllLanguageData(const std::string &pathToEvdevFile)
 {
   std::vector<Lang> allCodes;
   pugi::xml_document doc;
@@ -101,25 +91,20 @@ std::vector<X11LayoutsParser::Lang> X11LayoutsParser::getAllLanguageData(const S
   return allCodes;
 }
 
-void X11LayoutsParser::appendVectorUniq(const std::vector<String> &source, std::vector<String> &dst)
+void X11LayoutsParser::appendVectorUniq(const std::vector<std::string> &source, std::vector<std::string> &dst)
 {
   for (const auto &elem : source) {
-    if (std::find_if(dst.begin(), dst.end(), [elem](const String &s) { return s == elem; }) == dst.end()) {
+    if (std::find_if(dst.begin(), dst.end(), [elem](const std::string &s) { return s == elem; }) == dst.end()) {
       dst.push_back(elem);
     }
   }
 };
 
 void X11LayoutsParser::convertLayoutToISO639_2(
-    const String &pathToEvdevFile, bool needToReloadEvdev, const std::vector<String> &layoutNames,
-    const std::vector<String> &layoutVariantNames, std::vector<String> &iso639_2Codes
+    const std::string &pathToEvdevFile, bool needToReloadEvdev, const std::vector<std::string> &layoutNames,
+    const std::vector<std::string> &layoutVariantNames, std::vector<std::string> &iso639_2Codes
 )
 {
-  if (layoutNames.size() != layoutVariantNames.size()) {
-    LOG((CLOG_WARN "error in language layout or language layout variants list"));
-    return;
-  }
-
   static std::vector<X11LayoutsParser::Lang> allLang;
   if (allLang.empty() || needToReloadEvdev) {
     allLang = getAllLanguageData(pathToEvdevFile);
@@ -133,28 +118,32 @@ void X11LayoutsParser::convertLayoutToISO639_2(
       continue;
     }
 
-    const std::vector<String> *toCopy = nullptr;
-    if (layoutVariantNames[i].empty()) {
-      toCopy = &langIter->layoutBaseISO639_2;
-    } else {
-      const auto &variantName = layoutVariantNames[i];
-      auto langVariantIter =
-          std::find_if(langIter->variants.begin(), langIter->variants.end(), [&variantName](const Lang &l) {
-            return l.name == variantName;
-          });
-      if (langVariantIter == langIter->variants.end()) {
-        LOG(
-            (CLOG_WARN "variant \"%s\" of language \"%s\" is unknown", layoutVariantNames[i].c_str(),
-             layoutNames[i].c_str())
-        );
-        continue;
-      }
-
-      if (langVariantIter->layoutBaseISO639_2.empty()) {
+    const std::vector<std::string> *toCopy = nullptr;
+    if (i < layoutVariantNames.size()) {
+      if (layoutVariantNames[i].empty()) {
         toCopy = &langIter->layoutBaseISO639_2;
       } else {
-        toCopy = &langVariantIter->layoutBaseISO639_2;
+        const auto &variantName = layoutVariantNames[i];
+        auto langVariantIter =
+            std::find_if(langIter->variants.begin(), langIter->variants.end(), [&variantName](const Lang &l) {
+              return l.name == variantName;
+            });
+        if (langVariantIter == langIter->variants.end()) {
+          LOG(
+              (CLOG_WARN "variant \"%s\" of language \"%s\" is unknown", layoutVariantNames[i].c_str(),
+               layoutNames[i].c_str())
+          );
+          continue;
+        }
+
+        if (langVariantIter->layoutBaseISO639_2.empty()) {
+          toCopy = &langIter->layoutBaseISO639_2;
+        } else {
+          toCopy = &langVariantIter->layoutBaseISO639_2;
+        }
       }
+    } else {
+      toCopy = &langIter->layoutBaseISO639_2;
     }
 
     if (toCopy) {
@@ -163,25 +152,26 @@ void X11LayoutsParser::convertLayoutToISO639_2(
   }
 }
 
-std::vector<String> X11LayoutsParser::getX11LanguageList(const String &pathToEvdevFile)
+std::vector<std::string> X11LayoutsParser::getX11LanguageList(const std::string &pathToEvdevFile)
 {
-  std::vector<String> layoutNames;
-  std::vector<String> layoutVariantNames;
+  std::vector<std::string> layoutNames;
+  std::vector<std::string> layoutVariantNames;
 
   deskflow::linux::DeskflowXkbKeyboard keyboard;
   splitLine(layoutNames, keyboard.getLayout(), ',');
   splitLine(layoutVariantNames, keyboard.getVariant(), ',');
 
-  std::vector<String> iso639_2Codes;
+  std::vector<std::string> iso639_2Codes;
   iso639_2Codes.reserve(layoutNames.size());
   convertLayoutToISO639_2(pathToEvdevFile, true, layoutNames, layoutVariantNames, iso639_2Codes);
   return convertISO639_2ToISO639_1(iso639_2Codes);
 }
 
-String
-X11LayoutsParser::convertLayotToISO(const String &pathToEvdevFile, const String &layoutLangCode, bool needToReloadFiles)
+std::string X11LayoutsParser::convertLayotToISO(
+    const std::string &pathToEvdevFile, const std::string &layoutLangCode, bool needToReloadFiles
+)
 {
-  std::vector<String> iso639_2Codes;
+  std::vector<std::string> iso639_2Codes;
   convertLayoutToISO639_2(pathToEvdevFile, needToReloadFiles, {layoutLangCode}, {""}, iso639_2Codes);
   if (iso639_2Codes.empty()) {
     LOG((CLOG_WARN "failed to convert layout lang code: \"%s\"", layoutLangCode.c_str()));
@@ -197,12 +187,12 @@ X11LayoutsParser::convertLayotToISO(const String &pathToEvdevFile, const String 
   return *iso639_1Codes.begin();
 }
 
-std::vector<String> X11LayoutsParser::convertISO639_2ToISO639_1(const std::vector<String> &iso639_2Codes)
+std::vector<std::string> X11LayoutsParser::convertISO639_2ToISO639_1(const std::vector<std::string> &iso639_2Codes)
 {
-  std::vector<String> result;
+  std::vector<std::string> result;
   for (const auto &isoCode : iso639_2Codes) {
     const auto &tableIter =
-        std::find_if(ISO_Table.begin(), ISO_Table.end(), [&isoCode](const std::pair<String, String> &c) {
+        std::find_if(ISO_Table.begin(), ISO_Table.end(), [&isoCode](const std::pair<std::string, std::string> &c) {
           return c.first == isoCode;
         });
     if (tableIter == ISO_Table.end()) {

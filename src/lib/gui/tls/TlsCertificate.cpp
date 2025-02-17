@@ -1,144 +1,34 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2015 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2015 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "TlsCertificate.h"
 
-#include "TlsFingerprint.h"
-
+#include "base/finally.h"
 #include "common/constants.h"
+#include "gui/core/CoreTool.h"
+#include "net/FingerprintData.h"
+#include "net/FingerprintDatabase.h"
+#include "net/SecureUtils.h"
 
 #include <QCoreApplication>
 #include <QDir>
 #include <QProcess>
 
-static const char *const kCertificateKeyLength = "rsa:";
-static const char *const kCertificateHashAlgorithm = "-sha256";
-static const char *const kCertificateLifetime = "365";
-
-#if defined(Q_OS_WIN)
-static const char *const kWinOpenSslDir = "OpenSSL";
-static const char *const kWinOpenSslBinary = "openssl.exe";
-static const char *const kConfigFile = "openssl.cnf";
-#elif defined(Q_OS_UNIX)
-static const char *const kUnixOpenSslCommand = "openssl";
-#endif
-
-#if defined(Q_OS_WIN)
-
-namespace deskflow::gui {
-
-QString openSslWindowsDir()
-{
-
-  auto appDir = QDir(QCoreApplication::applicationDirPath());
-  auto openSslDir = QDir(appDir.filePath(kWinOpenSslDir));
-
-  // in production, openssl is deployed with the app.
-  // in development, we can use the openssl path available at compile-time.
-  if (!openSslDir.exists()) {
-    openSslDir = QDir(OPENSSL_EXE_DIR);
-  }
-
-  // if the path still isn't found, something is seriously wrong.
-  const auto path = openSslDir.absolutePath();
-  if (openSslDir.exists()) {
-    qDebug("openssl dir: %s", qUtf8Printable(path));
-  } else {
-    qFatal("openssl dir not found: %s", qUtf8Printable(path));
-  }
-
-  return QDir::cleanPath(path);
-}
-
-QString openSslWindowsBinary()
-{
-  auto dir = QDir(openSslWindowsDir());
-  auto path = dir.filePath(kWinOpenSslBinary);
-
-  // when installed, there is no openssl bin dir; it's installed at the base.
-  // in development, we use the standard dir structure for openssl (bin dir).
-  if (!QFile::exists(path)) {
-    auto binDir = QDir(dir.filePath("bin"));
-    path = binDir.filePath(kWinOpenSslBinary);
-  }
-
-  // if the path still isn't found, something is seriously wrong.
-  if (!QFile::exists(path)) {
-    qFatal() << "openssl binary not found: " << path;
-  }
-
-  return path;
-}
-
-} // namespace deskflow::gui
-
-using namespace deskflow::gui;
-
-#endif
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/x509.h>
 
 TlsCertificate::TlsCertificate(QObject *parent) : QObject(parent)
 {
-}
-
-bool TlsCertificate::runTool(const QStringList &args)
-{
-#if defined(Q_OS_WIN)
-  const auto program = openSslWindowsBinary();
-#else
-  const auto program = kUnixOpenSslCommand;
-#endif
-
-  QStringList environment;
-
-// Windows is special! :)
-// For OpenSSL, it's very common to bundle the openssl.exe and openssl.cnf files
-// with the application. This is made a little more complex in the Windows dev
-// env, because vcpkg can't find the openssl.cnf file by default, so we need to
-// give it a bit of guidance by setting the `OPENSSL_CONF` env var.
-#if defined(Q_OS_WIN)
-  const auto openSslDir = QDir(openSslWindowsDir());
-  const auto config = QDir::cleanPath(openSslDir.filePath(kConfigFile));
-  environment << QString("OPENSSL_CONF=%1").arg(config);
-#endif
-
-  QProcess process;
-  process.setEnvironment(environment);
-  for (const auto &envVar : std::as_const(environment)) {
-    qDebug("set env var: %s", qUtf8Printable(envVar));
-  }
-
-  qDebug("running: %s %s", qUtf8Printable(program), qUtf8Printable(args.join(" ")));
-  process.start(program, args);
-  bool success = process.waitForStarted();
-
-  QString toolStderr;
-  if (success && process.waitForFinished()) {
-    m_toolStdout = process.readAllStandardOutput().trimmed();
-    toolStderr = process.readAllStandardError().trimmed();
-  }
-
-  if (int code = process.exitCode(); !success || code != 0) {
-    qDebug("openssl failed with code %d: %s", code, qUtf8Printable(toolStderr));
-
-    qCritical("failed to generate tls certificate:\n\n%s", qUtf8Printable(toolStderr));
-    return false;
-  }
-
-  return true;
+  CoreTool coreTool;
+  m_profileDir = coreTool.getProfileDir();
+  if (m_profileDir.isEmpty())
+    qCritical() << "unable to get profile dir";
 }
 
 bool TlsCertificate::generateCertificate(const QString &path, int keyLength)
@@ -152,103 +42,87 @@ bool TlsCertificate::generateCertificate(const QString &path, int keyLength)
     return false;
   }
 
-  QString keySize = kCertificateKeyLength + QString::number(keyLength);
-
-  QStringList arguments;
-
-  // self signed certificate
-  arguments.append("req");
-  arguments.append("-x509");
-  arguments.append("-nodes");
-
-  // valid duration
-  arguments.append("-days");
-  arguments.append(kCertificateLifetime);
-
-  // subject information
-  arguments.append("-subj");
-
-  QString subInfo("/CN=%1");
-  arguments.append(subInfo.arg(kAppName));
-
-  // private key
-  arguments.append("-newkey");
-  arguments.append(keySize);
-
-  // key output filename
-  arguments.append("-keyout");
-  arguments.append(path);
-
-  // certificate output filename
-  arguments.append("-out");
-  arguments.append(path);
-
-  if (runTool(arguments)) {
-    qDebug("tls certificate generated");
-
-    return generateFingerprint(path);
-  } else {
-    qCritical("failed to generate tls certificate");
+  try {
+    deskflow::generatePemSelfSignedCert(path.toStdString(), keyLength);
+  } catch (const std::exception &e) {
+    qCritical() << "failed to generate self-signed pem cert: " << e.what();
     return false;
   }
+  qDebug("tls certificate generated");
+  return generateFingerprint(path);
 }
 
 bool TlsCertificate::generateFingerprint(const QString &certificateFilename)
 {
   qDebug("generating tls fingerprint");
+  const std::string certPath = certificateFilename.toStdString();
+  try {
+    deskflow::FingerprintDatabase db;
+    db.addTrusted(deskflow::pemFileCertFingerprint(certPath, deskflow::FingerprintType::SHA1));
+    db.addTrusted(deskflow::pemFileCertFingerprint(certPath, deskflow::FingerprintType::SHA256));
+    db.write(QStringLiteral("%1/%2").arg(getTlsDir(), kFingerprintLocalFilename).toStdString());
 
-  QStringList arguments;
-  arguments.append("x509");
-  arguments.append("-fingerprint");
-  arguments.append(kCertificateHashAlgorithm);
-  arguments.append("-noout");
-  arguments.append("-in");
-  arguments.append(certificateFilename);
-
-  if (!runTool(arguments)) {
-    qCritical("failed to generate tls fingerprint");
-    return false;
-  }
-
-  // find the fingerprint from the tool output
-  auto i = m_toolStdout.indexOf("=");
-  if (i != -1) {
-    i++;
-    QString fingerprint = m_toolStdout.mid(i, m_toolStdout.size() - i);
-
-    TlsFingerprint::local().trust(fingerprint, false);
     qDebug("tls fingerprint generated");
     return true;
-  } else {
-    qCritical("failed to find tls fingerprint in tls tool output");
+  } catch (const std::exception &e) {
+    qCritical() << "failed to find tls fingerprint: " << e.what();
     return false;
   }
 }
 
 int TlsCertificate::getCertKeyLength(const QString &path)
 {
+  return deskflow::getCertLength(path.toStdString());
+}
 
-  QStringList arguments;
-  arguments.append("rsa");
-  arguments.append("-in");
-  arguments.append(path);
-  arguments.append("-text");
-  arguments.append("-noout");
+QString TlsCertificate::getCertificatePath() const
+{
+  return QStringLiteral("%1/%2/%3").arg(m_profileDir, kSslDir, kCertificateFilename);
+}
 
-  if (!runTool(arguments)) {
-    qFatal("failed to get key length from certificate");
-    return 0;
+QString TlsCertificate::getTlsDir() const
+{
+  return QStringLiteral("%1/%2").arg(m_profileDir, kSslDir);
+}
+
+bool TlsCertificate::isCertificateValid(const QString &path)
+{
+  OpenSSL_add_all_algorithms();
+  ERR_load_crypto_strings();
+
+  auto fp = deskflow::fopenUtf8Path(path.toStdString(), "r");
+  if (!fp) {
+    qWarning() << tr("could not read from default certificate file");
+    return false;
+  }
+  auto fileClose = deskflow::finally([fp]() { std::fclose(fp); });
+
+  auto *cert = PEM_read_X509(fp, nullptr, nullptr, nullptr);
+  if (!cert) {
+    qWarning() << tr("could not load default certificate file to memory");
+    return false;
+  }
+  auto certFree = deskflow::finally([cert]() { X509_free(cert); });
+
+  auto *pubkey = X509_get_pubkey(cert);
+  if (!pubkey) {
+    qWarning() << tr("default certificate key file does not contain valid public key");
+    return false;
+  }
+  auto pubkeyFree = deskflow::finally([pubkey]() { EVP_PKEY_free(pubkey); });
+
+  auto type = EVP_PKEY_type(EVP_PKEY_id(pubkey));
+  if (type != EVP_PKEY_RSA && type != EVP_PKEY_DSA) {
+    qWarning() << tr("public key in default certificate key file is not RSA or DSA");
+    return false;
   }
 
-  const QString searchStart("Private-Key: (");
-  const QString searchEnd(" bit");
+  auto bits = EVP_PKEY_bits(pubkey);
+  if (bits < 2048) {
+    // We could have small keys in old barrier installations
+    qWarning() << tr("public key in default certificate key file is too small");
+    return false;
+  }
 
-  // Get the line that contains the key length from the output
-  const auto indexStart = m_toolStdout.indexOf(searchStart);
-  const auto indexEnd = m_toolStdout.indexOf(searchEnd, indexStart);
-  const auto start = indexStart + searchStart.length();
-  const auto end = indexEnd - (indexStart + searchStart.length());
-  auto keyLength = m_toolStdout.mid(start, end);
-
-  return keyLength.toInt();
+  return true;
 }

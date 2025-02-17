@@ -1,13 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- *
- * SPDX-FileCopyrightText: Copyright (C) 2024 Symless Ltd.
- * SPDX-License-Identifier: GPL-2.0
+ * SPDX-FileCopyrightText: (C) 2024 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "common/basic_types.h"
+#include "common/common.h"
 #include "deskflow/protocol_types.h"
 #include "io/IStream.h"
 
@@ -45,8 +44,8 @@ public:
   };
 
   explicit HelloBack(
-      std::shared_ptr<Deps> deps, const SInt16 majorVersion = kProtocolMajorVersion,
-      const SInt16 minorVersion = kProtocolMinorVersion
+      std::shared_ptr<Deps> deps, const int16_t majorVersion = kProtocolMajorVersion,
+      const int16_t minorVersion = kProtocolMinorVersion
   )
       : m_deps(deps),
         m_majorVersion(majorVersion),
@@ -63,8 +62,8 @@ private:
   bool shouldDowngrade(int major, int minor) const;
 
   std::shared_ptr<Deps> m_deps;
-  SInt16 m_majorVersion;
-  SInt16 m_minorVersion;
+  int16_t m_majorVersion;
+  int16_t m_minorVersion;
 };
 
 } // namespace deskflow::client

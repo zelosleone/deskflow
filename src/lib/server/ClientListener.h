@@ -1,19 +1,9 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -22,6 +12,7 @@
 #include "base/EventTypes.h"
 #include "common/stddeque.h"
 #include "common/stdset.h"
+#include "net/SecurityLevel.h"
 #include "server/Config.h"
 
 class ClientProxy;
@@ -37,7 +28,7 @@ class ClientListener
 {
 public:
   // The factories are adopted.
-  ClientListener(const NetworkAddress &, ISocketFactory *, IEventQueue *events, bool enableCrypto);
+  ClientListener(const NetworkAddress &, ISocketFactory *, IEventQueue *events, SecurityLevel securityLevel);
   ClientListener(ClientListener const &) = delete;
   ClientListener(ClientListener &&) = delete;
   ~ClientListener();
@@ -89,9 +80,9 @@ private:
   void removeUnknownClient(ClientProxyUnknown *unknownClient);
 
 private:
-  typedef std::set<ClientProxyUnknown *> NewClients;
-  typedef std::deque<ClientProxy *> WaitingClients;
-  typedef std::set<IDataSocket *> ClientSockets;
+  using NewClients = std::set<ClientProxyUnknown *>;
+  using WaitingClients = std::deque<ClientProxy *>;
+  using ClientSockets = std::set<IDataSocket *>;
 
   IListenSocket *m_listen;
   ISocketFactory *m_socketFactory;
@@ -99,7 +90,7 @@ private:
   WaitingClients m_waitingClients;
   Server *m_server;
   IEventQueue *m_events;
-  bool m_useSecureNetwork;
+  SecurityLevel m_securityLevel;
   ClientSockets m_clientSockets;
   NetworkAddress m_address;
 };

@@ -1,19 +1,10 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2022 Symless Ltd.
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2025 Deskflow Developers
+ * SPDX-FileCopyrightText: (C) 2012 - 2022 Symless Ltd.
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
+
 #include "InverseSocketFactory.h"
 #include "net/InverseSockets/InverseClientSocket.h"
 #include "net/InverseSockets/InverseServerSocket.h"
@@ -30,9 +21,9 @@ InverseSocketFactory::InverseSocketFactory(IEventQueue *events, SocketMultiplexe
 {
 }
 
-IDataSocket *InverseSocketFactory::create(bool secure, IArchNetwork::EAddressFamily family) const
+IDataSocket *InverseSocketFactory::create(IArchNetwork::EAddressFamily family, SecurityLevel securityLevel) const
 {
-  if (secure) {
+  if (securityLevel != SecurityLevel::PlainText) {
     auto secureSocket = new SecureClientSocket(m_events, m_socketMultiplexer, family);
     return secureSocket;
   } else {
@@ -40,11 +31,12 @@ IDataSocket *InverseSocketFactory::create(bool secure, IArchNetwork::EAddressFam
   }
 }
 
-IListenSocket *InverseSocketFactory::createListen(bool secure, IArchNetwork::EAddressFamily family) const
+IListenSocket *
+InverseSocketFactory::createListen(IArchNetwork::EAddressFamily family, SecurityLevel securityLevel) const
 {
   IListenSocket *socket = nullptr;
 
-  if (secure) {
+  if (securityLevel != SecurityLevel::PlainText) {
     socket = new SecureServerSocket(m_events, m_socketMultiplexer, family);
   } else {
     socket = new InverseServerSocket(m_events, m_socketMultiplexer, family);

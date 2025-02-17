@@ -1,31 +1,20 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
 #include "base/ILogOutputter.h"
-#include "base/String.h"
-#include "common/basic_types.h"
+#include "common/common.h"
 #include "common/stddeque.h"
 #include "mt/Thread.h"
 
 #include <fstream>
 #include <list>
+#include <string>
 
 //! Stop traversing log chain outputter
 /*!
@@ -137,12 +126,12 @@ This outputter records the last N log messages.
 class BufferedLogOutputter : public ILogOutputter
 {
 private:
-  typedef std::deque<String> Buffer;
+  using Buffer = std::deque<std::string>;
 
 public:
-  typedef Buffer::const_iterator const_iterator;
+  using const_iterator = Buffer::const_iterator;
 
-  BufferedLogOutputter(UInt32 maxBufferSize);
+  BufferedLogOutputter(uint32_t maxBufferSize);
   virtual ~BufferedLogOutputter();
 
   //! @name accessors
@@ -163,6 +152,6 @@ public:
   virtual bool write(ELevel level, const char *message);
 
 private:
-  UInt32 m_maxBufferSize;
+  uint32_t m_maxBufferSize;
   Buffer m_buffer;
 };

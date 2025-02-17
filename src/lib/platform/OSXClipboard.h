@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2004 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2004 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
@@ -37,12 +26,12 @@ public:
 
   // IClipboard overrides
   virtual bool empty();
-  virtual void add(EFormat, const String &data);
+  virtual void add(EFormat, const std::string &data);
   virtual bool open(Time) const;
   virtual void close() const;
   virtual Time getTime() const;
   virtual bool has(EFormat) const;
-  virtual String get(EFormat) const;
+  virtual std::string get(EFormat) const;
 
   bool synchronize();
 
@@ -50,7 +39,7 @@ private:
   void clearConverters();
 
 private:
-  typedef std::vector<IOSXClipboardConverter *> ConverterList;
+  using ConverterList = std::vector<IOSXClipboardConverter *>;
 
   mutable Time m_time;
   ConverterList m_converters;
@@ -83,14 +72,14 @@ public:
   getFormat().  The return data will be in the scrap
   format returned by getOSXFormat().
   */
-  virtual String fromIClipboard(const String &) const = 0;
+  virtual std::string fromIClipboard(const std::string &) const = 0;
 
   //! Convert to IClipboard format
   /*!
   Convert from the carbon scrap format to the IClipboard format
   (i.e., the reverse of fromIClipboard()).
   */
-  virtual String toIClipboard(const String &) const = 0;
+  virtual std::string toIClipboard(const std::string &) const = 0;
 
   //@}
 };

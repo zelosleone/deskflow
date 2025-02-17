@@ -1,24 +1,12 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #pragma once
 
-#include "base/String.h"
 #include "deskflow/IClient.h"
 
 namespace deskflow {
@@ -32,7 +20,7 @@ public:
   /*!
   \c name is the name of the client.
   */
-  BaseClientProxy(const String &name);
+  BaseClientProxy(const std::string &name);
   ~BaseClientProxy();
 
   //! @name manipulators
@@ -42,7 +30,7 @@ public:
   /*!
   Save the position of the cursor when jumping from client.
   */
-  void setJumpCursorPos(SInt32 x, SInt32 y);
+  void setJumpCursorPos(int32_t x, int32_t y);
 
   //@}
   //! @name accessors
@@ -52,7 +40,7 @@ public:
   /*!
   Get the position of the cursor when last jumping from client.
   */
-  void getJumpCursorPos(SInt32 &x, SInt32 &y) const;
+  void getJumpCursorPos(int32_t &x, int32_t &y) const;
 
   //! Get cursor position
   /*!
@@ -68,34 +56,34 @@ public:
   // IScreen
   virtual void *getEventTarget() const = 0;
   virtual bool getClipboard(ClipboardID id, IClipboard *) const = 0;
-  virtual void getShape(SInt32 &x, SInt32 &y, SInt32 &width, SInt32 &height) const = 0;
-  virtual void getCursorPos(SInt32 &x, SInt32 &y) const = 0;
+  virtual void getShape(int32_t &x, int32_t &y, int32_t &width, int32_t &height) const = 0;
+  virtual void getCursorPos(int32_t &x, int32_t &y) const = 0;
 
   // IClient overrides
-  virtual void enter(SInt32 xAbs, SInt32 yAbs, UInt32 seqNum, KeyModifierMask mask, bool forScreensaver) = 0;
+  virtual void enter(int32_t xAbs, int32_t yAbs, uint32_t seqNum, KeyModifierMask mask, bool forScreensaver) = 0;
   virtual bool leave() = 0;
   virtual void setClipboard(ClipboardID, const IClipboard *) = 0;
   virtual void grabClipboard(ClipboardID) = 0;
   virtual void setClipboardDirty(ClipboardID, bool) = 0;
-  virtual void keyDown(KeyID, KeyModifierMask, KeyButton, const String &) = 0;
-  virtual void keyRepeat(KeyID, KeyModifierMask, SInt32 count, KeyButton, const String &lang) = 0;
+  virtual void keyDown(KeyID, KeyModifierMask, KeyButton, const std::string &) = 0;
+  virtual void keyRepeat(KeyID, KeyModifierMask, int32_t count, KeyButton, const std::string &lang) = 0;
   virtual void keyUp(KeyID, KeyModifierMask, KeyButton) = 0;
   virtual void mouseDown(ButtonID) = 0;
   virtual void mouseUp(ButtonID) = 0;
-  virtual void mouseMove(SInt32 xAbs, SInt32 yAbs) = 0;
-  virtual void mouseRelativeMove(SInt32 xRel, SInt32 yRel) = 0;
-  virtual void mouseWheel(SInt32 xDelta, SInt32 yDelta) = 0;
+  virtual void mouseMove(int32_t xAbs, int32_t yAbs) = 0;
+  virtual void mouseRelativeMove(int32_t xRel, int32_t yRel) = 0;
+  virtual void mouseWheel(int32_t xDelta, int32_t yDelta) = 0;
   virtual void screensaver(bool activate) = 0;
   virtual void resetOptions() = 0;
   virtual void setOptions(const OptionsList &options) = 0;
-  virtual void sendDragInfo(UInt32 fileCount, const char *info, size_t size) = 0;
-  virtual void fileChunkSending(UInt8 mark, char *data, size_t dataSize) = 0;
-  virtual String getSecureInputApp() const = 0;
-  virtual void secureInputNotification(const String &app) const = 0;
-  virtual String getName() const;
+  virtual void sendDragInfo(uint32_t fileCount, const char *info, size_t size) = 0;
+  virtual void fileChunkSending(uint8_t mark, char *data, size_t dataSize) = 0;
+  virtual std::string getSecureInputApp() const = 0;
+  virtual void secureInputNotification(const std::string &app) const = 0;
+  virtual std::string getName() const;
   virtual deskflow::IStream *getStream() const = 0;
 
 private:
-  String m_name;
-  SInt32 m_x, m_y;
+  std::string m_name;
+  int32_t m_x, m_y;
 };

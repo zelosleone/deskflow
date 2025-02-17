@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2024 Deskflow Developers
+# SPDX-License-Identifier: MIT
+# Maintainer: Deskflow Developers
+
+pkgname=deskflow
+pkgver=@CMAKE_PROJECT_VERSION@
+pkgrel=1
+pkgdesc="Mouse and keyboard sharing utility"
+url='https://deskflow.org'
+arch=('i686' 'x86_64' 'armv7h' 'aarch64')
+license=(LicenseRef-GPL-2.0-only-WITH-OpenSSL-Exception)
+conflicts=('synergy-git' 'synergy-1.6' 'synergy1-bin' 'synergy2-bin' 'synergy3-bin' 'synergy3-beta-bin' 'synergy3-stable-bin' 'barrier' 'barrier-git' 'barrier-headless' 'barrier-headless-git' 'input-leap' 'input-leap-git' 'input-leap-headless-git' 'input-leap-headless' 'waynergy' 'waynergy-git' 'qsynergy' 'slim-synergy' 'quicksynergy' 'deskflow')
+provides=("deskflow-git${pkgver}")
+depends=(
+  'gcc-libs'
+  'glibc'
+  'openssl'
+  'libx11'
+  'libxi'
+  'libxkbfile'
+  'libxext'
+  'libxtst'
+  'libxinerama'
+  'libxkbcommon-x11'
+  'libnotify'
+  'hicolor-icon-theme'
+  'pugixml'
+  'qt6-base'
+  'qt6-tools'
+  'libei'
+  'libportal'
+  'tomlplusplus'
+  'cli11'
+)
+options=('!debug')
+
+package() {
+  # By default, `makepkg` will run from the `src` directory, which would
+  # only install the binaries, and not the .desktop file, etc. To install
+  # everything, we need to set DESTDIR.
+  cd $startdir
+  DESTDIR=$pkgdir cmake --install .
+}

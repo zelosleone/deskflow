@@ -1,19 +1,8 @@
 /*
  * Deskflow -- mouse and keyboard sharing utility
- * Copyright (C) 2012-2016 Symless Ltd.
- * Copyright (C) 2002 Chris Schoeneman
- *
- * This package is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * found in the file LICENSE that should have accompanied this file.
- *
- * This package is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-FileCopyrightText: (C) 2012 - 2016 Symless Ltd.
+ * SPDX-FileCopyrightText: (C) 2002 Chris Schoeneman
+ * SPDX-License-Identifier: GPL-2.0-only WITH LicenseRef-OpenSSL-Exception
  */
 
 #include "server/Config.h"
@@ -51,7 +40,7 @@ Config::~Config()
   // do nothing
 }
 
-bool Config::addScreen(const String &name)
+bool Config::addScreen(const std::string &name)
 {
   // alias name must not exist
   if (m_nameToCanonicalName.find(name) != m_nameToCanonicalName.end()) {
@@ -67,10 +56,10 @@ bool Config::addScreen(const String &name)
   return true;
 }
 
-bool Config::renameScreen(const String &oldName, const String &newName)
+bool Config::renameScreen(const std::string &oldName, const std::string &newName)
 {
   // get canonical name and find cell
-  String oldCanonical = getCanonicalName(oldName);
+  std::string oldCanonical = getCanonicalName(oldName);
   CellMap::iterator index = m_map.find(oldCanonical);
   if (index == m_map.end()) {
     return false;
@@ -109,10 +98,10 @@ bool Config::renameScreen(const String &oldName, const String &newName)
   return true;
 }
 
-void Config::removeScreen(const String &name)
+void Config::removeScreen(const std::string &name)
 {
   // get canonical name and find cell
-  String canonical = getCanonicalName(name);
+  std::string canonical = getCanonicalName(name);
   CellMap::iterator index = m_map.find(canonical);
   if (index == m_map.end()) {
     return;
@@ -143,7 +132,7 @@ void Config::removeAllScreens()
   m_nameToCanonicalName.clear();
 }
 
-bool Config::addAlias(const String &canonical, const String &alias)
+bool Config::addAlias(const std::string &canonical, const std::string &alias)
 {
   // alias name must not exist
   if (m_nameToCanonicalName.find(alias) != m_nameToCanonicalName.end()) {
@@ -161,7 +150,7 @@ bool Config::addAlias(const String &canonical, const String &alias)
   return true;
 }
 
-bool Config::removeAlias(const String &alias)
+bool Config::removeAlias(const std::string &alias)
 {
   // must not be a canonical name
   if (m_map.find(alias) != m_map.end()) {
@@ -180,7 +169,7 @@ bool Config::removeAlias(const String &alias)
   return true;
 }
 
-bool Config::removeAliases(const String &canonical)
+bool Config::removeAliases(const std::string &canonical)
 {
   // must be a canonical name
   if (m_map.find(canonical) == m_map.end()) {
@@ -211,8 +200,8 @@ void Config::removeAllAliases()
 }
 
 bool Config::connect(
-    const String &srcName, EDirection srcSide, float srcStart, float srcEnd, const String &dstName, float dstStart,
-    float dstEnd
+    const std::string &srcName, EDirection srcSide, float srcStart, float srcEnd, const std::string &dstName,
+    float dstStart, float dstEnd
 )
 {
   assert(srcSide >= kFirstDirection && srcSide <= kLastDirection);
@@ -229,7 +218,7 @@ bool Config::connect(
   return index->second.add(srcEdge, dstEdge);
 }
 
-bool Config::disconnect(const String &srcName, EDirection srcSide)
+bool Config::disconnect(const std::string &srcName, EDirection srcSide)
 {
   assert(srcSide >= kFirstDirection && srcSide <= kLastDirection);
 
@@ -245,7 +234,7 @@ bool Config::disconnect(const String &srcName, EDirection srcSide)
   return true;
 }
 
-bool Config::disconnect(const String &srcName, EDirection srcSide, float position)
+bool Config::disconnect(const std::string &srcName, EDirection srcSide, float position)
 {
   assert(srcSide >= kFirstDirection && srcSide <= kLastDirection);
 
@@ -266,7 +255,7 @@ void Config::setDeskflowAddress(const NetworkAddress &addr)
   m_deskflowAddress = addr;
 }
 
-bool Config::addOption(const String &name, OptionID option, OptionValue value)
+bool Config::addOption(const std::string &name, OptionID option, OptionValue value)
 {
   // find options
   ScreenOptions *options = NULL;
@@ -287,7 +276,7 @@ bool Config::addOption(const String &name, OptionID option, OptionValue value)
   return true;
 }
 
-bool Config::removeOption(const String &name, OptionID option)
+bool Config::removeOption(const std::string &name, OptionID option)
 {
   // find options
   ScreenOptions *options = NULL;
@@ -308,7 +297,7 @@ bool Config::removeOption(const String &name, OptionID option)
   return true;
 }
 
-bool Config::removeOptions(const String &name)
+bool Config::removeOptions(const std::string &name)
 {
   // find options
   ScreenOptions *options = NULL;
@@ -329,7 +318,7 @@ bool Config::removeOptions(const String &name)
   return true;
 }
 
-bool Config::isValidScreenName(const String &name) const
+bool Config::isValidScreenName(const std::string &name) const
 {
   // name is valid if matches validname
   //  name      ::= [_A-Za-z0-9] | [_A-Za-z0-9][-_A-Za-z0-9]*[_A-Za-z0-9]
@@ -344,7 +333,7 @@ bool Config::isValidScreenName(const String &name) const
   }
 
   // check each dot separated part
-  String::size_type b = 0;
+  std::string::size_type b = 0;
   for (;;) {
     // accept trailing .
     if (b == name.size()) {
@@ -352,8 +341,8 @@ bool Config::isValidScreenName(const String &name) const
     }
 
     // find end of part
-    String::size_type e = name.find('.', b);
-    if (e == String::npos) {
+    std::string::size_type e = name.find('.', b);
+    if (e == std::string::npos) {
       e = name.size();
     }
 
@@ -368,7 +357,7 @@ bool Config::isValidScreenName(const String &name) const
     }
 
     // check interior characters
-    for (String::size_type i = b; i < e; ++i) {
+    for (std::string::size_type i = b; i < e; ++i) {
       if (!isalnum(name[i]) && name[i] != '_' && name[i] != '-') {
         return false;
       }
@@ -405,34 +394,35 @@ Config::all_const_iterator Config::endAll() const
   return m_nameToCanonicalName.end();
 }
 
-bool Config::isScreen(const String &name) const
+bool Config::isScreen(const std::string &name) const
 {
   return (m_nameToCanonicalName.count(name) > 0);
 }
 
-bool Config::isCanonicalName(const String &name) const
+bool Config::isCanonicalName(const std::string &name) const
 {
   return (!name.empty() && CaselessCmp::equal(getCanonicalName(name), name));
 }
 
-String Config::getCanonicalName(const String &name) const
+std::string Config::getCanonicalName(const std::string &name) const
 {
   NameMap::const_iterator index = m_nameToCanonicalName.find(name);
   if (index == m_nameToCanonicalName.end()) {
-    return String();
+    return std::string();
   } else {
     return index->second;
   }
 }
 
-String Config::getNeighbor(const String &srcName, EDirection srcSide, float position, float *positionOut) const
+std::string
+Config::getNeighbor(const std::string &srcName, EDirection srcSide, float position, float *positionOut) const
 {
   assert(srcSide >= kFirstDirection && srcSide <= kLastDirection);
 
   // find source cell
   CellMap::const_iterator index = m_map.find(getCanonicalName(srcName));
   if (index == m_map.end()) {
-    return String();
+    return std::string();
   }
 
   // find edge
@@ -451,12 +441,12 @@ String Config::getNeighbor(const String &srcName, EDirection srcSide, float posi
   }
 }
 
-bool Config::hasNeighbor(const String &srcName, EDirection srcSide) const
+bool Config::hasNeighbor(const std::string &srcName, EDirection srcSide) const
 {
   return hasNeighbor(srcName, srcSide, 0.0f, 1.0f);
 }
 
-bool Config::hasNeighbor(const String &srcName, EDirection srcSide, float start, float end) const
+bool Config::hasNeighbor(const std::string &srcName, EDirection srcSide, float start, float end) const
 {
   assert(srcSide >= kFirstDirection && srcSide <= kLastDirection);
 
@@ -469,14 +459,14 @@ bool Config::hasNeighbor(const String &srcName, EDirection srcSide, float start,
   return index->second.overlaps(CellEdge(srcSide, Interval(start, end)));
 }
 
-Config::link_const_iterator Config::beginNeighbor(const String &srcName) const
+Config::link_const_iterator Config::beginNeighbor(const std::string &srcName) const
 {
   CellMap::const_iterator index = m_map.find(getCanonicalName(srcName));
   assert(index != m_map.end());
   return index->second.begin();
 }
 
-Config::link_const_iterator Config::endNeighbor(const String &srcName) const
+Config::link_const_iterator Config::endNeighbor(const std::string &srcName) const
 {
   CellMap::const_iterator index = m_map.find(getCanonicalName(srcName));
   assert(index != m_map.end());
@@ -488,7 +478,7 @@ const NetworkAddress &Config::getDeskflowAddress() const
   return m_deskflowAddress;
 }
 
-const Config::ScreenOptions *Config::getOptions(const String &name) const
+const Config::ScreenOptions *Config::getOptions(const std::string &name) const
 {
   // find options
   const ScreenOptions *options = NULL;
@@ -588,7 +578,7 @@ InputFilter *Config::getInputFilter()
   return &m_inputFilter;
 }
 
-String Config::formatInterval(const Interval &x)
+std::string Config::formatInterval(const Interval &x)
 {
   if (x.first == 0.0f && x.second == 1.0f) {
     return "";
@@ -596,7 +586,7 @@ String Config::formatInterval(const Interval &x)
   return deskflow::string::sprintf("(%d,%d)", (int)(x.first * 100.0f + 0.5f), (int)(x.second * 100.0f + 0.5f));
 }
 
-String Config::getClientAddress() const
+std::string Config::getClientAddress() const
 {
   return m_ClientAddress;
 }
@@ -614,7 +604,7 @@ void Config::readSection(ConfigReadContext &s)
   static const char s_links[] = "links";
   static const char s_aliases[] = "aliases";
 
-  String line;
+  std::string line;
   if (!s.readLine(line)) {
     // no more sections
     return;
@@ -626,13 +616,13 @@ void Config::readSection(ConfigReadContext &s)
   }
 
   // get section name
-  String::size_type i = line.find_first_not_of(" \t", sizeof(s_section) - 1);
-  if (i == String::npos) {
+  std::string::size_type i = line.find_first_not_of(" \t", sizeof(s_section) - 1);
+  if (i == std::string::npos) {
     throw XConfigRead(s, "section name is missing");
   }
-  String name = line.substr(i);
+  std::string name = line.substr(i);
   i = name.find_first_of(" \t");
-  if (i != String::npos) {
+  if (i != std::string::npos) {
     throw XConfigRead(s, "unexpected data after section name");
   }
 
@@ -652,7 +642,7 @@ void Config::readSection(ConfigReadContext &s)
 
 void Config::readSectionOptions(ConfigReadContext &s)
 {
-  String line;
+  std::string line;
   while (s.readLine(line)) {
     // check for end of section
     if (line == "end") {
@@ -663,8 +653,8 @@ void Config::readSectionOptions(ConfigReadContext &s)
     //   nameAndArgs  := <name>[(arg[,...])]
     //   values       := valueAndArgs[,valueAndArgs]...
     //   valueAndArgs := <value>[(arg[,...])]
-    String::size_type i = 0;
-    String name, value;
+    std::string::size_type i = 0;
+    std::string name, value;
     ConfigReadContext::ArgList nameArgs, valueArgs;
     s.parseNameWithArgs("name", line, "=", i, name, nameArgs);
     ++i;
@@ -676,7 +666,7 @@ void Config::readSectionOptions(ConfigReadContext &s)
         m_deskflowAddress = NetworkAddress(value, kDefaultPort);
         m_deskflowAddress.resolve();
       } catch (XSocketAddress &e) {
-        throw XConfigRead(s, String("invalid address argument ") + e.what());
+        throw XConfigRead(s, std::string("invalid address argument ") + e.what());
       }
     } else if (name == "heartbeat") {
       addOption("", kOptionHeartbeat, s.parseInt(value));
@@ -715,7 +705,7 @@ void Config::readSectionOptions(ConfigReadContext &s)
     if (handled) {
       // make sure handled options aren't followed by more values
       if (i < line.size() && (line[i] == ',' || line[i] == ';')) {
-        throw XConfigRead(s, "to many arguments to %s", name.c_str());
+        throw XConfigRead(s, std::string("too many arguments for: ").append(name));
       }
     } else {
       // make filter rule
@@ -737,7 +727,7 @@ void Config::readSectionOptions(ConfigReadContext &s)
       if (i < line.length() && line[i] == ';') {
         // allow trailing ';'
         i = line.find_first_not_of(" \t", i + 1);
-        if (i == String::npos) {
+        if (i == std::string::npos) {
           i = line.length();
         } else {
           --i;
@@ -760,8 +750,8 @@ void Config::readSectionOptions(ConfigReadContext &s)
 
 void Config::readSectionScreens(ConfigReadContext &s)
 {
-  String line;
-  String screen;
+  std::string line;
+  std::string screen;
   while (s.readLine(line)) {
     // check for end of section
     if (line == "end") {
@@ -786,21 +776,21 @@ void Config::readSectionScreens(ConfigReadContext &s)
       throw XConfigRead(s, "argument before first screen");
     } else {
       // parse argument:  `<name>=<value>'
-      String::size_type i = line.find_first_of(" \t=");
+      std::string::size_type i = line.find_first_of(" \t=");
       if (i == 0) {
         throw XConfigRead(s, "missing argument name");
       }
-      if (i == String::npos) {
+      if (i == std::string::npos) {
         throw XConfigRead(s, "missing =");
       }
-      String name = line.substr(0, i);
+      std::string name = line.substr(0, i);
       i = line.find_first_not_of(" \t", i);
-      if (i == String::npos || line[i] != '=') {
+      if (i == std::string::npos || line[i] != '=') {
         throw XConfigRead(s, "missing =");
       }
       i = line.find_first_not_of(" \t", i + 1);
-      String value;
-      if (i != String::npos) {
+      std::string value;
+      if (i != std::string::npos) {
         value = line.substr(i);
       }
 
@@ -842,8 +832,8 @@ void Config::readSectionScreens(ConfigReadContext &s)
 
 void Config::readSectionLinks(ConfigReadContext &s)
 {
-  String line;
-  String screen;
+  std::string line;
+  std::string screen;
   while (s.readLine(line)) {
     // check for end of section
     if (line == "end") {
@@ -869,8 +859,8 @@ void Config::readSectionLinks(ConfigReadContext &s)
       // the stuff in brackets is optional.  interval values must be
       // in the range [0,100] and start < end.  if not given the
       // interval is taken to be (0,100).
-      String::size_type i = 0;
-      String side, dstScreen, srcArgString, dstArgString;
+      std::string::size_type i = 0;
+      std::string side, dstScreen, srcArgString, dstArgString;
       ConfigReadContext::ArgList srcArgs, dstArgs;
       s.parseNameWithArgs("link", line, "=", i, side, srcArgs);
       ++i;
@@ -907,8 +897,8 @@ void Config::readSectionLinks(ConfigReadContext &s)
 
 void Config::readSectionAliases(ConfigReadContext &s)
 {
-  String line;
-  String screen;
+  std::string line;
+  std::string screen;
   while (s.readLine(line)) {
     // check for end of section
     if (line == "end") {
@@ -945,7 +935,7 @@ void Config::readSectionAliases(ConfigReadContext &s)
 }
 
 InputFilter::Condition *
-Config::parseCondition(ConfigReadContext &s, const String &name, const std::vector<String> &args)
+Config::parseCondition(ConfigReadContext &s, const std::string &name, const std::vector<std::string> &args)
 {
   if (name == "keystroke") {
     if (args.size() != 1) {
@@ -972,7 +962,7 @@ Config::parseCondition(ConfigReadContext &s, const String &name, const std::vect
       throw XConfigRead(s, "syntax for condition: connect([screen])");
     }
 
-    String screen = args[0];
+    std::string screen = args[0];
     if (isScreen(screen)) {
       screen = getCanonicalName(screen);
     } else if (!screen.empty()) {
@@ -986,7 +976,8 @@ Config::parseCondition(ConfigReadContext &s, const String &name, const std::vect
 }
 
 void Config::parseAction(
-    ConfigReadContext &s, const String &name, const std::vector<String> &args, InputFilter::Rule &rule, bool activate
+    ConfigReadContext &s, const std::string &name, const std::vector<std::string> &args, InputFilter::Rule &rule,
+    bool activate
 )
 {
   InputFilter::Action *action;
@@ -1000,7 +991,7 @@ void Config::parseAction(
     if (args.size() == 1) {
       keyInfo = s.parseKeystroke(args[0]);
     } else {
-      std::set<String> screens;
+      std::set<std::string> screens;
       parseScreens(s, args[1], screens);
       keyInfo = s.parseKeystroke(args[0], screens);
     }
@@ -1056,7 +1047,7 @@ void Config::parseAction(
       throw XConfigRead(s, "syntax for action: switchToScreen(name)");
     }
 
-    String screen = args[0];
+    std::string screen = args[0];
     if (isScreen(screen)) {
       screen = getCanonicalName(screen);
     } else if (!screen.empty()) {
@@ -1151,7 +1142,7 @@ void Config::parseAction(
       }
     }
 
-    std::set<String> screens;
+    std::set<std::string> screens;
     if (args.size() >= 2) {
       parseScreens(s, args[1], screens);
     }
@@ -1166,20 +1157,20 @@ void Config::parseAction(
   rule.adoptAction(action, activate);
 }
 
-void Config::parseScreens(ConfigReadContext &c, const String &s, std::set<String> &screens) const
+void Config::parseScreens(ConfigReadContext &c, const std::string &s, std::set<std::string> &screens) const
 {
   screens.clear();
 
-  String::size_type i = 0;
+  std::string::size_type i = 0;
   while (i < s.size()) {
     // find end of next screen name
-    String::size_type j = s.find(':', i);
-    if (j == String::npos) {
+    std::string::size_type j = s.find(':', i);
+    if (j == std::string::npos) {
       j = s.size();
     }
 
     // extract name
-    String rawName;
+    std::string rawName;
     i = s.find_first_not_of(" \t", i);
     if (i < j) {
       rawName = s.substr(i, s.find_last_not_of(" \t", j - 1) - i + 1);
@@ -1189,7 +1180,7 @@ void Config::parseScreens(ConfigReadContext &c, const String &s, std::set<String
     if (rawName == "*") {
       screens.insert("*");
     } else if (!rawName.empty()) {
-      String name = getCanonicalName(rawName);
+      std::string name = getCanonicalName(rawName);
       if (name.empty()) {
         throw XConfigRead(c, "unknown screen name \"%{1}\"", rawName);
       }
@@ -1278,7 +1269,7 @@ const char *Config::getOptionName(OptionID id)
   return NULL;
 }
 
-String Config::getOptionValue(OptionID id, OptionValue value)
+std::string Config::getOptionValue(OptionID id, OptionValue value)
 {
   if (id == kOptionHalfDuplexCapsLock || id == kOptionHalfDuplexNumLock || id == kOptionHalfDuplexScrollLock ||
       id == kOptionScreenSwitchNeedsShift || id == kOptionScreenSwitchNeedsControl ||
@@ -1351,14 +1342,14 @@ String Config::getOptionValue(OptionID id, OptionValue value)
 // Config::Name
 //
 
-Config::Name::Name(Config *config, const String &name) : m_config(config), m_name(config->getCanonicalName(name))
+Config::Name::Name(Config *config, const std::string &name) : m_config(config), m_name(config->getCanonicalName(name))
 {
   // do nothing
 }
 
-bool Config::Name::operator==(const String &name) const
+bool Config::Name::operator==(const std::string &name) const
 {
-  String canonical = m_config->getCanonicalName(name);
+  std::string canonical = m_config->getCanonicalName(name);
   return CaselessCmp::equal(canonical, m_name);
 }
 
@@ -1380,7 +1371,7 @@ Config::CellEdge::CellEdge(EDirection side, const Interval &interval)
   init("", side, interval);
 }
 
-Config::CellEdge::CellEdge(const String &name, EDirection side, const Interval &interval)
+Config::CellEdge::CellEdge(const std::string &name, EDirection side, const Interval &interval)
 {
   assert(interval.first >= 0.0f);
   assert(interval.second <= 1.0f);
@@ -1394,7 +1385,7 @@ Config::CellEdge::~CellEdge()
   // do nothing
 }
 
-void Config::CellEdge::init(const String &name, EDirection side, const Interval &interval)
+void Config::CellEdge::init(const std::string &name, EDirection side, const Interval &interval)
 {
   assert(side != kNoDirection);
 
@@ -1408,12 +1399,12 @@ Config::Interval Config::CellEdge::getInterval() const
   return m_interval;
 }
 
-void Config::CellEdge::setName(const String &newName)
+void Config::CellEdge::setName(const std::string &newName)
 {
   m_name = newName;
 }
 
-String Config::CellEdge::getName() const
+std::string Config::CellEdge::getName() const
 {
   return m_name;
 }
@@ -1518,7 +1509,7 @@ void Config::Cell::remove(const Name &name)
   }
 }
 
-void Config::Cell::rename(const Name &oldName, const String &newName)
+void Config::Cell::rename(const Name &oldName, const std::string &newName)
 {
   for (EdgeLinks::iterator j = m_neighbors.begin(); j != m_neighbors.end(); ++j) {
     if (oldName == j->second.getName()) {
@@ -1629,7 +1620,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
     if (options != NULL && options->size() > 0) {
       for (Config::ScreenOptions::const_iterator option = options->begin(); option != options->end(); ++option) {
         const char *name = Config::getOptionName(option->first);
-        String value = Config::getOptionValue(option->first, option->second);
+        std::string value = Config::getOptionValue(option->first, option->second);
         if (name != NULL && !value.empty()) {
           s << "\t\t" << name << " = " << value << std::endl;
         }
@@ -1639,7 +1630,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
   s << "end" << std::endl;
 
   // links section
-  String neighbor;
+  std::string neighbor;
   s << "section: links" << std::endl;
   for (Config::const_iterator screen = config.begin(); screen != config.end(); ++screen) {
     s << "\t" << screen->c_str() << ":" << std::endl;
@@ -1655,7 +1646,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
   // aliases section (if there are any)
   if (config.m_map.size() != config.m_nameToCanonicalName.size()) {
     // map canonical to alias
-    typedef std::multimap<String, String, CaselessCmp> CMNameMap;
+    using CMNameMap = std::multimap<std::string, std::string, CaselessCmp>;
     CMNameMap aliases;
     for (Config::NameMap::const_iterator index = config.m_nameToCanonicalName.begin();
          index != config.m_nameToCanonicalName.end(); ++index) {
@@ -1665,7 +1656,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
     }
 
     // dump it
-    String screen;
+    std::string screen;
     s << "section: aliases" << std::endl;
     for (CMNameMap::const_iterator index = aliases.begin(); index != aliases.end(); ++index) {
       if (index->first != screen) {
@@ -1683,7 +1674,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
   if (options != NULL && options->size() > 0) {
     for (Config::ScreenOptions::const_iterator option = options->begin(); option != options->end(); ++option) {
       const char *name = Config::getOptionName(option->first);
-      String value = Config::getOptionValue(option->first, option->second);
+      std::string value = Config::getOptionValue(option->first, option->second);
       if (name != NULL && !value.empty()) {
         s << "\t" << name << " = " << value << std::endl;
       }
@@ -1702,7 +1693,7 @@ std::ostream &operator<<(std::ostream &s, const Config &config)
 // ConfigReadContext
 //
 
-ConfigReadContext::ConfigReadContext(std::istream &s, SInt32 firstLine) : m_stream(s), m_line(firstLine - 1)
+ConfigReadContext::ConfigReadContext(std::istream &s, int32_t firstLine) : m_stream(s), m_line(firstLine - 1)
 {
   // do nothing
 }
@@ -1712,23 +1703,23 @@ ConfigReadContext::~ConfigReadContext()
   // do nothing
 }
 
-bool ConfigReadContext::readLine(String &line)
+bool ConfigReadContext::readLine(std::string &line)
 {
   ++m_line;
   while (std::getline(m_stream, line)) {
     // strip leading whitespace
-    String::size_type i = line.find_first_not_of(" \t");
-    if (i != String::npos) {
+    std::string::size_type i = line.find_first_not_of(" \t");
+    if (i != std::string::npos) {
       line.erase(0, i);
     }
 
     // strip comments and then trailing whitespace
     i = line.find('#');
-    if (i != String::npos) {
+    if (i != std::string::npos) {
       line.erase(i);
     }
     i = line.find_last_not_of(" \r\t");
-    if (i != String::npos) {
+    if (i != std::string::npos) {
       line.erase(i + 1);
     }
 
@@ -1750,7 +1741,7 @@ bool ConfigReadContext::readLine(String &line)
   return false;
 }
 
-UInt32 ConfigReadContext::getLineNumber() const
+uint32_t ConfigReadContext::getLineNumber() const
 {
   return m_line;
 }
@@ -1760,7 +1751,7 @@ bool ConfigReadContext::operator!() const
   return !m_stream;
 }
 
-OptionValue ConfigReadContext::parseBoolean(const String &arg) const
+OptionValue ConfigReadContext::parseBoolean(const std::string &arg) const
 {
   if (CaselessCmp::equal(arg, "true")) {
     return static_cast<OptionValue>(true);
@@ -1771,7 +1762,7 @@ OptionValue ConfigReadContext::parseBoolean(const String &arg) const
   throw XConfigRead(*this, "invalid boolean argument \"%{1}\"", arg);
 }
 
-OptionValue ConfigReadContext::parseInt(const String &arg) const
+OptionValue ConfigReadContext::parseInt(const std::string &arg) const
 {
   const char *s = arg.c_str();
   char *end;
@@ -1788,7 +1779,7 @@ OptionValue ConfigReadContext::parseInt(const String &arg) const
   return value;
 }
 
-OptionValue ConfigReadContext::parseModifierKey(const String &arg) const
+OptionValue ConfigReadContext::parseModifierKey(const std::string &arg) const
 {
   if (CaselessCmp::equal(arg, "shift")) {
     return static_cast<OptionValue>(kKeyModifierIDShift);
@@ -1814,7 +1805,7 @@ OptionValue ConfigReadContext::parseModifierKey(const String &arg) const
   throw XConfigRead(*this, "invalid argument \"%{1}\"", arg);
 }
 
-OptionValue ConfigReadContext::parseCorner(const String &arg) const
+OptionValue ConfigReadContext::parseCorner(const std::string &arg) const
 {
   if (CaselessCmp::equal(arg, "left")) {
     return kTopLeftMask | kBottomLeftMask;
@@ -1840,7 +1831,7 @@ OptionValue ConfigReadContext::parseCorner(const String &arg) const
   throw XConfigRead(*this, "invalid argument \"%{1}\"", arg);
 }
 
-OptionValue ConfigReadContext::parseProtocol(const String &args) const
+OptionValue ConfigReadContext::parseProtocol(const std::string &args) const
 {
   if (CaselessCmp::equal(args, kSynergyProtocolOption)) {
     return static_cast<OptionValue>(ENetworkProtocol::kSynergy);
@@ -1850,21 +1841,21 @@ OptionValue ConfigReadContext::parseProtocol(const String &args) const
   throw XConfigRead(*this, "invalid protocol argument \"%{1}\"", args);
 }
 
-OptionValue ConfigReadContext::parseCorners(const String &args) const
+OptionValue ConfigReadContext::parseCorners(const std::string &args) const
 {
   // find first token
-  String::size_type i = args.find_first_not_of(" \t", 0);
-  if (i == String::npos) {
+  std::string::size_type i = args.find_first_not_of(" \t", 0);
+  if (i == std::string::npos) {
     throw XConfigRead(*this, "missing corner argument");
   }
-  String::size_type j = args.find_first_of(" \t", i);
+  std::string::size_type j = args.find_first_of(" \t", i);
 
   // parse first corner token
   OptionValue corners = parseCorner(args.substr(i, j - i));
 
   // get +/-
   i = args.find_first_not_of(" \t", j);
-  while (i != String::npos) {
+  while (i != std::string::npos) {
     // parse +/-
     bool add;
     if (args[i] == '-') {
@@ -1872,13 +1863,13 @@ OptionValue ConfigReadContext::parseCorners(const String &args) const
     } else if (args[i] == '+') {
       add = true;
     } else {
-      throw XConfigRead(*this, "invalid corner operator \"%{1}\"", String(args.c_str() + i, 1));
+      throw XConfigRead(*this, "invalid corner operator \"%{1}\"", std::string(args.c_str() + i, 1));
     }
 
     // get next corner token
     i = args.find_first_not_of(" \t", i + 1);
     j = args.find_first_of(" \t", i);
-    if (i == String::npos) {
+    if (i == std::string::npos) {
       throw XConfigRead(*this, "missing corner argument");
     }
 
@@ -1923,18 +1914,19 @@ Config::Interval ConfigReadContext::parseInterval(const ArgList &args) const
 }
 
 void ConfigReadContext::parseNameWithArgs(
-    const String &type, const String &line, const String &delim, String::size_type &index, String &name, ArgList &args
+    const std::string &type, const std::string &line, const std::string &delim, std::string::size_type &index,
+    std::string &name, ArgList &args
 ) const
 {
   // skip leading whitespace
-  String::size_type i = line.find_first_not_of(" \t", index);
-  if (i == String::npos) {
-    throw XConfigRead(*this, String("missing ") + type);
+  std::string::size_type i = line.find_first_not_of(" \t", index);
+  if (i == std::string::npos) {
+    throw XConfigRead(*this, std::string("missing ") + type);
   }
 
   // find end of name
-  String::size_type j = line.find_first_of(" \t(" + delim, i);
-  if (j == String::npos) {
+  std::string::size_type j = line.find_first_of(" \t(" + delim, i);
+  if (j == std::string::npos) {
     j = line.length();
   }
 
@@ -1943,15 +1935,15 @@ void ConfigReadContext::parseNameWithArgs(
   args.clear();
 
   // is it okay to not find a delimiter?
-  bool needDelim = (!delim.empty() && delim.find('\n') == String::npos);
+  bool needDelim = (!delim.empty() && delim.find('\n') == std::string::npos);
 
   // skip whitespace
   i = line.find_first_not_of(" \t", j);
-  if (i == String::npos && needDelim) {
+  if (i == std::string::npos && needDelim) {
     // expected delimiter but didn't find it
-    throw XConfigRead(*this, String("missing ") + delim[0]);
+    throw XConfigRead(*this, std::string("missing ") + delim[0]);
   }
-  if (i == String::npos) {
+  if (i == std::string::npos) {
     // no arguments
     index = line.length();
     return;
@@ -1967,18 +1959,18 @@ void ConfigReadContext::parseNameWithArgs(
 
   // parse arguments
   j = line.find_first_of(",)", i);
-  while (j != String::npos) {
+  while (j != std::string::npos) {
     // extract arg
-    String arg(line.substr(i, j - i));
+    std::string arg(line.substr(i, j - i));
     i = j;
 
     // trim whitespace
     j = arg.find_first_not_of(" \t");
-    if (j != String::npos) {
+    if (j != std::string::npos) {
       arg.erase(0, j);
     }
     j = arg.find_last_not_of(" \t");
-    if (j != String::npos) {
+    if (j != std::string::npos) {
       arg.erase(j + 1);
     }
 
@@ -1998,7 +1990,7 @@ void ConfigReadContext::parseNameWithArgs(
   }
 
   // verify ')'
-  if (j == String::npos) {
+  if (j == std::string::npos) {
     // expected )
     throw XConfigRead(*this, "missing )");
   }
@@ -2008,17 +2000,17 @@ void ConfigReadContext::parseNameWithArgs(
 
   // skip whitespace
   j = line.find_first_not_of(" \t", i);
-  if (j == String::npos && needDelim) {
+  if (j == std::string::npos && needDelim) {
     // expected delimiter but didn't find it
-    throw XConfigRead(*this, String("missing ") + delim[0]);
+    throw XConfigRead(*this, std::string("missing ") + delim[0]);
   }
 
   // verify delimiter
-  if (needDelim && delim.find(line[j]) == String::npos) {
-    throw XConfigRead(*this, String("expected ") + delim[0]);
+  if (needDelim && delim.find(line[j]) == std::string::npos) {
+    throw XConfigRead(*this, std::string("expected ") + delim[0]);
   }
 
-  if (j == String::npos) {
+  if (j == std::string::npos) {
     j = line.length();
   }
 
@@ -2026,15 +2018,15 @@ void ConfigReadContext::parseNameWithArgs(
   return;
 }
 
-IPlatformScreen::KeyInfo *ConfigReadContext::parseKeystroke(const String &keystroke) const
+IPlatformScreen::KeyInfo *ConfigReadContext::parseKeystroke(const std::string &keystroke) const
 {
-  return parseKeystroke(keystroke, std::set<String>());
+  return parseKeystroke(keystroke, std::set<std::string>());
 }
 
 IPlatformScreen::KeyInfo *
-ConfigReadContext::parseKeystroke(const String &keystroke, const std::set<String> &screens) const
+ConfigReadContext::parseKeystroke(const std::string &keystroke, const std::set<std::string> &screens) const
 {
-  String s = keystroke;
+  std::string s = keystroke;
 
   KeyModifierMask mask;
   if (!deskflow::KeyMap::parseModifiers(s, mask)) {
@@ -2053,9 +2045,9 @@ ConfigReadContext::parseKeystroke(const String &keystroke, const std::set<String
   return IPlatformScreen::KeyInfo::alloc(key, mask, 0, 0, screens);
 }
 
-IPlatformScreen::ButtonInfo *ConfigReadContext::parseMouse(const String &mouse) const
+IPlatformScreen::ButtonInfo *ConfigReadContext::parseMouse(const std::string &mouse) const
 {
-  String s = mouse;
+  std::string s = mouse;
 
   KeyModifierMask mask;
   if (!deskflow::KeyMap::parseModifiers(s, mask)) {
@@ -2074,9 +2066,9 @@ IPlatformScreen::ButtonInfo *ConfigReadContext::parseMouse(const String &mouse) 
   return IPlatformScreen::ButtonInfo::alloc(button, mask);
 }
 
-KeyModifierMask ConfigReadContext::parseModifier(const String &modifiers) const
+KeyModifierMask ConfigReadContext::parseModifier(const std::string &modifiers) const
 {
-  String s = modifiers;
+  std::string s = modifiers;
 
   KeyModifierMask mask;
   if (!deskflow::KeyMap::parseModifiers(s, mask)) {
@@ -2090,9 +2082,9 @@ KeyModifierMask ConfigReadContext::parseModifier(const String &modifiers) const
   return mask;
 }
 
-String ConfigReadContext::concatArgs(const ArgList &args)
+std::string ConfigReadContext::concatArgs(const ArgList &args)
 {
-  String s("(");
+  std::string s("(");
   for (size_t i = 0; i < args.size(); ++i) {
     if (i != 0) {
       s += ",";
@@ -2107,13 +2099,13 @@ String ConfigReadContext::concatArgs(const ArgList &args)
 // Config I/O exceptions
 //
 
-XConfigRead::XConfigRead(const ConfigReadContext &context, const String &error)
+XConfigRead::XConfigRead(const ConfigReadContext &context, const std::string &error)
     : m_error(deskflow::string::sprintf("line %d: %s", context.getLineNumber(), error.c_str()))
 {
   // do nothing
 }
 
-XConfigRead::XConfigRead(const ConfigReadContext &context, const char *errorFmt, const String &arg)
+XConfigRead::XConfigRead(const ConfigReadContext &context, const char *errorFmt, const std::string &arg)
     : m_error(
           deskflow::string::sprintf("line %d: ", context.getLineNumber()) +
           deskflow::string::format(errorFmt, arg.c_str())
@@ -2127,7 +2119,7 @@ XConfigRead::~XConfigRead() _NOEXCEPT
   // do nothing
 }
 
-String XConfigRead::getWhat() const throw()
+std::string XConfigRead::getWhat() const throw()
 {
   return format("XConfigRead", "read error: %{1}", m_error.c_str());
 }
